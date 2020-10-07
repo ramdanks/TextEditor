@@ -1,40 +1,62 @@
 #pragma once
+#include <filesystem>
 #include <fstream>
 
-struct sFileinfo
+class Filestream
 {
-	std::string filename;
-	size_t filesize;
+	Filestream() {}
+public:
+	Filestream( const Filestream& other ) = delete;
+	Filestream operator = ( const Filestream& other ) = delete;
+
+	static bool Create_Directories( const std::string& path )
+	{
+		return std::filesystem::create_directories( path );
+	}
+
+	static void Append_Text( const std::string& string, const std::string& filepath )
+	{
+		auto myfile = std::fstream( filepath, std::ios::app );
+		if ( myfile )
+		{
+			myfile.write( string.c_str(), string.size() );
+		}
+		myfile.close();
+	}
+
+	static void Write_Bin( const char* fp, size_t filesize, const std::string& filepath )
+	{
+		auto myfile = std::fstream( filepath, std::ios::out | std::ios::binary );
+		if ( myfile )
+		{
+			if ( filesize > 0 ) myfile.write( fp, filesize );
+			myfile.close();
+		}
+	}
+
+	static std::vector<char> Read_Bin( const std::string& filepath )
+	{
+		std::vector<char> buf;
+		auto myfile = std::fstream( filepath, std::ios::in | std::ios::binary );
+		if ( myfile )
+		{
+			myfile.seekg( 0, myfile.end );
+			auto filesize = myfile.tellg();
+			if ( filesize > 0 )
+			{
+				myfile.seekg( 0 );
+				buf.resize( filesize );
+				myfile.read( (char*) &buf[0], filesize );
+			}
+			myfile.close();
+		}
+		return buf;
+	}
+
+	static std::string FileExtension( const std::string& s )
+	{
+		size_t i = s.rfind( '.', s.length() );
+		if ( i != std::string::npos ) return( s.substr( i + 1, s.length() - i ) );
+		return std::string();
+	}
 };
-
-void File_Write_Bin( char* fp, const sFileinfo& info )
-{
-	auto myfile = std::fstream( info.filename, std::ios::out | std::ios::binary );
-	if ( myfile )
-	{
-		if ( info.filesize > 0 )
-		{
-			myfile.write( fp, info.filesize );
-		}
-		myfile.close();
-	}
-}
-
-char* File_Read_Bin( sFileinfo& info )
-{
-	char* fp = nullptr;
-	auto myfile = std::fstream( info.filename, std::ios::in | std::ios::binary );
-	if ( myfile )
-	{
-		myfile.seekg( 0, myfile.end );
-		info.filesize = myfile.tellg();
-		if ( info.filesize > 0 )
-		{
-			myfile.seekg( 0 );
-			fp = (char*) malloc( info.filesize * sizeof(char) );
-			myfile.read( fp, info.filesize );
-		}
-		myfile.close();
-	}
-	return fp;
-}

@@ -1,10 +1,9 @@
 #pragma once
 #include <vector>
-#include <cmath>
-#include <fstream>
 
 #define BYTELEN 8
 #define BYTESIZE 256
+#define COMPRESSION_REVISION "0.1a"
 
 struct sCompressInfo
 {
