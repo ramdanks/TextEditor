@@ -8,7 +8,7 @@
 struct sCompressInfo
 {
 	uint8_t* pData;
-	uint64_t SizeSource;
+	uint32_t SizeSource;
 };
 
 struct sCompressHeader
@@ -25,17 +25,36 @@ class Compression
 public:
 	Compression() : CompressionSize(0) {}
 
-	uint8_t* Compress( sCompressInfo info );
-	uint8_t* Decompress( uint8_t* pCompressed );
+	//function will return nullptr if fail to reduce size. force=true will compress it anyway
+	uint8_t* Compress( sCompressInfo info, bool force = false );
+	//function will leave vBuffer empty if fail to reduce size. force=true will compress it anyway
+	static void Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo info, bool force = false );
+	//this function expect param contain compressed format
+	uint8_t* Decompress( const uint8_t* pCompressed );
+	//this function expect param contain compressed format
+	static void Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed );
+	//this function will accept uncompressed format, please give the correct pointer size
+	uint8_t* Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize );
+	//this function will accept uncompressed format, please give the correct pointer size
+	static void Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed, uint32_t pSize );
+
+	//return uncompressed format
+	uint8_t* Uncompressed( sCompressInfo info );
+	//return uncompressed format, buffer will be erased
+	static void Uncompressed_Buffer( sCompressInfo info, std::vector<uint8_t>& vBuffer );
+
 	size_t Compression_Size() const;
 	size_t Original_Size() const;
 
+	//find compression size
+	static uint32_t Calc_Comp_Size( sCompressInfo info );
 
 private:
-	uint8_t Len_Bit( const uint8_t& num );
-	uint8_t Header_Create( const sCompressHeader& header );
-	sCompressHeader Header_Read( const uint8_t* pCompressed );
+	static uint8_t Len_Bit( const uint8_t& num );
+	static bool needCompression( sCompressHeader header );
+	static uint8_t Header_Create( const sCompressHeader& header );
+	static sCompressHeader Header_Read( const uint8_t* pCompressed );
 
-	void Merge_Compression( uint8_t* pBuffer, const sCompressHeader& header, const std::vector<uint8_t>& vCompressed, const std::vector<uint8_t>& vDecoder );
-	void Expand_Compression( uint8_t* pCompressed, const sCompressHeader& header, std::vector<uint8_t>& vBufferData, std::vector<uint8_t>& vBufferDecoder );
+	static void Merge_Compression( uint8_t* pBuffer, const sCompressHeader& header, const std::vector<uint8_t>& vCompressed, const std::vector<uint8_t>& vDecoder );
+	static void Expand_Compression( const uint8_t* pCompressed, const sCompressHeader& header, std::vector<uint8_t>& vBufferData, std::vector<uint8_t>& vBufferDecoder );
 };

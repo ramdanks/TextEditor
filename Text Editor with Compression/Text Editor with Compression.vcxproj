@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Compressor\Compression.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="Utilities\Archiver.cpp" />
+    <ClCompile Include="Utilities\Merger.cpp" />
     <ClCompile Include="Utilities\Command.cpp" />
     <ClCompile Include="Utilities\Err.cpp" />
     <ClCompile Include="Utilities\Logging.cpp" />
@@ -29,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Compressor\Compression.h" />
-    <ClInclude Include="Utilities\Archiver.h" />
+    <ClInclude Include="Utilities\Merger.h" />
     <ClInclude Include="Utilities\Command.h" />
     <ClInclude Include="Utilities\Err.h" />
     <ClInclude Include="Utilities\Filestream.h" />

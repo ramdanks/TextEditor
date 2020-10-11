@@ -1,13 +1,13 @@
 #include "Command.h"
 #include "Timer.h"
-#include "..\Compressor\Compression.h"
 #include "Filestream.h"
 #include "Err.h"
+#include "Merger.h"
 
 #define BENCHMARK_SIZE 1000000u
 #define FIRST_SPACING 3
-#define SECOND_SPACING 5
-#define THIRD_SPACING 20
+#define SECOND_SPACING 7
+#define THIRD_SPACING 25
 
 Timer tm( "", MS, false );
 Logging clog( { LEVEL, TIME, MSG } );
@@ -16,13 +16,13 @@ void CMD::Init()
 {
 	CmdList.reserve( 10 );
 	//command list:      "cmd"                   argument                             info
-	CmdList.push_back( { CMD_HELP,				"",						"help, show all usable command"									} );
-	CmdList.push_back( { CMD_VERSION,			"",						"version, show current revision of compressor"					} );
-	CmdList.push_back( { CMD_ABOUT,				"",						"about, show information about compressor"						} );
-	CmdList.push_back( { CMD_BENCHMARK,			"iteration",            "benchmark, test your device compression speed"					} );
-	CmdList.push_back( { CMD_COMPRESS,			"input output",		    "compress, compress input file and output to compressed format" } );
-	CmdList.push_back( { CMD_DECOMPRESS,		"input output",		    "decompress, decompress file and return to original format"		} );
-	CmdList.push_back( { CMD_READSIZE,			"input",				"read size, check your file compression and original size"		} );
+	CmdList.push_back( { CMD_HELP,				"",						    "help, show all usable command"									} );
+	CmdList.push_back( { CMD_VERSION,			"",						    "version, show current revision of compressor"					} );
+	CmdList.push_back( { CMD_ABOUT,				"",						    "about, show information about compressor"						} );
+	CmdList.push_back( { CMD_BENCHMARK,			"iteration     -mt",        "benchmark, test your device compression speed"					} );
+	CmdList.push_back( { CMD_COMPRESS,			"input         output",     "compress, compress input file and output to compressed format"   } );
+	CmdList.push_back( { CMD_DECOMPRESS,		"input         output",	    "decompress, decompress file and return to original format"		} );
+	CmdList.push_back( { CMD_READSIZE,			"input",				    "read size, check your file compression and original size"		} );
 }
 
 void CMD::Init( const std::string& err_filepath, const std::string& log_filepath )
@@ -35,7 +35,7 @@ void CMD::Init( const std::string& err_filepath, const std::string& log_filepath
 void CMD::Recognize( int argc, const char* argv[] )
 {
 	if ( isCommand( argv[1], CMD_HELP ) )				Handle_Help();
-	else if ( isCommand( argv[1], CMD_VERSION ) )		printf( "Compressor Revision:%s\n", COMPRESSION_REVISION );
+	else if ( isCommand( argv[1], CMD_VERSION ) )		Handle_Version();
 	else if ( isCommand( argv[1], CMD_ABOUT ) )			Handle_About();
 	else if ( isCommand( argv[1], CMD_BENCHMARK ) )		Handle_Benchmark( argc, argv );
 	else if ( isCommand( argv[1], CMD_COMPRESS ) )		Handle_Compression( argc, argv, true );
@@ -57,7 +57,11 @@ inline bool CMD::File_Exist( const std::string filepath )
 
 void CMD::Handle_Compression( int argc, const char* argv[], bool compress )
 {
-	if ( argc != 4 )
+	Timer timer( "", MS, false );
+
+	bool multi_thread = false;
+	if ( argc == 5 && isCommand( argv[4], CMD_MULTITHREAD ) ) multi_thread = true;
+	else if ( argc != 4 )
 	{
 		Handle_Unknown();
 		return;
@@ -67,87 +71,102 @@ void CMD::Handle_Compression( int argc, const char* argv[], bool compress )
 	const char* filewrite = argv[3];
 	try
 	{
-		std::vector<char> read = Filestream::Read_Bin( fileread );
+		std::vector<uint8_t> pWrite;
+		auto read = Filestream::Read_Bin( fileread );
 		THROW_ERR_IF( read.empty(), "File not found or empty!" );
 
 		tm.Tic(); //start timer
-		float ms;
-		Compression cp;
+		float exec_ms, write_ms;
 		if ( compress )
 		{
 			sCompressInfo ci;
 			ci.pData = (uint8_t*) &read[0];
 			ci.SizeSource = read.size();
 
-			auto pCompressed = cp.Compress( ci );
-			THROW_ERR_IFNULLPTR( pCompressed, "Compress to file failed. Compression seems cannot reduce original size!" );
-
-			Filestream::Write_Bin( (const char*) pCompressed, cp.Compression_Size(), filewrite );
-			THROW_ERR_IFNOT( File_Exist( filewrite ), "Write file failed. File cannot be saved!" );
+			pWrite = Merger::Compress_Merge( ci, multi_thread );
+			THROW_ERR_IF( pWrite.empty(), "Compress to file failed. Compression seems cannot reduce original size!" );
 
 			//stop timer and log
-			ms = tm.Toc();
-			clog.Log( INFO, "Compress to file success" );
-			if ( !FileLog.empty() ) clog.Log_File( INFO, "Compress to file sucess", FileLog );
+			exec_ms = tm.Toc();
+			printf( "Compress and Write file success!" );
+			if ( !FileLog.empty() ) clog.Log_File( INFO, "Compress and Write file success!", FileLog );
 		}
 		else
 		{
-			auto pDecompressed = cp.Decompress( (uint8_t*) &read[0] );
-			THROW_ERR_IFNULLPTR( pDecompressed, "Decompress to file failed. May caused by logic or file integrity error!" );
+			pWrite = Merger::Decompress_Merge( read, multi_thread );
+			THROW_ERR_IF( pWrite.empty(), "Decompress to file failed. May caused by logic or file integrity error!" );
 			
-			Filestream::Write_Bin( (const char*) pDecompressed, cp.Original_Size(), filewrite );
-			THROW_ERR_IFNOT( File_Exist( filewrite ), "Write file failed. File cannot be saved!" );
-
 			//stop timer and log
-			ms = tm.Toc();
-			clog.Log( INFO, "Decompress to file success" );
-			if ( !FileLog.empty() ) clog.Log_File( INFO, "Decompress to file sucess", FileLog );
+			exec_ms = tm.Toc();
+			printf( "Decompress and Write file success!" );
+			if ( !FileLog.empty() ) clog.Log_File( INFO, "Decompress and Write file success!", FileLog );
 		}
+		//use timer when write to files
+		tm.Tic();
+		Filestream::Write_Bin( (const char*) &pWrite[0], pWrite.size(), filewrite );
+		THROW_ERR_IFNOT( File_Exist( filewrite ), "Write file failed. File cannot be saved!" );
+		write_ms = tm.Toc();
 
 		//trace result
-		float MBps = (double) read.size() / 1000 / ms;
-		std::string speed = "Time:" + std::to_string( ms ) + "(ms), " + "Speed:" + std::to_string( MBps ) + "(MBps)";
-		if ( !FileLog.empty() ) clog.Log_File( TRACE, speed, FileLog );
+		float combined_time = timer.Toc();
+		float exec_MBps = (double) read.size() / 1000 / exec_ms;
+		float write_MBps = (double) pWrite.size() / 1000 / write_ms;
+
+		#define ftos(x) std::to_string(x)
+		std::string bandwidth = "MT:" + ftos(multi_thread) + ", Size:" + ftos( pWrite.size() ) + "(Bytes), [C/D]Bandwidth:" + ftos( exec_MBps ) +
+								"(MBps), Write:" + ftos( write_MBps ) + "(MBps), CombinedTime:" + ftos( combined_time ) + "(ms)";
+		if ( !FileLog.empty() ) clog.Log_File( TRACE, bandwidth, FileLog );
 	}
 	catch ( Err& error )
 	{
-		clog.Log( ERROR, error.Seek() );
+		printf( "Unhandled Exception:%s\n", error.Seek() );
 		if ( !FileErr.empty() ) error.Log( ERROR, FileErr );
 	}
 }
 
 void CMD::Handle_Benchmark( int argc, const char* argv[] )
 {
-	int iteration = 0;
-	if ( argc == 2 )	iteration = 1;
-	else				iteration = atoi( argv[2] );
-
-	for ( unsigned int i = 0; i < iteration; i++ )
+	int iteration = 1;
+	bool multi_thread = false;
+	if ( argc > 2 )
 	{
-		int* block = (int*) malloc( BENCHMARK_SIZE );
-		for ( uint64_t i = 0; i < BENCHMARK_SIZE / sizeof( int ); i++ ) block[i] = rand() % 63;
+		iteration = atoi( argv[2] );
+		if ( argc == 4 && isCommand( argv[3], CMD_MULTITHREAD ) ) multi_thread = true;
+	}
 
-		Timer tm( "Compression", MS, false );
-		Compression cp;
-		sCompressInfo ci;
-		ci.pData = (uint8_t*) block;
-		ci.SizeSource = BENCHMARK_SIZE;
+	try
+	{
+		for ( unsigned int i = 0; i < iteration; i++ )
+		{
+			int* block = (int*) malloc( BENCHMARK_SIZE );
+			for ( uint64_t i = 0; i < BENCHMARK_SIZE / sizeof( int ); i++ ) block[i] = rand() % 63;
 
-		tm.Tic();
-		auto result_comp = cp.Compress( ci );
-		auto compression_time = tm.Toc();
+			Timer tm( "Compression", MS, false );
+			sCompressInfo ci;
+			ci.pData = (uint8_t*) block;
+			ci.SizeSource = BENCHMARK_SIZE;
 
-		tm.Tic();
-		auto result_decomp = cp.Decompress( result_comp );
-		auto decompression_time = tm.Toc();
+			tm.Tic();
+			auto result_comp = Merger::Compress_Merge( ci, multi_thread );
+			auto compression_time = tm.Toc();
+			THROW_ERR_IF( result_comp.empty(), "Compression and Merger Failed!" );
 
-		double compress_speed = (double) BENCHMARK_SIZE / 1000 / compression_time;
-		double decompress_speed = (double) BENCHMARK_SIZE / 1000 / decompression_time;
-		printf( "[%u/%u]:Compression:%.2f(MBps), Decompression:%.2f(MBps)\n", i+1, iteration, compress_speed, decompress_speed );
+			tm.Tic();
+			auto result_decomp = Merger::Decompress_Merge( result_comp, multi_thread );
+			auto decompression_time = tm.Toc();
+			THROW_ERR_IF( result_decomp.empty(), "Decompression and Merger Failed!" );
 
-		free( block );
-		free( result_comp );
-		free( result_decomp );
+			double compress_speed = (double) BENCHMARK_SIZE / 1000 / compression_time;
+			double decompress_speed = (double) BENCHMARK_SIZE / 1000 / decompression_time;
+			printf( "[%u/%u]:Compression:%.2f(MBps), Decompression:%.2f(MBps)\n", i+1, iteration, compress_speed, decompress_speed );
+
+			free( block );
+		}
+	}
+	catch ( Err& error )
+	{
+		printf( "Unhandled Exception:%s\n", error.Seek() );
+		if ( !FileErr.empty() ) error.Log( ERROR, FileErr );
 	}
 }
 
@@ -168,36 +187,40 @@ void CMD::Handle_Readsize( const char* fileread )
 			auto read = Filestream::Read_Bin( fileread );
 			THROW_ERR_IF( read.empty(), "File not found or empty!" );
 
-			Compression cp;
-			if ( ext == "txt" )
+			if ( ext == "bin" )
+			{
+				auto vDecompressed = Merger::Decompress_Merge( read, true );
+				THROW_ERR_IF( vDecompressed.empty(), "Cannot identify size. May caused by logic or file integrity error!" );
+
+				uint32_t reduce_size = vDecompressed.size() - read.size();
+				printf( "Original:%u(Bytes), Compression:%u(Bytes), Reduced:%u(Bytes)\n", vDecompressed.size(), read.size(), reduce_size );
+			}
+			else
 			{
 				sCompressInfo ci;
 				ci.pData = (uint8_t*) &read[0];
 				ci.SizeSource = read.size();
 
-				auto pCompressed = cp.Compress( ci );
-				THROW_ERR_IFNULLPTR( pCompressed, "Cannot identify size. Compression seems cannot reduce original size!" );
+				auto vCompressed = Merger::Compress_Merge( ci, true );
+				THROW_ERR_IF( vCompressed.empty(), "Cannot identify size. May caused by Merger or Compression logic error!" );
 
-				uint32_t reduce_size = read.size() - cp.Compression_Size();
-				printf( "Original Size:%u(Bytes), Compression Size:%u(Bytes), Reduce:%u(Bytes)\n", read.size(), cp.Compression_Size(), reduce_size );
+				uint32_t reduce_size = read.size() - vCompressed.size();
+				printf( "Original:%u(Bytes), Compression:%u(Bytes), Reduced:%u(Bytes)\n", read.size(), vCompressed.size(), reduce_size );
 			}
-			else if ( ext == "bin" )
-			{
-				auto pDecompressed = cp.Decompress( (uint8_t*) &read[0] );
-				THROW_ERR_IFNULLPTR( pDecompressed, "Cannot identify size. May caused by logic or file integrity error!" );
-
-				uint32_t reduce_size = cp.Original_Size() - read.size();
-				printf( "Original Size:%u(Bytes), Compression Size:%u(Bytes), Reduce:%u(Bytes)\n", cp.Original_Size(), read.size(), reduce_size );
-			}
-			else THROW_ERR( "Format " + ext + " is not supported!" );
 		}
 		catch ( Err& error )
 		{
-			clog.Log( ERROR, error.Seek() );
+			printf( "Unhandled Exception:%s\n", error.Seek() );
 			if ( !FileErr.empty() ) error.Log( ERROR, FileErr );
 		}
 	}
 
+}
+
+void CMD::Handle_Version()
+{
+	printf( "Compression Revision:%s\n", COMPRESSION_REVISION );
+	printf( "Merger Revision:%s\n", MERGER_REVISION );
 }
 
 void CMD::Handle_Unknown()

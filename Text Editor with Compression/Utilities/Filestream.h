@@ -34,9 +34,9 @@ public:
 		}
 	}
 
-	static std::vector<char> Read_Bin( const std::string& filepath )
+	static std::vector<uint8_t> Read_Bin( const std::string& filepath )
 	{
-		std::vector<char> buf;
+		std::vector<uint8_t> buf;
 		auto myfile = std::fstream( filepath, std::ios::in | std::ios::binary );
 		if ( myfile )
 		{

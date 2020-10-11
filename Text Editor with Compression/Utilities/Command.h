@@ -36,15 +36,22 @@ private:
 	static void Handle_Compression( int argc, const char* argv[], bool compress );
 	static void Handle_Benchmark( int argc, const char* argv[] );
 	static void Handle_Readsize( const char* fileread );
-	static void Handle_About();
+	static void Handle_Version();
 	static void Handle_Help();
+	static void Handle_About();
 };
 
-#define CMD_BENCHMARK	"-b"
-#define CMD_VERSION		"-v"
-#define CMD_HELP		"-h"
-#define CMD_ABOUT		"-a"
+#define CMD_BENCHMARK	    "-b"
+#define CMD_BENCHMARK_RAW   "-br"
+#define CMD_VERSION		    "-v"
+#define CMD_HELP		    "-h"
+#define CMD_ABOUT		    "-a"
 
-#define CMD_COMPRESS	"-c"
-#define CMD_DECOMPRESS	"-d"
-#define CMD_READSIZE	"-r"
+#define CMD_COMPRESS	    "-c"
+#define CMD_COMPRESS_RAW    "-cr"
+#define CMD_DECOMPRESS	    "-d"
+#define CMD_DECOMPRESS_RAW  "-dr"
+#define CMD_READSIZE	    "-r"
+
+#define CMD_MULTITHREAD     "-mt"
+#define CMD_SINGLETHREAD    "-st"
