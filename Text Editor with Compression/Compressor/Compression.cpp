@@ -1,419 +1,387 @@
 #include "Compression.h"
-#include <stdlib.h>
-#include <cmath>
+#include <iostream>
+#include <thread>
+#include "../../Utilities/Timer.h"
 
-constexpr uint8_t MaskTemplate[9] = { 0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF };
+#define ITERATION_SIZE 8096
+#define EXCEPTION_SIZE 8096
 
-uint8_t* Compression::Compress( sCompressInfo info, bool force )
+std::vector<uint8_t> Compression::Compress_Merge( const sCompressInfo& info, bool mt )
 {
-	if ( info.SizeSource == 0 || info.pData == nullptr ) return nullptr;
+	uint32_t IterationSize = info.SizeSource / 1024;
+	uint32_t LowestMergeSize = info.SizeSource;
+	uint32_t BestClusterSize = info.SizeSource;
 
-	bool ByteCombination[BYTESIZE];
-	for ( uint32_t i = 0; i < BYTESIZE; i++ ) ByteCombination[i] = false;
-
-	//find amount of byte combination in source data
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		ByteCombination[info.pData[i]] = true;
-
-	//based on amount of byte combination in sourcedata, create new value and store old value
-	std::vector<uint8_t> OldValueTable;
-	uint8_t* NewValueTable = (uint8_t*) calloc( BYTESIZE, sizeof( bool ) );
-	uint8_t NewValue = 0;
-	for ( size_t i = 0; i < BYTESIZE; i++ )
+	//small files, doesnt need clusterization
+	if ( IterationSize == 0 )
 	{
-		if ( ByteCombination[i] )
-		{
-			//the reason NewValue starts at "1" is because we need "0" to represent a terminating pointer
-			//when we merge the compressed value, at the end we put "0" to indicate the end of data
-			//this trick is to seperates or identify where's the compressed data and the decoder, so no need to memorize location
-			NewValue++;
-			NewValueTable[i] = NewValue;
-			OldValueTable.push_back( i );
-		}
+		//include 1 byte for merge header
+		uint32_t ReportedMergeSize = 1 + HuffmanCodes::Calc_Comp_Size( info );
+		//doesnt need to report BestClusterSize because there's only 1 cluster
+		if ( ReportedMergeSize < LowestMergeSize ) LowestMergeSize = ReportedMergeSize;
 	}
-
-	//calculate compression size
-	auto BitLenData = Len_Bit( NewValue ); //find bit length to represent Highest number of new value
-	auto BitLenDecoder = Len_Bit( OldValueTable.back() ); //find bit length to represent Highest number of old value
-
-	//NewValue represent how much combination of bytes in compressed format
-	uint64_t TotalAllocationData = std::ceil( (double) BitLenData * (info.SizeSource + 1) / 8 ); //find amount of bytes to store compressed data
-	uint64_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 ); //find amount of bytes to store old (original) data
-	uint64_t TotalAllocationCombined = 1 + TotalAllocationData + TotalAllocationDecoder; //header need 1 byte
-	this->CompressionSize = TotalAllocationCombined;
-
-	//if compression doesnt reduce it's original size, then return null
-	if ( TotalAllocationCombined >= info.SizeSource )
+	//clusterization
+	else
 	{
-		if ( !force ) return nullptr;
+		//single-thread workload
+		if ( !mt )
+		{
+			for ( uint32_t i = IterationSize; i < info.SizeSource; i += IterationSize )
+			{
+				uint32_t ReportedMergeSize;
+				if ( i > info.SizeSource ) i = info.SizeSource;
+				Compression::Find_Compression_Merge_Size( i, info, ReportedMergeSize );
+				if ( ReportedMergeSize < LowestMergeSize )
+				{
+					BestClusterSize = i;
+					LowestMergeSize = ReportedMergeSize;
+				}
+			}
+		}
+		//multi-thread workload
 		else
 		{
-			this->CompressionSize = 1 + info.SizeSource;
-			return Compression::Uncompressed( info );
-		}
-	}
+			uint32_t ThreadSize = info.SizeSource / IterationSize;
+			if ( info.SizeSource % IterationSize != 0 ) ThreadSize++;
 
-	uint8_t* pCompressed = (uint8_t*) calloc( this->CompressionSize, sizeof( uint8_t ) );
+			std::vector<uint32_t> MergeSize( ThreadSize );
+			std::vector<std::thread> pThread( ThreadSize );
 
-	//create buffer for compression data based on original order
-	std::vector<uint8_t> BufferCompressedData;
-	BufferCompressedData.resize( info.SizeSource + 1 ); //additional bytes for null pointer
-	BufferCompressedData[info.SizeSource] = 0; //add terminating pointer at the end
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		BufferCompressedData[i] = NewValueTable[info.pData[i]];
+			for ( uint32_t i = 0; i < ThreadSize; i++ )
+			{
+				uint32_t ClusterSize = (i+1) * IterationSize;
+				if ( ClusterSize > info.SizeSource ) ClusterSize = info.SizeSource;
+				pThread[i] = std::thread( Compression::Find_Compression_Merge_Size, ClusterSize, info, std::ref( MergeSize[i] ) );
+			}
 	
-	//create header
-	sCompressHeader header;
-	header.DataLength = BitLenData;
-	header.DecoderLength = BitLenDecoder;
-	pCompressed[0] = Header_Create( header );
-
-	//combine header, compressed value, decoder tablo to pCompressed buffer.
-	Merge_Compression( &pCompressed[1], header, BufferCompressedData, OldValueTable );
-
-	return pCompressed;
-}
-
-void Compression::Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo info, bool force )
-{
-	if ( info.SizeSource == 0 || info.pData == nullptr ) return;
-
-	bool ByteCombination[BYTESIZE];
-	for ( uint32_t i = 0; i < BYTESIZE; i++ ) ByteCombination[i] = false;
-
-	//find amount of byte combination in source data
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		ByteCombination[info.pData[i]] = true;
-
-	//based on amount of byte combination in sourcedata, create new value and store old value
-	std::vector<uint8_t> OldValueTable;
-	uint8_t* NewValueTable = (uint8_t*) calloc( BYTESIZE, sizeof( bool ) );
-	uint8_t NewValue = 0;
-	for ( size_t i = 0; i < BYTESIZE; i++ )
-	{
-		if ( ByteCombination[i] )
-		{
-			//the reason NewValue starts at "1" is because we need "0" to represent a terminating pointer
-			//when we merge the compressed value, at the end we put "0" to indicate the end of data
-			//this trick is to seperates or identify where's the compressed data and the decoder, so no need to memorize location
-			NewValue++;
-			NewValueTable[i] = NewValue;
-			OldValueTable.push_back( i );
+			for ( uint32_t i = ThreadSize - 1; ; i-- )
+			{
+				pThread[i].join();
+				if ( MergeSize[i] < LowestMergeSize )
+				{
+					LowestMergeSize = MergeSize[i];
+					BestClusterSize = ( i + 1 ) * IterationSize;
+				}
+				if ( i == 0 ) break;
+			}
 		}
 	}
-	//calculate compression size
-	auto BitLenData = Len_Bit( NewValue ); //find bit length to represent Highest number of new value
-	auto BitLenDecoder = Len_Bit( OldValueTable.back() ); //find bit length to represent Highest number of old value
 
-	//NewValue represent how much combination of bytes in compressed format
-	uint64_t TotalAllocationData = std::ceil( (double) BitLenData * ( info.SizeSource + 1 ) / 8 ); //find amount of bytes to store compressed data
-	uint64_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 ); //find amount of bytes to store old (original) data
-	uint64_t TotalAllocationCombined = 1 + TotalAllocationData + TotalAllocationDecoder; //header need 1 byte
-
-	//if compression doesnt reduce it's original size, then return null
-	if ( TotalAllocationCombined >= info.SizeSource )
+	//if no efficiency found
+	if ( LowestMergeSize == info.SizeSource )
 	{
-		if ( !force ) return;
+		HuffmanCodes cp;
+		uint8_t* pUncompressed = cp.Uncompressed( info );
+		std::vector<uint8_t> vUncompressedMerge( 1 + cp.Compressed_Size() );
+		vUncompressedMerge[0] = 0; //null addressing
+		memcpy( &vUncompressedMerge[1], pUncompressed, cp.Compressed_Size() );
+		return vUncompressedMerge;
+	}
+
+	return Compression::Compress_Merge_Fix( BestClusterSize, info, mt );
+}
+
+std::vector<uint8_t> Compression::Compress_Merge_Greedy( const sCompressInfo& info, bool mt )
+{
+	#define REMAINING_UNCOMPRESSED (info.SizeSource - readIndex)
+
+	std::vector<uint32_t> addressList;
+	std::vector<uint8_t> bufferCompressed;
+	std::vector<sCompressInfo> vCInfo;
+
+	uint32_t readIndex = 0;
+	uint32_t writeSize = info.SizeSource;
+
+	while ( readIndex < info.SizeSource )
+	{
+		double bestEfficiency = 0;
+		//find best ratio
+		for ( uint32_t i = 0; i < REMAINING_UNCOMPRESSED; )
+		{
+			i += ITERATION_SIZE;
+			if ( i > REMAINING_UNCOMPRESSED ) i = REMAINING_UNCOMPRESSED;
+			sCompressInfo ci;
+			ci.SizeSource = i;
+			ci.pData = &info.pData[readIndex];
+			double efficiency = (double) i / HuffmanCodes::Calc_Comp_Size( ci );
+			if ( efficiency > bestEfficiency )
+			{
+				bestEfficiency = efficiency;
+				writeSize = i;
+			}
+		}
+		//if fail to reduce size
+		if ( bestEfficiency < 1.0 )
+		{
+			if ( REMAINING_UNCOMPRESSED < EXCEPTION_SIZE ) writeSize = REMAINING_UNCOMPRESSED;
+			else writeSize = EXCEPTION_SIZE;
+		}
+		//save cluster address
+		addressList.push_back( bufferCompressed.size() + 1 ); //save cluster address
+
+		sCompressInfo ci;
+		ci.pData = &info.pData[readIndex];
+		ci.SizeSource = writeSize;
+
+		if ( mt ) vCInfo.push_back( ci );
 		else
 		{
-			return Compression::Uncompressed_Buffer( info, vBuffer );
+			std::vector<uint8_t> buffer;
+			HuffmanCodes::Compress_Buffer( buffer, ci, true );
+			//copy compressed value to buffer
+			for ( auto i : buffer )
+				bufferCompressed.push_back( i );
 		}
+
+		readIndex += writeSize; //iterate to next non-compressed data
 	}
 
-	vBuffer.resize( TotalAllocationCombined );
-
-	//create buffer for compression data based on original order
-	std::vector<uint8_t> BufferCompressedData;
-	BufferCompressedData.resize( info.SizeSource + 1 ); //additional bytes for null pointer
-	BufferCompressedData[info.SizeSource] = 0; //add terminating pointer at the end
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		BufferCompressedData[i] = NewValueTable[info.pData[i]];
-
-	//create header
-	sCompressHeader header;
-	header.DataLength = BitLenData;
-	header.DecoderLength = BitLenDecoder;
-	vBuffer[0] = Header_Create( header );
-
-	//combine header, compressed value, decoder tablo to pCompressed buffer.
-	Merge_Compression( &vBuffer[1], header, BufferCompressedData, OldValueTable );
-}
-
-uint8_t* Compression::Decompress( const uint8_t* pCompressed )
-{
-	if ( pCompressed == nullptr ) return nullptr;
-
-	uint8_t* pOriginal = nullptr;
-	sCompressHeader header = Header_Read( pCompressed );
-
-	std::vector<uint8_t> vBufferData, vBufferDecoder;
-	Expand_Compression( pCompressed, header, vBufferData, vBufferDecoder );
-
-	//allocate, original size is determined
-	pOriginal = (uint8_t*) malloc( vBufferData.size() * sizeof( uint8_t ) );
-	this->OriginalSize = vBufferData.size();
-
-	//translation with decoder table
-	for ( size_t i = 0; i < vBufferData.size(); i++ )
+	uint8_t addressingSize = 0;
+	//if there's multiple cluster
+	if ( addressList.size() > 1 )
 	{
-		auto val = vBufferData[i];
-		pOriginal[i] = vBufferDecoder[val-1];
+		//find amount of bytes needed to save cluster address
+		addressingSize = Addressing_Size( addressList.back() );
+		addressList.push_back( 0 ); //terminating address pointer (divider between address and compressed block)
 	}
-	return pOriginal;
-}
 
-void Compression::Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed )
-{
-	if ( pCompressed == nullptr ) return;
-
-	sCompressHeader header = Header_Read( pCompressed );
-	std::vector<uint8_t> vBufferData, vBufferDecoder;
-	Expand_Compression( pCompressed, header, vBufferData, vBufferDecoder );
-
-	//reserve size to avoid dynamic allocation
-	vBuffer.resize( vBufferData.size() );
-
-	//translation with decoder table
-	for ( size_t i = 0; i < vBufferData.size(); i++ )
-		vBuffer[i] = vBufferDecoder[vBufferData[i] - 1];
-}
-
-uint8_t* Compression::Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize )
-{
-	sCompressHeader header = Header_Read( pCompressed );
-	if ( !needCompression( header ) )
+	//merge all component (header, address, compressedData) / assembling of compressed data
+	std::vector<uint8_t> bufferMerge;
+	if ( mt )
 	{
-		//pSize is size of an uncompressed format
-		//the actual size if (size-1) because we ignore compression header which cost 1 byte.
-		this->OriginalSize = pSize - 1;
-		uint8_t* pOriginal = (uint8_t*) malloc( this->OriginalSize );
-		memcpy( pOriginal, &pCompressed[1], this->OriginalSize );
-		return pOriginal;
-	}
-	return Decompress( pCompressed );
-}
+		uint32_t CompressSize = 0;
+		std::vector<std::thread> pThread( vCInfo.size() );
+		std::vector<std::vector<uint8_t>> vCompressBuffer( vCInfo.size() );
+		for ( uint32_t i = 0; i < vCInfo.size(); i++ )
+			pThread[i] = std::thread( HuffmanCodes::Compress_Buffer, std::ref( vCompressBuffer[i] ), vCInfo[i], true );
 
-void Compression::Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed, uint32_t pSize )
-{
-	sCompressHeader header = Header_Read( pCompressed );
-	if ( !needCompression( header ) )
-	{
-		uint32_t OriginalSize = pSize - 1;
-		vBuffer.resize( OriginalSize );
-		for ( uint32_t i = 0; i < OriginalSize; i++ ) vBuffer[i] = pCompressed[1 + i];
-		return;
-	}
-	Decompress_Buffer( vBuffer, pCompressed );
-}
-
-uint8_t* Compression::Uncompressed( sCompressInfo info )
-{
-	this->CompressionSize = 1 + info.SizeSource;
-	uint8_t* pUncompressed = (uint8_t*) malloc( 1 + info.SizeSource );
-	sCompressHeader header;
-	header.DataLength = 8;
-	header.DecoderLength = 0;
-	pUncompressed[0] = Header_Create( header );
-	memcpy( &pUncompressed[1], info.pData, info.SizeSource );
-	return pUncompressed;
-}
-
-void Compression::Uncompressed_Buffer( sCompressInfo info, std::vector<uint8_t>& vBuffer )
-{
-	vBuffer.resize( 1 + info.SizeSource );
-	sCompressHeader header;
-	header.DataLength = 8;
-	header.DecoderLength = 0;
-	vBuffer[0] = Header_Create( header );
-	memcpy( &vBuffer[1], info.pData, info.SizeSource );
-}
-
-size_t Compression::Compression_Size() const
-{
-	return this->CompressionSize;
-}
-
-size_t Compression::Original_Size() const
-{
-	return this->OriginalSize;
-}
-
-uint32_t Compression::Calc_Comp_Size( sCompressInfo info )
-{
-	if ( info.SizeSource == 0 || info.pData == nullptr ) return 0;
-
-	bool ByteCombination[BYTESIZE];
-	for ( int i = 0; i < BYTESIZE; i++ )
-		ByteCombination[i] = false;
-	for ( uint32_t i = 0; i < info.SizeSource; i++ )
-		ByteCombination[info.pData[i]] = true;
-
-	uint8_t OriginalHighestValue = 0;
-	uint8_t NewValue = 0;
-	uint8_t NewValueTable[BYTESIZE];
-
-	for ( int i = 0; i < BYTESIZE; i++ )
-		NewValueTable[i] = 0;
-	for ( size_t i = 0; i < BYTESIZE; i++ )
-	{
-		if ( ByteCombination[i] )
+		for ( uint32_t i = 0; i < vCInfo.size(); i++ )
 		{
-			NewValue++;
-			NewValueTable[i] = NewValue;
-			OriginalHighestValue = i;
+			pThread[i].join();
+			CompressSize += vCompressBuffer[i].size();
 		}
+
+		uint32_t CombinedSize = 1 + addressList.size() * addressingSize + CompressSize;
+		bufferMerge.reserve( CombinedSize );
+
+		bufferMerge.push_back( addressingSize );
+		if ( addressList.size() > 1 ) Store_Cluster_Address( addressList, addressingSize, bufferMerge );
+		for ( auto i : vCompressBuffer )
+			for ( auto j : i )
+				bufferMerge.push_back( j );
+	}
+	else
+	{
+		//header(1) + addressingSize(n*size) + compressedData(n)
+		uint32_t CombinedSize = 1 + addressList.size() * addressingSize + bufferCompressed.size();
+		bufferMerge.reserve( CombinedSize );
+
+		bufferMerge.push_back( addressingSize );
+		if ( addressList.size() > 1 ) Store_Cluster_Address( addressList, addressingSize, bufferMerge );
+		for ( auto i : bufferCompressed ) bufferMerge.push_back( i );
 	}
 
-	//calculate compression size
-	auto BitLenData = Len_Bit( NewValue );
-	auto BitLenDecoder = Len_Bit( OriginalHighestValue );
-
-	uint32_t TotalAllocationData = std::ceil( (double) BitLenData * ( info.SizeSource + 1 ) / 8 );
-	uint32_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 );
-	return 1 + TotalAllocationData + TotalAllocationDecoder;
+	return bufferMerge;
 }
 
-uint8_t Compression::Len_Bit( const uint8_t& num )
+std::vector<uint8_t> Compression::Compress_Merge_Fix( uint32_t clusterSize, const sCompressInfo& info, bool mt )
 {
-	return (uint8_t) log2( num ) + 1;
-}
+	//multi-thread based on amount of cluster
+	uint32_t threadSize = std::ceil( (double) info.SizeSource / clusterSize );
+	std::vector<std::vector<uint8_t>> vBufferCompressed( threadSize );
 
-bool Compression::needCompression( sCompressHeader header )
-{
-	return header.DecoderLength != 0;
-}
+	sCompressInfo lastCluster;
+	lastCluster.pData = (uint8_t*) &info.pData[( threadSize - 1 ) * clusterSize];
+	if ( clusterSize == info.SizeSource ) lastCluster.SizeSource = info.SizeSource;
+	else                                  lastCluster.SizeSource = info.SizeSource % clusterSize;
 
-uint8_t Compression::Header_Create( const sCompressHeader& header )
-{
-	#define DATA_REPOSITION header.DataLength << 4
-	#define DECODER_REPOSITION header.DecoderLength << 0
-	return ( DATA_REPOSITION ) | ( DECODER_REPOSITION );
-}
-
-sCompressHeader Compression::Header_Read( const uint8_t* pCompressed )
-{
-	sCompressHeader header;
-	header.DataLength = pCompressed[0] >> 4;
-	header.DecoderLength = 0x0F & pCompressed[0];
-	return header;
-}
-
-void Compression::Merge_Compression( uint8_t* pBuffer, const sCompressHeader& header,  const std::vector<uint8_t>& vCompressed, const std::vector<uint8_t>& vDecoder )
-{
-	size_t write_index = 0;
-	for ( int i = 0; i < 2; i++ )
+	//single-thread workload if not enable mt or only 1 cluster
+	if ( !mt || threadSize == 1 )
 	{
-		size_t write_size;
-		const uint8_t* data_ref;
-		uint8_t available_bit = BYTELEN;
-		uint8_t concat, char_read, get, bit_limit;
-		concat = char_read = get = 0;
-		if ( i == 0 )
+		for ( uint32_t i = 0; i < threadSize - 1; i++ )
 		{
-			data_ref = &vCompressed[0];
-			bit_limit = header.DataLength;
-			write_size = vCompressed.size();
+			sCompressInfo ci;
+			ci.pData = (uint8_t*) &info.pData[i * clusterSize];
+			ci.SizeSource = clusterSize;
+			HuffmanCodes::Compress_Buffer( vBufferCompressed[i], ci, true );
 		}
+		HuffmanCodes::Compress_Buffer( vBufferCompressed[threadSize - 1], lastCluster, true );
+	}
+	//multi-thread workload
+	else
+	{
+		std::vector<std::thread> pThread( threadSize );
+		for ( uint32_t i = 0; i < threadSize - 1; i++ )
+		{
+			sCompressInfo ci;
+			ci.pData = (uint8_t*) &info.pData[i * clusterSize];
+			ci.SizeSource = clusterSize;
+			pThread[i] = std::thread( HuffmanCodes::Compress_Buffer, std::ref( vBufferCompressed[i] ), ci, true );
+		}
+		pThread[threadSize - 1] = std::thread( HuffmanCodes::Compress_Buffer, std::ref( vBufferCompressed[threadSize - 1] ), lastCluster, true );
+
+		for ( uint32_t i = 0; i < threadSize; i++ )
+			pThread[i].join();
+	}
+
+	//find total cluster size
+	uint32_t CompressedSize = 0;
+	for ( auto i : vBufferCompressed )
+		CompressedSize += i.size();
+
+	//store cluster address if more than 1 cluster
+	uint32_t addressingSize = 0;
+	std::vector<uint32_t> addressList;
+	if ( threadSize > 1 )
+	{
+		addressList.reserve( threadSize + 1 ); //include null address pointer
+		addressList.push_back( 1 ); //first address always be 1
+		for ( uint32_t i = 0; i < threadSize - 1; i++ )
+		{
+			uint32_t nextAddress = addressList.back() + vBufferCompressed[i].size();
+			addressList.push_back( nextAddress );
+		}
+		addressingSize = Addressing_Size( addressList.back() );
+		addressList.push_back( 0 );
+	}
+
+	//combined size header + address block + total cluster size
+	uint32_t CombinedSize = 1 + addressList.size() * addressingSize + CompressedSize;
+
+	std::vector<uint8_t> vCompressed;
+	vCompressed.reserve( CombinedSize );
+	vCompressed.push_back( addressingSize ); //insert header
+
+	//threadSize also indicates the amount of cluster, only store store address if more than 1 cluster
+	if ( threadSize > 1 ) Store_Cluster_Address( addressList, addressingSize, vCompressed );
+
+	//save compressed format
+	for ( auto i : vBufferCompressed )
+		for ( auto j : i )
+			vCompressed.push_back( j );
+	
+	return vCompressed;
+}
+
+std::vector<uint8_t> Compression::Decompress_Merge( const std::vector<uint8_t>& merged, bool mt )
+{
+	const uint8_t& addressingSize = merged[0];
+	if ( addressingSize == 0 )
+	{
+		HuffmanCodes cp;
+		std::vector<uint8_t> vDecompressed;
+		HuffmanCodes::Decompress_Reference_Buffer( vDecompressed, &merged[1], merged.size() - 1 ); //no clusterization, skip merger header
+		return vDecompressed;
+	}
+	else
+	{
+		std::vector<uint32_t> vAddress;
+		vAddress = Retrieve_Cluster_Address( addressingSize, merged );
+
+		//skipping address block (including null address)
+		uint32_t offset = (vAddress.size() + 1) * addressingSize;
+		for ( uint32_t i = 0; i < vAddress.size(); i++ )
+			vAddress[i] += offset;
+		vAddress.push_back( merged.size() ); //add null address pointer
+		
+		const uint32_t threadSize = vAddress.size() - 1; //skip null address pointer
+		std::vector<std::vector<uint8_t>> vDecompressedBuffer( threadSize );
+
+		//single threaded
+		HuffmanCodes cp;
+		if ( !mt )
+		{
+			//Decompress Reference is safest way to decompress file
+			//if the we are decompressing an Uncompressed format, this function can handle
+			//we should give the pointer size as a reference, to tell how large the originalsize of uncompressed format
+			for ( uint32_t i = 0; i < vAddress.size() - 1; i++ )
+				HuffmanCodes::Decompress_Reference_Buffer( vDecompressedBuffer[i], &merged[vAddress[i]], vAddress[i + 1] - vAddress[i] );
+		}
+		//multi threaded
 		else
 		{
-			data_ref = &vDecoder[0];
-			bit_limit = header.DecoderLength;
-			write_size = vDecoder.size();
+			std::vector<std::thread> pThread( threadSize );
+
+			for ( uint32_t i = 0; i < threadSize; i++ )
+				pThread[i] = std::thread( HuffmanCodes::Decompress_Reference_Buffer, std::ref( vDecompressedBuffer[i] ), &merged[vAddress[i]], vAddress[i + 1] - vAddress[i] );
+
+			for ( uint32_t i = 0; i < threadSize; i++ )
+				pThread[i].join();
 		}
 
-		for ( size_t read_index = 0; read_index < write_size; read_index++ )
-		{
-			if ( available_bit < bit_limit )
-			{
-				if ( available_bit != (uint8_t) 0 )
-				{
-					char_read = data_ref[read_index] << get;
-					concat = concat | char_read;
-				}
-				pBuffer[write_index] = concat;
-				write_index++;
+		//calculate OriginalSize
+		uint32_t OriginalSize = 0;
+		for ( auto i : vDecompressedBuffer )
+			OriginalSize += i.size();
 
-				get = available_bit == 0 ? bit_limit : bit_limit - available_bit;
-				char_read = data_ref[read_index] >> available_bit;
-				concat = char_read;
-				available_bit = BYTELEN - get;
-			}
-			else
-			{
-				char_read = data_ref[read_index] << get;
-				get += bit_limit;
-				available_bit -= bit_limit;
-				concat = concat | char_read;
-			}
-		}
-		pBuffer[write_index] = concat;
-		write_index++;
+		std::vector<uint8_t> vDecompressed;
+		vDecompressed.reserve( OriginalSize );
+
+		for ( auto i : vDecompressedBuffer )
+			for ( auto j : i )
+				vDecompressed.push_back( j );	
+
+		return vDecompressed;
 	}
 }
 
-void Compression::Expand_Compression( const uint8_t* pCompressed, const sCompressHeader& header, std::vector<uint8_t>& vBufferData, std::vector<uint8_t>& vBufferDecoder )
+uint8_t Compression::Addressing_Size( uint64_t address )
 {
-	uint8_t charRead = 1;
-	size_t readIndex = 1;
-	uint8_t totalVariation = 0;
+	for ( int i = 8; i < 64; i += 8 )
+		if ( address - 1 <= pow( 2, i ) ) return i / 8;
+}
 
-	for ( int i = 1; i < 3; i++ )
+void Compression::Find_Compression_Merge_Size( uint32_t clusterSize, const sCompressInfo& info, uint32_t& bufferSize )
+{
+	if ( clusterSize == 0 ) return;
+
+	uint32_t CombinedCompressionSize = 0;
+	uint32_t LastSize = info.SizeSource % clusterSize;
+	uint32_t ClusterAmount = info.SizeSource / clusterSize;
+
+	for ( uint32_t i = 0; i < ClusterAmount; i++ )
 	{
-		uint8_t charlen;
-		uint8_t get = 0;
-		uint8_t concat = 0;
-		uint8_t bitAvailable = BYTELEN;
-		std::vector<uint8_t>* refBuffer;
-		if ( i == 1 )
-		{
-			charlen = header.DataLength;
-			refBuffer = &vBufferData;
-		}
-		else
-		{
-			readIndex++;
-			charlen = header.DecoderLength;
-			refBuffer = &vBufferDecoder;
-			vBufferDecoder.reserve( totalVariation );
-		}
+		sCompressInfo ci;
+		ci.pData = &info.pData[i * clusterSize];
+		ci.SizeSource = clusterSize;
+		CombinedCompressionSize += HuffmanCodes::Calc_Comp_Size( ci );
+	}
+	if ( LastSize != 0 )
+	{
+		sCompressInfo ci;
+		ci.pData = &info.pData[ClusterAmount * clusterSize];
+		ci.SizeSource = LastSize;
+		CombinedCompressionSize += HuffmanCodes::Calc_Comp_Size( ci );
+	}
+	uint32_t addressingSize = Addressing_Size( CombinedCompressionSize );
+	//reported size: header + Address Block size + Combined Compression Size
+	bufferSize = 1 + ClusterAmount * addressingSize + CombinedCompressionSize;
+}
 
-		//get data
-		while ( true )
+void Compression::Store_Cluster_Address( const std::vector<uint32_t>& vList, uint8_t addressing, std::vector<uint8_t>& vBuffer )
+{
+	for ( auto address : vList )
+	{
+		uint8_t* ptr = (uint8_t*) &address;
+		for ( int i = 0; i < addressing; i++ )
 		{
-			if ( bitAvailable < charlen )
-			{
-				if ( bitAvailable != 0 )
-				{
-					get = BYTELEN - bitAvailable;
-					concat = pCompressed[readIndex] >> get;
-					concat = concat & MaskTemplate[bitAvailable];
-					get = charlen - bitAvailable;
-				}
-				else
-				{
-					charRead = 0;
-					get = charlen;
-				}
-				readIndex++;
-				charRead = pCompressed[readIndex] << bitAvailable;
-				charRead = charRead & MaskTemplate[charlen];
-				charRead = concat | charRead;
-				bitAvailable = BYTELEN - get;
-				concat = 0;
-			}
-			else
-			{
-				charRead = pCompressed[readIndex] >> get;
-				charRead = charRead & MaskTemplate[charlen];
-				bitAvailable -= charlen;
-				get += charlen;
-			}
-			if ( i == 1 && charRead == NULL ) break;
-			refBuffer->push_back( charRead );
-			if ( i == 2 && vBufferDecoder.size() >= totalVariation ) break;
-			
-			//check how amount of combination
-			if ( i == 1 && totalVariation < charRead ) totalVariation = charRead;
+			vBuffer.push_back( *ptr );
+			ptr++;
 		}
 	}
+}
+
+std::vector<uint32_t> Compression::Retrieve_Cluster_Address( uint8_t addressing, const std::vector<uint8_t>& vBuffer )
+{
+	constexpr uint32_t MaskBytes[] = { 0x0, 0xFF, 0xFFFF, 0xFFFFFF, 0xFFFFFFFF };
+	std::vector<uint32_t> vList;
+	uint32_t readAddress;
+	for ( uint32_t readIndex = 1; ; readIndex += addressing )
+	{
+		readAddress = *(uint32_t*) &vBuffer[readIndex];
+		readAddress = readAddress & MaskBytes[addressing];
+		if ( readAddress == 0 ) break;
+		vList.push_back( readAddress );
+	}
+	return vList;
 }

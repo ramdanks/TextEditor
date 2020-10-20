@@ -1,60 +1,39 @@
 #pragma once
 #include <vector>
-
-#define BYTELEN 8
-#define BYTESIZE 256
+#include "HuffmanCodes.h"
 #define COMPRESSION_REVISION "0.1a"
 
-struct sCompressInfo
+struct sArchiveHeader
 {
-	uint8_t* pData;
-	uint32_t SizeSource;
-};
-
-struct sCompressHeader
-{
-	uint8_t DataLength : 4;
-	uint8_t DecoderLength : 4;
+	uint8_t AddressingSize;
+	std::vector<uint8_t> Address;
 };
 
 class Compression
 {
-	size_t CompressionSize;
-	size_t OriginalSize;
-
 public:
-	Compression() : CompressionSize(0) {}
+	Compression() = delete;
+	Compression( const Compression& other ) = delete;
+	Compression operator = ( const Compression& other ) = delete;
 
-	//function will return nullptr if fail to reduce size. force=true will compress it anyway
-	uint8_t* Compress( sCompressInfo info, bool force = false );
-	//function will leave vBuffer empty if fail to reduce size. force=true will compress it anyway
-	static void Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo info, bool force = false );
-	//this function expect param contain compressed format
-	uint8_t* Decompress( const uint8_t* pCompressed );
-	//this function expect param contain compressed format
-	static void Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed );
-	//this function will accept uncompressed format, please give the correct pointer size
-	uint8_t* Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize );
-	//this function will accept uncompressed format, please give the correct pointer size
-	static void Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed, uint32_t pSize );
+	//Merge compression use clusterization, automatically find the best cluster size
+	static std::vector<uint8_t> Compress_Merge( const sCompressInfo& info, bool mt );
+	//Best efficiency of cluster size achieve by greedy algorithm
+	static std::vector<uint8_t> Compress_Merge_Greedy( const sCompressInfo& info, bool mt );
+	//Merge compression with fix clusterSize
+	static std::vector<uint8_t> Compress_Merge_Fix( uint32_t clusterSize, const sCompressInfo& info, bool mt );
 
-	//return uncompressed format
-	uint8_t* Uncompressed( sCompressInfo info );
-	//return uncompressed format, buffer will be erased
-	static void Uncompressed_Buffer( sCompressInfo info, std::vector<uint8_t>& vBuffer );
-
-	size_t Compression_Size() const;
-	size_t Original_Size() const;
-
-	//find compression size
-	static uint32_t Calc_Comp_Size( sCompressInfo info );
+	//Decompress merge compressed file. cannot handle non-merged compression file.
+	static std::vector<uint8_t> Decompress_Merge( const std::vector<uint8_t>& merged, bool mt );
 
 private:
-	static uint8_t Len_Bit( const uint8_t& num );
-	static bool needCompression( sCompressHeader header );
-	static uint8_t Header_Create( const sCompressHeader& header );
-	static sCompressHeader Header_Read( const uint8_t* pCompressed );
+	//return amount of bytes needed to store address value
+	static uint8_t inline Addressing_Size( uint64_t address );
+	//find compression size based on cluster size
+	static void Find_Compression_Merge_Size( uint32_t clusterSize, const sCompressInfo& info, uint32_t& bufferSize );
 
-	static void Merge_Compression( uint8_t* pBuffer, const sCompressHeader& header, const std::vector<uint8_t>& vCompressed, const std::vector<uint8_t>& vDecoder );
-	static void Expand_Compression( const uint8_t* pCompressed, const sCompressHeader& header, std::vector<uint8_t>& vBufferData, std::vector<uint8_t>& vBufferDecoder );
+	//this function not include null address pointer, push_back(0) before entering this function
+	static void Store_Cluster_Address( const std::vector<uint32_t>& vList, uint8_t addressing, std::vector<uint8_t>& vBuffer );
+	//this function except null address pointer, and will return the vector without the null value
+	static std::vector<uint32_t> Retrieve_Cluster_Address( uint8_t addressing, const std::vector<uint8_t>& vBuffer );
 };

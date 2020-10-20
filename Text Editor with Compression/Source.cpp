@@ -1,9 +1,8 @@
-#include "Utilities/Command.h"
-#include "Utilities/Filestream.h"
-#include "Utilities/Merger.h"
+#include "Command.h"
+#include "../Utilities/Filestream.h"
 
-#define ERR_FILEPATH	"Log/Error.txt"
-#define LOG_FILEPATH	"Log/Log.txt"
+#define ERR_FILEPATH	"Log/CompError.txt"
+#define LOG_FILEPATH	"Log/CompLog.txt"
 
 int main( int argc, char* argv[] )
 {

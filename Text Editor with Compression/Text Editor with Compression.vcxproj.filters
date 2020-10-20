@@ -15,48 +15,48 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Utilities\Logging.cpp">
+    <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\Timer.cpp">
+    <ClCompile Include="Compressor\HuffmanCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Compressor\Compression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source.cpp">
+    <ClCompile Include="Command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\Command.cpp">
+    <ClCompile Include="..\Utilities\Err.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\Err.cpp">
+    <ClCompile Include="..\Utilities\Logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities\Merger.cpp">
+    <ClCompile Include="..\Utilities\Timer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Utilities\Err.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utilities\Command.h">
+    <ClInclude Include="Compressor\HuffmanCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Compressor\Compression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\Filestream.h">
+    <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\Logging.h">
+    <ClInclude Include="..\Utilities\Err.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\Timer.h">
+    <ClInclude Include="..\Utilities\Filestream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utilities\Merger.h">
+    <ClInclude Include="..\Utilities\Logging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utilities\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
