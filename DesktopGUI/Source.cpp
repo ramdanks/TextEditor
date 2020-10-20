@@ -3,8 +3,8 @@
 #include "AppFrame.h"
 #include "../Utilities/Filestream.h"
 
-#define ERR_FILEPATH	"Log/AppError.txt"
-#define LOG_FILEPATH	"Log/AppLog.txt"
+#define ERR_FILEPATH	"log/AppError.txt"
+#define LOG_FILEPATH	"log/AppLog.txt"
 
 struct sColour
 { uint8_t r, g, b, a; };
@@ -16,18 +16,16 @@ public:
 
 private:
     AppFrame* MainFrame;
-    wxStyledTextCtrl* TextField;
 }; 
 
 wxIMPLEMENT_APP( MyApp ); //entry point for program handled by wxWidgets
 
 bool MyApp::OnInit()
 {
-    Filestream::Create_Directories( "Log" );
+    Filestream::Create_Directories( "log" );
+    Filestream::Create_Directories( "temp" );
     AppFrame::InitLog( LOG_FILEPATH, ERR_FILEPATH );
     this->MainFrame = new AppFrame( "Memoriser", wxPoint( 50, 50 ), wxSize( 800, 600 ) );
     this->MainFrame->Show( true );
-    this->TextField = new wxStyledTextCtrl( MainFrame );
-    this->TextField->Show( true );
     return true;
 }
