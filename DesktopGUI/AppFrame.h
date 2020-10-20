@@ -22,6 +22,8 @@ private:
     void OnExit( wxCommandEvent& event );
     void OnAbout( wxCommandEvent& event );
     void OnDocumentation( wxCommandEvent& event );
+    void OnLogDir( wxCommandEvent& event );
+    void OnReportBug( wxCommandEvent& event );
 
     //handle debug frame
     void CreateDebugFrame();
@@ -45,7 +47,9 @@ enum menu
     ID_HELP,
     ID_DOCUMENTATION,
     ID_DEBUGCONSOLE,
-    ID_SETONTOP
+    ID_SETONTOP,
+    ID_LOGDIR,
+    ID_REPORTBUG
 };
 
 #define LOGFILE(l,msg,file)  Log->Log_File(l,msg,file)

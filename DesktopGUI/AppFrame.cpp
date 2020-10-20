@@ -6,6 +6,8 @@ EVT_MENU( wxID_EXIT, AppFrame::OnExit )
 EVT_MENU( wxID_ABOUT, AppFrame::OnAbout )
 EVT_MENU( ID_DOCUMENTATION, AppFrame::OnDocumentation )
 EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugConsole )
+EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
+EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
 wxEND_EVENT_TABLE()
 
 AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size )
@@ -90,8 +92,11 @@ void AppFrame::CreateMenu()
     menuSearch->Append( wxID_ANY, "Goto\t\tCtrl-G" );
 
     wxMenu* menuHelp = new wxMenu;
-    menuHelp->Append( wxID_ABOUT );
+    menuHelp->Append( ID_REPORTBUG, "Report Bug" );
+    menuHelp->Append( ID_LOGDIR, "Open Log Directory" );
+    menuHelp->AppendSeparator();
     menuHelp->Append( ID_DOCUMENTATION, "See Documentation" );
+    menuHelp->Append( wxID_ABOUT );
 
     wxMenu* menuView = new wxMenu;
     menuView->Append( wxID_ANY, "Always on Top" );
@@ -137,6 +142,21 @@ void AppFrame::OnDocumentation( wxCommandEvent& event )
 #elif defined ( __linux__ ) 
     system( "xdg-open https://github.com/ramdanks/TextEditor" );
 #endif
+}
+
+void AppFrame::OnLogDir( wxCommandEvent& event )
+{
+    #if defined( _WIN32 )       
+    system( "explorer Log" );
+    #elif defined( __APPLE__ )  
+    system( "open Log" );
+    #elif defined ( __linux__ ) 
+    system( "nautilus Log" );
+    #endif
+}
+
+void AppFrame::OnReportBug( wxCommandEvent& event )
+{
 }
 
 void AppFrame::OnDebugConsole( wxCommandEvent& event )

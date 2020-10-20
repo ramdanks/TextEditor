@@ -1,0 +1,6 @@
+[INFO]{2020-10-20 17:26:04} Main Frame Created: 0.009219(sec), 9.219100(ms)
+[INFO]{2020-10-20 17:36:07} Main Frame Created: 0.008604(sec), 8.603701(ms)
+[INFO]{2020-10-20 17:37:56} Main Frame Created: 0.007485(sec), 7.485200(ms)
+[INFO]{2020-10-20 17:38:43} Main Frame Created: 0.007876(sec), 7.875700(ms)
+[INFO]{2020-10-20 17:39:13} Main Frame Created: 0.008617(sec), 8.616900(ms)
+[INFO]{2020-10-20 17:39:43} Main Frame Created: 0.085320(sec), 85.320396(ms)
