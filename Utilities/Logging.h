@@ -20,7 +20,7 @@ namespace Util
 
 	class Logging
 	{
-		std::vector<LogFormat> mFormat;
+		std::vector<LogFormat> mFormat = std::vector<LogFormat>();
 
 	public:
 		Logging( const std::vector<LogFormat>& format ) : mFormat(format) {}

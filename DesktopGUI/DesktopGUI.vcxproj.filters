@@ -33,6 +33,12 @@
     <ClCompile Include="..\Utilities\Timer.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="Filehandle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LogGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppFrame.h">
@@ -49,6 +55,12 @@
     </ClInclude>
     <ClInclude Include="..\Utilities\Timer.h">
       <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Filehandle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LogGUI.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

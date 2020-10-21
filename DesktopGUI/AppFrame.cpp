@@ -1,68 +1,41 @@
 #include "AppFrame.h"
-#include <wx/filedlg.h>
-#include <wx/wfstream.h>
+#include "LogGUI.h"
 #include "../Utilities/Timer.h"
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Err.h"
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
+
 EVT_MENU( wxID_EXIT, AppFrame::OnExit )
 EVT_MENU( wxID_ABOUT, AppFrame::OnAbout )
 EVT_MENU( ID_DOCUMENTATION, AppFrame::OnDocumentation )
 EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugConsole )
 EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
 EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
-EVT_MENU( ID_OPENFILE, AppFrame::OnOpenFile )
 EVT_MENU( ID_TABCLOSE, AppFrame::OnTabClose )
 EVT_MENU( ID_TABCLOSEALL, AppFrame::OnTabCloseAll )
-EVT_MENU( ID_NEWFILE, AppFrame::OnNewFile )
+
+EVT_MENU( ID_OPENFILE, AppFrame::OnOpenFile )
+EVT_MENU( ID_SAVEFILE, AppFrame::OnSaveFile )
+EVT_MENU( ID_SAVEFILEAS, AppFrame::OnSaveFileAs )
+EVT_MENU( ID_SAVEFILEALL, AppFrame::OnSaveFileAll )
+EVT_MENU( ID_RENAMEFILE, AppFrame::OnRenameFile )
+
 wxEND_EVENT_TABLE()
 
 AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size )
     : wxFrame( NULL, 1, title, pos, size )
 {
-    Util::Timer tm;
-    
+    this->mTab = new wxNotebook( this, wxID_ANY );
+    this->fh.InitFilehandle( this, this->mTab, &this->mTextField );
+
     #ifdef _DEBUG
     CreateDebugFrame();
+    LogGUI::SetDebugTextField( this->mDebugTextField ); //LogFile static file for logging
     #endif
+
     CreateMenu();
-    InitFileSupport();
     FetchTempFile();
     this->mStatusBar = CreateStatusBar();
     this->mStatusBar->SetStatusText( "Welcome to Memoriser!" );
-
-    if ( Log != nullptr )
-    {
-        auto sec = tm.Toc();
-        auto ms = tm.Adjust_Time( MS, sec );
-        std::string str = "Main Frame Created: " + std::to_string( sec ) + "(sec), " + std::to_string( ms ) + "(ms)";
-        LOGALL( LEVEL_INFO, str, FileLog );
-    }
-}
-
-void AppFrame::InitLog( const std::string& logpath, const std::string& errpath )
-{
-    std::vector<Util::LogFormat> format = { FORMAT_LEVEL, FORMAT_TIME, FORMAT_SPACE, FORMAT_MSG };
-    Log = new Util::Logging( format );
-    FileLog = logpath;
-    FileErr = errpath;
-}
-
-void AppFrame::InitFileSupport()
-{
-    SupportedFormat.push_back( "All types (*.*)|*.*" );
-    SupportedFormat.push_back( "Normal text file (*.txt)|*.txt" );
-    SupportedFormat.push_back( "Memoriser file (*.mtx)|*.mtx" );
-    SupportedFormat.push_back( "Memoriser dictionary (*.mdt)|*.mdt" );
-    SupportedFormat.push_back( "Memoriser archive (*.mac)|*.mac" );
-}
-
-void AppFrame::PrintDebug( const std::string& str )
-{
-    this->mDebugTextField->SetEditable( true );
-    this->mDebugTextField->AppendText( str );
-    this->mDebugTextField->SetEditable( false );
 }
 
 void AppFrame::AddNewTab( const std::string& name )
@@ -75,7 +48,6 @@ void AppFrame::AddNewTab( const std::string& name )
 void AppFrame::FetchTempFile()
 {
     mTempAmount = 1;
-    this->mTab = new wxNotebook( this, wxID_ANY );
     for ( uint32_t i = 0; i < mTempAmount; i++ )
     {
         AddNewTab( "new" );
@@ -97,11 +69,11 @@ void AppFrame::CreateMenu()
 {
     wxMenu* menuFile = new wxMenu;
     menuFile->Append( ID_NEWFILE, "&New\tCtrl-N" );
-    menuFile->Append( wxID_ANY, "&Save\tCtrl-S" );
-    menuFile->Append( wxID_ANY, "&Save As\tCtrl-Alt-S" );
-    menuFile->Append( wxID_ANY, "&Save All\tCtrl-Shift-S" );
+    menuFile->Append( ID_SAVEFILE, "&Save\tCtrl-S" );
+    menuFile->Append( ID_SAVEFILEAS, "&Save As\tCtrl-Alt-S" );
+    menuFile->Append( ID_SAVEFILEALL, "&Save All\tCtrl-Shift-S" );
     menuFile->Append( ID_OPENFILE, "&Open\tCtrl-O" );
-    menuFile->Append( wxID_ANY, "&Rename" );
+    menuFile->Append( ID_RENAMEFILE, "&Rename" );
     menuFile->Append( ID_TABCLOSE, "&Close\tCtrl-W" );
     menuFile->Append( ID_TABCLOSEALL, "&Close All\tCtrl-Shift-W" );
     menuFile->AppendSeparator();
@@ -200,39 +172,6 @@ void AppFrame::OnReportBug( wxCommandEvent& event )
 {
 }
 
-void AppFrame::OnOpenFile( wxCommandEvent& event )
-{
-    std::string combinedFormat = SupportedFormat[0];
-    for ( uint32_t i = 1; i < SupportedFormat.size(); i++ ) combinedFormat += "|" + SupportedFormat[i];
-
-    wxFileDialog openFileDialog( this, _( "Open Text File" ), "", "", combinedFormat, wxFD_OPEN | wxFD_FILE_MUST_EXIST );
-    if ( openFileDialog.ShowModal() == wxID_CANCEL ) return;
-
-    try
-    {
-        std::string filepath = std::string( openFileDialog.GetPath().mb_str() );
-        LOGALL( LEVEL_TRACE, std::string( "Opened Filepath: " + filepath ), FileLog );
-
-        auto vRead = Filestream::Read_Bin( filepath );
-        THROW_ERR_IF( vRead.empty(), std::string( "Cannot open file " + filepath ) );
-
-        std::string readSize = "File size: " + std::to_string( vRead.size() ) + "(bytes)";
-        LOGALL( LEVEL_TRACE, readSize, FileLog );
-
-        auto format = Filestream::FileExtension( std::string( openFileDialog.GetPath().mb_str() ) );
-
-        if ( !this->mTextField.back()->IsEmpty() ) AddNewTab( Filestream::getFileName( filepath ) );
-        else this->mTab->SetPageText( mTextField.size() - 1, Filestream::getFileName( filepath ) );
-        
-        this->mTextField.back()->AppendText( wxString( &vRead[0] ) );
-    }
-    catch ( Util::Err& e )
-    {
-        LOGALL( LEVEL_ERROR, e.Seek(), FileErr );
-        wxLogError( wxString( e.Seek() ) );
-    }
-}
-
 void AppFrame::OnTabClose( wxCommandEvent& event )
 {
     auto currentPage = this->mTab->GetSelection();
@@ -267,6 +206,21 @@ void AppFrame::OnNewFile( wxCommandEvent& event )
 {
     if ( !this->mTextField.back()->IsEmpty() ) AddNewTab( "new" );
 }
+
+void AppFrame::OnOpenFile( wxCommandEvent& event )
+{ fh.OnOpenFile(); }
+
+void AppFrame::OnSaveFile( wxCommandEvent& event )
+{ fh.OnSaveFile(); }
+
+void AppFrame::OnSaveFileAs( wxCommandEvent& event )
+{ fh.OnSaveFileAs(); }
+
+void AppFrame::OnSaveFileAll( wxCommandEvent& event )
+{ fh.OnSaveFileAll(); }
+
+void AppFrame::OnRenameFile( wxCommandEvent& event )
+{ fh.OnRenameFile(); }
 
 void AppFrame::OnDebugConsole( wxCommandEvent& event )
 {
