@@ -1,6 +1,6 @@
 #pragma once
 #include <wx/wxprec.h>
-#include <wx/notebook.h>
+#include <wx/aui/auibook.h>
 #include <wx/stc/stc.h>
 
 //can manipulate MainFrame automatically
@@ -15,18 +15,19 @@ public:
 	static void OnRenameFile();
 	static void OnOpenFile();
 	static void OnTabClose();
+	static void OnTabClose( wxAuiNotebookEvent& evt );
 	static void OnTabCloseAll();
 	static void OnClose();
 
 	static void OnSaveFile();
 	static void OnSaveFileAll();
-	static void OnSaveFileAs();
+	static bool OnSaveFileAs();
 
 private:
 	static void AddNewTab( const std::string& name );
 
 	static wxWindow* mParent;
-	static wxNotebook* mTab;
+	static wxAuiNotebook* mTab;
 
 	static std::vector<wxStyledTextCtrl*> mTextField;
 	static std::vector<std::string> mPathAbsolute;

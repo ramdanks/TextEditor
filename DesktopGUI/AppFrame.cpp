@@ -14,14 +14,13 @@ EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
 EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
 EVT_MENU( ID_TABCLOSE, AppFrame::OnTabClose )
 EVT_MENU( ID_TABCLOSEALL, AppFrame::OnTabCloseAll )
-
-
 EVT_MENU( ID_NEWFILE, AppFrame::OnNewFile )
 EVT_MENU( ID_OPENFILE, AppFrame::OnOpenFile )
 EVT_MENU( ID_SAVEFILE, AppFrame::OnSaveFile )
 EVT_MENU( ID_SAVEFILEAS, AppFrame::OnSaveFileAs )
 EVT_MENU( ID_SAVEFILEALL, AppFrame::OnSaveFileAll )
 EVT_MENU( ID_RENAMEFILE, AppFrame::OnRenameFile )
+EVT_AUINOTEBOOK_PAGE_CLOSE( wxID_ANY, AppFrame::OnNotebookPageClose )
 
 wxEND_EVENT_TABLE()
 
@@ -164,6 +163,9 @@ void AppFrame::OnTabClose( wxCommandEvent& event )
 
 void AppFrame::OnTabCloseAll( wxCommandEvent& event )
 { TextField::OnTabCloseAll(); }
+
+void AppFrame::OnNotebookPageClose( wxAuiNotebookEvent & evt )
+{ TextField::OnTabClose( evt ); }
 
 void AppFrame::OnNewFile( wxCommandEvent& event )
 { TextField::OnNewFile(); }

@@ -19,6 +19,11 @@ public:
 		return std::remove( filepath.c_str() ) == 0;
 	}
 
+	inline static void Rename_File( const std::string& after, const std::string& filepath )
+	{
+		std::filesystem::rename( filepath, after );
+	}
+
 	static void Delete_Dir_File( const std::string& dir_path )
 	{
 		for ( const auto& entry : std::filesystem::directory_iterator( dir_path ) )

@@ -67,3 +67,249 @@
 [TRACE]{2020-10-21 13:23:24} File size: 15(bytes)
 [TRACE]{2020-10-21 13:23:49} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
 [TRACE]{2020-10-21 13:23:49} File size: 15(bytes)
+[TRACE]{2020-10-21 14:12:16} Temporary file amount: 2
+[INFO]{2020-10-21 14:12:16} Application Created: 0.120285(sec), 120.285103(ms)
+[INFO]{2020-10-21 14:12:59} File saved as: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 14:15:14} Temporary file amount: 1
+[INFO]{2020-10-21 14:15:14} Application Created: 0.114924(sec), 114.924095(ms)
+[TRACE]{2020-10-21 14:15:20} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:15:20} File size: 15(bytes)
+[TRACE]{2020-10-21 14:25:12} Temporary file amount: 1
+[INFO]{2020-10-21 14:25:12} Application Created: 0.119853(sec), 119.853195(ms)
+[TRACE]{2020-10-21 14:25:20} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:25:20} File size: 15(bytes)
+[TRACE]{2020-10-21 14:25:28} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:25:28} File size: 15(bytes)
+[TRACE]{2020-10-21 14:25:44} Opened Filepath: C:\Users\Ramadhan\Desktop\JadwalKuliah.jpg
+[TRACE]{2020-10-21 14:25:44} File size: 148951(bytes)
+[TRACE]{2020-10-21 14:26:59} Temporary file amount: 1
+[INFO]{2020-10-21 14:26:59} Application Created: 0.107036(sec), 107.036003(ms)
+[TRACE]{2020-10-21 14:27:02} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:27:02} File size: 15(bytes)
+[TRACE]{2020-10-21 14:27:07} Opened Filepath: C:\Users\Ramadhan\Desktop\JadwalKuliah.jpg
+[TRACE]{2020-10-21 14:27:07} File size: 148951(bytes)
+[TRACE]{2020-10-21 14:27:12} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:27:12} File size: 15(bytes)
+[TRACE]{2020-10-21 14:27:20} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:27:20} File size: 15(bytes)
+[TRACE]{2020-10-21 14:27:36} Temporary file amount: 1
+[INFO]{2020-10-21 14:27:36} Application Created: 0.120592(sec), 120.591904(ms)
+[TRACE]{2020-10-21 14:28:29} Temporary file amount: 1
+[INFO]{2020-10-21 14:28:29} Application Created: 0.112816(sec), 112.816093(ms)
+[TRACE]{2020-10-21 14:28:57} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:29:40} Temporary file amount: 1
+[INFO]{2020-10-21 14:29:40} Application Created: 0.111833(sec), 111.833099(ms)
+[TRACE]{2020-10-21 14:29:44} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:29:44} File size: 15(bytes)
+[TRACE]{2020-10-21 14:29:52} Opened Filepath: C:\Users\Ramadhan\Desktop\JadwalKuliah.jpg
+[TRACE]{2020-10-21 14:29:52} File size: 148951(bytes)
+[TRACE]{2020-10-21 14:30:50} Temporary file amount: 1
+[INFO]{2020-10-21 14:30:50} Application Created: 0.124946(sec), 124.945602(ms)
+[TRACE]{2020-10-21 14:30:58} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:30:58} File size: 15(bytes)
+[INFO]{2020-10-21 14:31:02} File saved: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[INFO]{2020-10-21 14:31:13} File saved: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[INFO]{2020-10-21 14:31:26} File saved: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[INFO]{2020-10-21 14:31:36} File saved as: C:\Users\Ramadhan\Desktop\test.mtx
+[TRACE]{2020-10-21 14:31:57} Opened Filepath: C:\Users\Ramadhan\Desktop\test.mtx
+[TRACE]{2020-10-21 14:31:57} File size: 36(bytes)
+[TRACE]{2020-10-21 14:32:14} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:32:14} File size: 46(bytes)
+[TRACE]{2020-10-21 14:37:16} Temporary file amount: 1
+[INFO]{2020-10-21 14:37:16} Application Created: 0.120048(sec), 120.048004(ms)
+[TRACE]{2020-10-21 14:37:22} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:37:22} File size: 19(bytes)
+[TRACE]{2020-10-21 14:37:28} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:37:28} File size: 19(bytes)
+[TRACE]{2020-10-21 14:39:08} Temporary file amount: 1
+[INFO]{2020-10-21 14:39:08} Application Created: 0.118029(sec), 118.029297(ms)
+[TRACE]{2020-10-21 14:39:11} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:39:11} File size: 19(bytes)
+[TRACE]{2020-10-21 14:39:36} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:39:36} File size: 19(bytes)
+[TRACE]{2020-10-21 14:40:28} Temporary file amount: 1
+[INFO]{2020-10-21 14:40:28} Application Created: 0.103178(sec), 103.178101(ms)
+[TRACE]{2020-10-21 14:40:30} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 14:40:30} File size: 19(bytes)
+[TRACE]{2020-10-21 14:40:38} Opened Filepath: C:\Users\Ramadhan\AMD_Chipset_IODrivers.log
+[TRACE]{2020-10-21 14:40:38} File size: 2682670(bytes)
+[TRACE]{2020-10-21 14:42:17} Temporary file amount: 1
+[INFO]{2020-10-21 14:42:17} Application Created: 0.116231(sec), 116.231293(ms)
+[ERROR]{2020-10-21 14:42:32} Problem saving a file, please contact developer!
+[INFO]{2020-10-21 14:46:02} File saved: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 14:47:33} Temporary file amount: 1
+[INFO]{2020-10-21 14:47:33} Application Created: 0.114947(sec), 114.947296(ms)
+[TRACE]{2020-10-21 14:47:55} Temporary file amount: 1
+[INFO]{2020-10-21 14:47:55} Application Created: 0.105206(sec), 105.206001(ms)
+[TRACE]{2020-10-21 14:50:01} Temporary file amount: 1
+[INFO]{2020-10-21 14:50:01} Application Created: 0.118918(sec), 118.917908(ms)
+[TRACE]{2020-10-21 14:50:42} Temporary file amount: 1
+[INFO]{2020-10-21 14:50:43} Application Created: 0.104845(sec), 104.845291(ms)
+[TRACE]{2020-10-21 14:57:23} Temporary file amount: 1
+[INFO]{2020-10-21 14:57:23} Application Created: 0.104327(sec), 104.327202(ms)
+[TRACE]{2020-10-21 15:00:30} Temporary file amount: 1
+[INFO]{2020-10-21 15:00:30} Application Created: 0.107687(sec), 107.686996(ms)
+[TRACE]{2020-10-21 15:00:53} Temporary file amount: 1
+[INFO]{2020-10-21 15:00:53} Application Created: 0.120168(sec), 120.167801(ms)
+[INFO]{2020-10-21 15:01:05} File saved as: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 15:02:49} Temporary file amount: 1
+[INFO]{2020-10-21 15:02:49} Application Created: 0.114234(sec), 114.234306(ms)
+[INFO]{2020-10-21 15:02:57} File saved as: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:03:58} Temporary file amount: 1
+[INFO]{2020-10-21 15:03:58} Application Created: 0.108797(sec), 108.797104(ms)
+[TRACE]{2020-10-21 15:06:50} Temporary file amount: 1
+[INFO]{2020-10-21 15:06:50} Application Created: 0.112887(sec), 112.886902(ms)
+[TRACE]{2020-10-21 15:06:54} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:06:54} File size: 20(bytes)
+[TRACE]{2020-10-21 15:07:09} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
+[TRACE]{2020-10-21 15:07:09} File size: 16766(bytes)
+[TRACE]{2020-10-21 15:09:13} Temporary file amount: 1
+[INFO]{2020-10-21 15:09:13} Application Created: 0.101859(sec), 101.859001(ms)
+[TRACE]{2020-10-21 15:09:25} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:09:25} File size: 20(bytes)
+[TRACE]{2020-10-21 15:09:53} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:09:53} File size: 20(bytes)
+[TRACE]{2020-10-21 15:15:24} Temporary file amount: 1
+[INFO]{2020-10-21 15:15:24} Application Created: 0.120492(sec), 120.491997(ms)
+[TRACE]{2020-10-21 15:16:56} Temporary file amount: 1
+[INFO]{2020-10-21 15:16:56} Application Created: 0.115505(sec), 115.505394(ms)
+[TRACE]{2020-10-21 15:17:00} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:17:00} File size: 20(bytes)
+[TRACE]{2020-10-21 15:17:26} Opened Filepath: C:\Users\Ramadhan\Documents\GitHub\TextEditor\.gitignore
+[TRACE]{2020-10-21 15:17:26} File size: 129(bytes)
+[TRACE]{2020-10-21 15:17:51} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:17:51} File size: 20(bytes)
+[INFO]{2020-10-21 15:18:03} File saved as: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 15:20:21} Temporary file amount: 1
+[INFO]{2020-10-21 15:20:21} Application Created: 0.097610(sec), 97.610092(ms)
+[TRACE]{2020-10-21 15:20:25} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 15:20:25} File size: 20(bytes)
+[INFO]{2020-10-21 15:20:32} File saved as: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 15:36:58} Temporary file amount: 1
+[INFO]{2020-10-21 15:36:58} Application Created: 0.109884(sec), 109.884308(ms)
+[INFO]{2020-10-21 15:37:20} File saved as: C:\Users\Ramadhan\Desktop\new1.txt
+[INFO]{2020-10-21 15:37:28} File saved as: C:\Users\Ramadhan\Desktop\new2.txt
+[INFO]{2020-10-21 15:37:32} File saved as: C:\Users\Ramadhan\Desktop\new3.txt
+[TRACE]{2020-10-21 15:40:07} Temporary file amount: 1
+[INFO]{2020-10-21 15:40:07} Application Created: 0.079820(sec), 79.820496(ms)
+[TRACE]{2020-10-21 15:48:48} Temporary file amount: 1
+[INFO]{2020-10-21 15:48:48} Application Created: 0.087528(sec), 87.528198(ms)
+[TRACE]{2020-10-21 15:49:03} Temporary file amount: 1
+[INFO]{2020-10-21 15:49:03} Application Created: 0.120146(sec), 120.146202(ms)
+[TRACE]{2020-10-21 15:57:14} Temporary file amount: 2
+[INFO]{2020-10-21 15:57:14} Application Created: 0.105014(sec), 105.014305(ms)
+[TRACE]{2020-10-21 15:57:45} Temporary file amount: 1
+[INFO]{2020-10-21 15:57:45} Application Created: 0.113980(sec), 113.979500(ms)
+[TRACE]{2020-10-21 15:58:18} Temporary file amount: 1
+[INFO]{2020-10-21 15:58:18} Application Created: 0.122636(sec), 122.636200(ms)
+[TRACE]{2020-10-21 15:58:35} Temporary file amount: 1
+[INFO]{2020-10-21 15:58:35} Application Created: 0.121692(sec), 121.691902(ms)
+[TRACE]{2020-10-21 15:59:35} Temporary file amount: 1
+[INFO]{2020-10-21 15:59:35} Application Created: 0.125392(sec), 125.392006(ms)
+[TRACE]{2020-10-21 16:00:15} Temporary file amount: 1
+[INFO]{2020-10-21 16:00:15} Application Created: 0.120382(sec), 120.381805(ms)
+[TRACE]{2020-10-21 16:00:20} Temporary file amount: 1
+[INFO]{2020-10-21 16:00:20} Application Created: 0.121713(sec), 121.712708(ms)
+[TRACE]{2020-10-21 16:01:23} Temporary file amount: 1
+[INFO]{2020-10-21 16:01:23} Application Created: 0.128446(sec), 128.445602(ms)
+[TRACE]{2020-10-21 16:01:44} Temporary file amount: 1
+[INFO]{2020-10-21 16:01:44} Application Created: 0.114291(sec), 114.291298(ms)
+[TRACE]{2020-10-21 16:03:57} Temporary file amount: 1
+[INFO]{2020-10-21 16:03:57} Application Created: 0.110173(sec), 110.173004(ms)
+[TRACE]{2020-10-21 16:06:30} Temporary file amount: 1
+[INFO]{2020-10-21 16:06:30} Application Created: 0.112369(sec), 112.369202(ms)
+[TRACE]{2020-10-21 16:08:11} Temporary file amount: 1
+[INFO]{2020-10-21 16:08:11} Application Created: 0.113860(sec), 113.860298(ms)
+[TRACE]{2020-10-21 16:16:23} Temporary file amount: 1
+[INFO]{2020-10-21 16:16:23} Application Created: 0.125039(sec), 125.039207(ms)
+[TRACE]{2020-10-21 16:16:36} Temporary file amount: 1
+[INFO]{2020-10-21 16:16:36} Application Created: 0.125798(sec), 125.798401(ms)
+[TRACE]{2020-10-21 16:17:29} Temporary file amount: 1
+[INFO]{2020-10-21 16:17:29} Application Created: 0.117967(sec), 117.966705(ms)
+[TRACE]{2020-10-21 16:17:35} Temporary file amount: 1
+[INFO]{2020-10-21 16:17:35} Application Created: 0.127050(sec), 127.049805(ms)
+[TRACE]{2020-10-21 16:18:09} Temporary file amount: 2
+[INFO]{2020-10-21 16:18:09} Application Created: 0.119496(sec), 119.496193(ms)
+[TRACE]{2020-10-21 16:18:26} Temporary file amount: 2
+[INFO]{2020-10-21 16:18:26} Application Created: 0.139128(sec), 139.128403(ms)
+[TRACE]{2020-10-21 16:18:35} Temporary file amount: 2
+[INFO]{2020-10-21 16:18:35} Application Created: 0.152059(sec), 152.059204(ms)
+[TRACE]{2020-10-21 16:20:02} Temporary file amount: 2
+[INFO]{2020-10-21 16:20:02} Application Created: 0.125870(sec), 125.870003(ms)
+[TRACE]{2020-10-21 16:20:34} Temporary file amount: 1
+[INFO]{2020-10-21 16:20:34} Application Created: 0.117147(sec), 117.147202(ms)
+[TRACE]{2020-10-21 16:20:49} Temporary file amount: 1
+[INFO]{2020-10-21 16:20:49} Application Created: 0.129447(sec), 129.446808(ms)
+[TRACE]{2020-10-21 16:22:17} Temporary file amount: 1
+[INFO]{2020-10-21 16:22:17} Application Created: 0.124595(sec), 124.594597(ms)
+[TRACE]{2020-10-21 16:24:11} Temporary file amount: 3
+[INFO]{2020-10-21 16:24:11} Application Created: 0.150639(sec), 150.639389(ms)
+[TRACE]{2020-10-21 16:26:50} Temporary file amount: 3
+[INFO]{2020-10-21 16:26:50} Application Created: 0.134021(sec), 134.021301(ms)
+[TRACE]{2020-10-21 16:28:45} Temporary file amount: 3
+[INFO]{2020-10-21 16:28:45} Application Created: 0.131947(sec), 131.947205(ms)
+[TRACE]{2020-10-21 16:29:41} Temporary file amount: 3
+[INFO]{2020-10-21 16:29:42} Application Created: 0.122590(sec), 122.589996(ms)
+[TRACE]{2020-10-21 16:30:17} Temporary file amount: 3
+[INFO]{2020-10-21 16:30:17} Application Created: 0.140540(sec), 140.539810(ms)
+[TRACE]{2020-10-21 16:31:46} Temporary file amount: 3
+[INFO]{2020-10-21 16:31:46} Application Created: 0.144147(sec), 144.146591(ms)
+[TRACE]{2020-10-21 16:51:18} Temporary file amount: 3
+[INFO]{2020-10-21 16:51:18} Application Created: 0.129715(sec), 129.714691(ms)
+[TRACE]{2020-10-21 16:51:25} Temporary file amount: 1
+[INFO]{2020-10-21 16:51:25} Application Created: 0.118512(sec), 118.512306(ms)
+[TRACE]{2020-10-21 16:51:52} Temporary file amount: 1
+[INFO]{2020-10-21 16:51:52} Application Created: 0.110333(sec), 110.332901(ms)
+[TRACE]{2020-10-21 16:52:12} Temporary file amount: 1
+[INFO]{2020-10-21 16:52:12} Application Created: 0.108875(sec), 108.875404(ms)
+[TRACE]{2020-10-21 16:53:59} Temporary file amount: 1
+[INFO]{2020-10-21 16:53:59} Application Created: 0.114934(sec), 114.934402(ms)
+[TRACE]{2020-10-21 17:00:09} Temporary file amount: 1
+[INFO]{2020-10-21 17:00:09} Application Created: 0.114357(sec), 114.357292(ms)
+[TRACE]{2020-10-21 17:00:52} Temporary file amount: 1
+[INFO]{2020-10-21 17:00:52} Application Created: 0.123369(sec), 123.368797(ms)
+[TRACE]{2020-10-21 17:01:06} Temporary file amount: 1
+[INFO]{2020-10-21 17:01:06} Application Created: 0.126245(sec), 126.245110(ms)
+[TRACE]{2020-10-21 17:02:35} Temporary file amount: 1
+[INFO]{2020-10-21 17:02:35} Application Created: 0.110615(sec), 110.614899(ms)
+[TRACE]{2020-10-21 17:04:05} Temporary file amount: 1
+[INFO]{2020-10-21 17:04:05} Application Created: 0.117020(sec), 117.020401(ms)
+[TRACE]{2020-10-21 17:13:42} Temporary file amount: 1
+[INFO]{2020-10-21 17:13:42} Application Created: 0.115512(sec), 115.512306(ms)
+[INFO]{2020-10-21 17:14:00} File saved as: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 17:18:37} Temporary file amount: 1
+[INFO]{2020-10-21 17:18:37} Application Created: 0.116426(sec), 116.426308(ms)
+[TRACE]{2020-10-21 17:18:44} Opened Filepath: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 17:18:44} File size: 8(bytes)
+[TRACE]{2020-10-21 17:20:05} Temporary file amount: 1
+[INFO]{2020-10-21 17:20:05} Application Created: 0.118107(sec), 118.106697(ms)
+[TRACE]{2020-10-21 17:20:12} Opened Filepath: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 17:20:12} File size: 8(bytes)
+[TRACE]{2020-10-21 17:20:46} Temporary file amount: 1
+[INFO]{2020-10-21 17:20:46} Application Created: 0.122025(sec), 122.025002(ms)
+[TRACE]{2020-10-21 17:20:49} Opened Filepath: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 17:20:49} File size: 8(bytes)
+[TRACE]{2020-10-21 17:21:31} Temporary file amount: 1
+[INFO]{2020-10-21 17:21:31} Application Created: 0.114460(sec), 114.459595(ms)
+[TRACE]{2020-10-21 17:21:34} Opened Filepath: C:\Users\Ramadhan\Desktop\test.txt
+[TRACE]{2020-10-21 17:21:34} File size: 8(bytes)
+[TRACE]{2020-10-21 17:28:22} Temporary file amount: 1
+[INFO]{2020-10-21 17:28:22} Application Created: 0.114486(sec), 114.486397(ms)
+[TRACE]{2020-10-21 17:28:29} Opened Filepath: C:\Users\Ramadhan\Desktop\asik.txt
+[TRACE]{2020-10-21 17:28:29} File size: 15(bytes)
+[INFO]{2020-10-21 17:28:37} File saved as: C:\Users\Ramadhan\Desktop\aku.txt
+[INFO]{2020-10-21 17:28:38} File saved: C:\Users\Ramadhan\Desktop\aku.txt
+[INFO]{2020-10-21 17:28:42} File saved: C:\Users\Ramadhan\Desktop\aku.txt
+[TRACE]{2020-10-21 17:28:48} Opened Filepath: C:\Users\Ramadhan\Desktop\asik.txt
+[TRACE]{2020-10-21 17:28:48} File size: 15(bytes)
+[INFO]{2020-10-21 17:28:53} File saved: C:\Users\Ramadhan\Desktop\asik.txt
+[TRACE]{2020-10-21 17:39:13} Temporary file amount: 1
+[INFO]{2020-10-21 17:39:13} Application Created: 0.117414(sec), 117.413795(ms)
+[TRACE]{2020-10-21 17:41:29} Temporary file amount: 1
+[INFO]{2020-10-21 17:41:29} Application Created: 0.114261(sec), 114.261200(ms)
+[TRACE]{2020-10-21 17:42:49} Temporary file amount: 1
+[INFO]{2020-10-21 17:42:49} Application Created: 0.109548(sec), 109.547905(ms)
+[TRACE]{2020-10-21 17:42:58} Temporary file amount: 1
+[INFO]{2020-10-21 17:42:58} Application Created: 0.120506(sec), 120.506096(ms)
+[TRACE]{2020-10-21 17:43:10} Temporary file amount: 1
+[INFO]{2020-10-21 17:43:10} Application Created: 0.122308(sec), 122.308205(ms)

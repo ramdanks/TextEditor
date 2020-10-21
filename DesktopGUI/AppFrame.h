@@ -1,6 +1,7 @@
 #pragma once
 #include <wx/wxprec.h>
 #include <wx/stc/stc.h>
+#include <wx/aui/auibook.h>
 
 class AppFrame : public wxFrame
 {
@@ -11,7 +12,7 @@ public:
 private:
     //handle main frame
     void CreateMenu();
-    void OnHello( wxCommandEvent& event );
+    void OnNewFile( wxCommandEvent& event );
     void OnExit( wxCommandEvent& event );
     void OnAbout( wxCommandEvent& event );
     void OnDocumentation( wxCommandEvent& event );
@@ -19,7 +20,7 @@ private:
     void OnReportBug( wxCommandEvent& event );
     void OnTabClose( wxCommandEvent& event );
     void OnTabCloseAll( wxCommandEvent& event );
-    void OnNewFile( wxCommandEvent& event );
+    void OnNotebookPageClose( wxAuiNotebookEvent& evt );
 
     void OnOpenFile( wxCommandEvent& event );
     void OnSaveFile( wxCommandEvent& event );
