@@ -172,7 +172,7 @@
     <ClCompile Include="..\Utilities\Logging.cpp" />
     <ClCompile Include="..\Utilities\Timer.cpp" />
     <ClCompile Include="AppFrame.cpp" />
-    <ClCompile Include="Filehandle.cpp" />
+    <ClCompile Include="TextField.cpp" />
     <ClCompile Include="LogGUI.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
@@ -182,7 +182,7 @@
     <ClInclude Include="..\Utilities\Logging.h" />
     <ClInclude Include="..\Utilities\Timer.h" />
     <ClInclude Include="AppFrame.h" />
-    <ClInclude Include="Filehandle.h" />
+    <ClInclude Include="TextField.h" />
     <ClInclude Include="LogGUI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

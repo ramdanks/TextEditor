@@ -1,15 +1,12 @@
 #pragma once
-#include "Filehandle.h"
 #include <wx/wxprec.h>
+#include <wx/stc/stc.h>
 
 class AppFrame : public wxFrame
 {
 public:
     AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size );
     ~AppFrame() {}
-
-    void AddNewTab( const std::string& name );
-    void FetchTempFile();
 
 private:
     //handle main frame
@@ -39,17 +36,12 @@ private:
     wxDECLARE_EVENT_TABLE();
 
 private:
-    Filehandle fh;
-
-    AppFrame* mAppFrame;
-    wxStatusBar* mStatusBar;
-    wxNotebook* mTab;
-    std::vector<wxStyledTextCtrl*> mTextField;
-    
-    uint32_t mTempAmount;
-
     wxFrame* mDebugFrame;
     wxStyledTextCtrl* mDebugTextField;  
+    AppFrame* mAppFrame;
+    wxStatusBar* mStatusBar;
+
+    float AutosaveTime;
 };
 
 enum menu

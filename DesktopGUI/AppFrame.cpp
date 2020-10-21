@@ -1,6 +1,8 @@
 #include "AppFrame.h"
 #include "LogGUI.h"
 #include "../Utilities/Timer.h"
+#include "../Utilities/Filestream.h"
+#include "TextField.h"
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
 
@@ -13,6 +15,8 @@ EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
 EVT_MENU( ID_TABCLOSE, AppFrame::OnTabClose )
 EVT_MENU( ID_TABCLOSEALL, AppFrame::OnTabCloseAll )
 
+
+EVT_MENU( ID_NEWFILE, AppFrame::OnNewFile )
 EVT_MENU( ID_OPENFILE, AppFrame::OnOpenFile )
 EVT_MENU( ID_SAVEFILE, AppFrame::OnSaveFile )
 EVT_MENU( ID_SAVEFILEAS, AppFrame::OnSaveFileAs )
@@ -24,45 +28,28 @@ wxEND_EVENT_TABLE()
 AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size )
     : wxFrame( NULL, 1, title, pos, size )
 {
-    this->mTab = new wxNotebook( this, wxID_ANY );
-    this->fh.InitFilehandle( this, this->mTab, &this->mTextField );
-
     #ifdef _DEBUG
-    CreateDebugFrame();
-    LogGUI::SetDebugTextField( this->mDebugTextField ); //LogFile static file for logging
+    CreateDebugFrame(); //create debug frame for logging on GUI
     #endif
 
+    TextField::InitFilehandle( this );
+    TextField::FetchTempFile();
     CreateMenu();
-    FetchTempFile();
+    
     this->mStatusBar = CreateStatusBar();
     this->mStatusBar->SetStatusText( "Welcome to Memoriser!" );
 }
 
-void AppFrame::AddNewTab( const std::string& name )
-{
-    this->mTextField.push_back( new wxStyledTextCtrl( this->mTab, wxID_ANY ) );
-    mTab->AddPage( mTextField.back(), name );
-    mTab->ChangeSelection( mTextField.size() - 1 );
-}
-
-void AppFrame::FetchTempFile()
-{
-    mTempAmount = 1;
-    for ( uint32_t i = 0; i < mTempAmount; i++ )
-    {
-        AddNewTab( "new" );
-    }
-}
-
 void AppFrame::CreateDebugFrame()
 {
-    this->mDebugFrame = new wxFrame( this, wxID_ANY, "Memoriser - Debug Console", wxDefaultPosition, wxSize( 600, 300 ) );
-    this->mDebugFrame->Bind( wxEVT_CLOSE_WINDOW, &AppFrame::OnDebugExit, this ); //handle close window event (dont exit, just hide)
-    this->mDebugTextField = new wxStyledTextCtrl( this->mDebugFrame, wxID_ANY, wxDefaultPosition );
-    this->mDebugTextField->SetEditable( false );
+    mDebugFrame = new wxFrame( this, wxID_ANY, "Memoriser - Debug Console", wxDefaultPosition, wxSize( 600, 300 ) );
+    mDebugFrame->Bind( wxEVT_CLOSE_WINDOW, &AppFrame::OnDebugExit, this ); //handle close window event (dont exit, just hide)
+    mDebugTextField = new wxStyledTextCtrl( this->mDebugFrame, wxID_ANY, wxDefaultPosition );
+    mDebugTextField->SetEditable( false );
+    LogGUI::SetDebugTextField( this->mDebugTextField ); //LogFile static file for logging
     
-    this->mDebugFrame->Show( true );
-    this->mDebugTextField->Show( true );
+    mDebugFrame->Show( true );
+    mDebugTextField->Show( true );
 }
 
 void AppFrame::CreateMenu()
@@ -136,6 +123,7 @@ void AppFrame::CreateMenu()
 
 void AppFrame::OnExit( wxCommandEvent& event )
 {
+    TextField::OnClose();
     Close( true );
 }
 
@@ -169,66 +157,37 @@ void AppFrame::OnLogDir( wxCommandEvent& event )
 }
 
 void AppFrame::OnReportBug( wxCommandEvent& event )
-{
-}
+{ }
 
 void AppFrame::OnTabClose( wxCommandEvent& event )
-{
-    auto currentPage = this->mTab->GetSelection();
-    if ( !this->mTextField[currentPage]->IsEmpty() )
-    {
-        auto prompt = new wxMessageDialog( this, "Are you sure want to close this file? Any changes will be ignored, please save your work!", "Close Window", wxYES_NO );
-        if ( prompt->ShowModal() == wxID_YES )
-        {
-            this->mTab->DeletePage( currentPage );
-            this->mTextField.erase( mTextField.begin() + currentPage );
-            if ( this->mTextField.size() < 1 ) AddNewTab( "new" ); 
-        }
-        prompt->Destroy();
-    } 
-}
+{ TextField::OnTabClose(); }
 
 void AppFrame::OnTabCloseAll( wxCommandEvent& event )
-{
-    if ( this->mTextField.size() == 1 && this->mTextField[0]->IsEmpty() ) return;
-
-    auto prompt = new wxMessageDialog( this, "Are you sure want to close all file? Any changes will be ignored, please save your work!", "Close All Window", wxYES_NO );
-    if ( prompt->ShowModal() == wxID_YES )
-    {
-        this->mTab->DeleteAllPages();
-        this->mTextField.clear();
-        if ( this->mTextField.size() < 1 ) AddNewTab( "new" );
-    }
-    prompt->Destroy();
-}
+{ TextField::OnTabCloseAll(); }
 
 void AppFrame::OnNewFile( wxCommandEvent& event )
-{
-    if ( !this->mTextField.back()->IsEmpty() ) AddNewTab( "new" );
-}
+{ TextField::OnNewFile(); }
 
 void AppFrame::OnOpenFile( wxCommandEvent& event )
-{ fh.OnOpenFile(); }
+{ TextField::OnOpenFile(); }
 
 void AppFrame::OnSaveFile( wxCommandEvent& event )
-{ fh.OnSaveFile(); }
+{ TextField::OnSaveFile(); }
 
 void AppFrame::OnSaveFileAs( wxCommandEvent& event )
-{ fh.OnSaveFileAs(); }
+{ TextField::OnSaveFileAs(); }
 
 void AppFrame::OnSaveFileAll( wxCommandEvent& event )
-{ fh.OnSaveFileAll(); }
+{ TextField::OnSaveFileAll(); }
 
 void AppFrame::OnRenameFile( wxCommandEvent& event )
-{ fh.OnRenameFile(); }
+{ TextField::OnRenameFile(); }
 
 void AppFrame::OnDebugConsole( wxCommandEvent& event )
 {
-    this->mDebugFrame->Show( true );
-    this->mDebugFrame->Raise();
+    mDebugFrame->Show( true );
+    mDebugFrame->Raise();
 }
 
 void AppFrame::OnDebugExit( wxCloseEvent& event )
-{
-    this->mDebugFrame->Show( false ); //hide instead of closing
-}
+{ mDebugFrame->Show( false ); } //hide instead of closing

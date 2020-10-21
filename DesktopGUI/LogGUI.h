@@ -1,6 +1,6 @@
 #pragma once
 #include "../Utilities/Logging.h"
-#include "wx/stc/stc.h"
+#include <wx/stc/stc.h>
 
 #define ERR_FILEPATH	"log/AppError.txt"
 #define LOG_FILEPATH	"log/AppLog.txt"

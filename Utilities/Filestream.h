@@ -14,6 +14,23 @@ public:
 		return std::filesystem::create_directories( path );
 	}
 
+	inline static bool Delete_File( const std::string& filepath )
+	{
+		return std::remove( filepath.c_str() ) == 0;
+	}
+
+	static void Delete_Dir_File( const std::string& dir_path )
+	{
+		for ( const auto& entry : std::filesystem::directory_iterator( dir_path ) )
+			std::filesystem::remove_all( entry.path() );
+	}
+
+	static bool Is_Exist( const std::string& filepath )
+	{
+		struct stat buffer;
+		return stat( filepath.c_str(), &buffer ) == 0;
+	}
+
 	static void Append_Text( const std::string& string, const std::string& filepath )
 	{
 		auto myfile = std::fstream( filepath, std::ios::app );
@@ -22,6 +39,14 @@ public:
 			myfile.write( string.c_str(), string.size() );
 		}
 		myfile.close();
+	}
+
+	static std::vector<std::string> File_List( const std::string& filepath )
+	{
+		std::vector<std::string> list;
+		for ( const auto& entry : std::filesystem::directory_iterator( filepath ) )
+			list.push_back( entry.path().string() );
+		return list;
 	}
 
 	static void Write_Bin( const char* fp, size_t filesize, const std::string& filepath )

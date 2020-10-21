@@ -1,150 +1,69 @@
-[INFO]{2020-10-20 17:26:04} Main Frame Created: 0.009219(sec), 9.219100(ms)
-[INFO]{2020-10-20 17:36:07} Main Frame Created: 0.008604(sec), 8.603701(ms)
-[INFO]{2020-10-20 17:37:56} Main Frame Created: 0.007485(sec), 7.485200(ms)
-[INFO]{2020-10-20 17:38:43} Main Frame Created: 0.007876(sec), 7.875700(ms)
-[INFO]{2020-10-20 17:39:13} Main Frame Created: 0.008617(sec), 8.616900(ms)
-[INFO]{2020-10-20 17:39:43} Main Frame Created: 0.085320(sec), 85.320396(ms)
-[INFO]{2020-10-20 20:05:18} Main Frame Created: 0.071861(sec), 71.861404(ms)
-[INFO]{2020-10-20 20:20:17} Main Frame Created: 0.093287(sec), 93.287300(ms)
-[INFO]{2020-10-20 20:20:44} Main Frame Created: 0.087855(sec), 87.854805(ms)
-[INFO]{2020-10-20 20:30:40} Main Frame Created: 0.094745(sec), 94.744598(ms)
-[INFO]{2020-10-20 20:31:17} Main Frame Created: 0.082556(sec), 82.556206(ms)
-[INFO]{2020-10-20 20:31:53} Main Frame Created: 0.087462(sec), 87.461998(ms)
-[TRACE]{2020-10-20 20:32:24} Opened file size: 18899(bytes)
-[INFO]{2020-10-20 20:35:39} Main Frame Created: 0.086755(sec), 86.754997(ms)
-[INFO]{2020-10-20 20:36:26} Main Frame Created: 0.108007(sec), 108.006599(ms)
-[INFO]{2020-10-20 20:47:05} Main Frame Created: 0.100769(sec), 100.769203(ms)
-[TRACE]{2020-10-20 20:47:30} Opened file size: 18899(bytes)
-[TRACE]{2020-10-20 20:47:40} Opened file size: 552504(bytes)
-[TRACE]{2020-10-20 20:47:47} Opened file size: 70979(bytes)
-[TRACE]{2020-10-20 20:47:53} Opened file size: 2148(bytes)
-[INFO]{2020-10-20 20:52:54} Main Frame Created: 0.104385(sec), 104.384804(ms)
-[TRACE]{2020-10-20 20:53:48} Opened file size: 771(bytes)
-[INFO]{2020-10-20 21:06:16} Main Frame Created: 0.098345(sec), 98.344704(ms)
-[TRACE]{2020-10-20 21:06:24} Opened file size: 771(bytes)
-[TRACE]{2020-10-20 21:06:41} Opened file size: 16766(bytes)
-[INFO]{2020-10-20 21:07:05} Main Frame Created: 0.088764(sec), 88.764496(ms)
-[TRACE]{2020-10-20 21:07:22} Opened file size: 16766(bytes)
-[INFO]{2020-10-20 21:18:03} Main Frame Created: 0.088395(sec), 88.394798(ms)
-[INFO]{2020-10-20 21:19:15} Main Frame Created: 0.086006(sec), 86.005600(ms)
-[TRACE]{2020-10-20 21:19:21} Opened file size: 16766(bytes)
-[INFO]{2020-10-20 21:21:54} Main Frame Created: 0.047002(sec), 47.001701(ms)
-[INFO]{2020-10-20 21:28:43} Main Frame Created: 0.040674(sec), 40.673698(ms)
-[INFO]{2020-10-20 21:29:44} Main Frame Created: 0.052291(sec), 52.290699(ms)
-[INFO]{2020-10-20 21:33:53} Main Frame Created: 0.050013(sec), 50.013100(ms)
-[INFO]{2020-10-20 21:34:10} Main Frame Created: 0.071860(sec), 71.860497(ms)
-[INFO]{2020-10-20 21:35:47} Main Frame Created: 0.074219(sec), 74.219398(ms)
-[INFO]{2020-10-20 21:35:58} Main Frame Created: 0.051057(sec), 51.056900(ms)
-[INFO]{2020-10-20 21:43:30} Main Frame Created: 0.046535(sec), 46.534901(ms)
-[TRACE]{2020-10-20 21:43:37} Opened file size: 16766(bytes)
-[TRACE]{2020-10-20 21:43:47} Opened file size: 17085(bytes)
-[INFO]{2020-10-20 21:46:28} Main Frame Created: 0.054214(sec), 54.213799(ms)
-[TRACE]{2020-10-20 21:46:33} Opened file size: 17085(bytes)
-[TRACE]{2020-10-20 21:46:40} Opened file size: 16766(bytes)
-[TRACE]{2020-10-20 21:46:53} Opened file size: 17085(bytes)
-[INFO]{2020-10-20 21:50:09} Main Frame Created: 0.100774(sec), 100.773903(ms)
-[TRACE]{2020-10-20 21:50:18} Opened file size: 17085(bytes)
-[TRACE]{2020-10-20 21:50:25} Opened file size: 17085(bytes)
-[INFO]{2020-10-20 21:56:54} Main Frame Created: 0.090205(sec), 90.204796(ms)
-[TRACE]{2020-10-20 21:56:59} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 21:56:59} File size: 17085(bytes)
-[INFO]{2020-10-20 21:57:40} Main Frame Created: 0.101371(sec), 101.370995(ms)
-[TRACE]{2020-10-20 21:57:45} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 21:57:45} File size: 17085(bytes)
-[TRACE]{2020-10-20 21:57:55} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 21:57:55} File size: 17085(bytes)
-[TRACE]{2020-10-20 21:58:11} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 21:58:11} File size: 16766(bytes)
-[INFO]{2020-10-20 22:00:00} Main Frame Created: 0.089538(sec), 89.537498(ms)
-[TRACE]{2020-10-20 22:00:06} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:00:06} File size: 16766(bytes)
-[TRACE]{2020-10-20 22:00:28} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:00:28} File size: 16766(bytes)
-[INFO]{2020-10-20 22:03:07} Main Frame Created: 0.090628(sec), 90.627899(ms)
-[INFO]{2020-10-20 22:12:50} Main Frame Created: 0.093600(sec), 93.599792(ms)
-[INFO]{2020-10-20 22:17:00} Main Frame Created: 0.089037(sec), 89.036797(ms)
-[TRACE]{2020-10-20 22:17:14} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:17:14} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:17:28} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:17:28} File size: 16766(bytes)
-[TRACE]{2020-10-20 22:17:35} Opened Filepath: C:\Users\Ramadhan\OneDrive\UNIVERSITAS INDONESIA\PASSWORD UI.txt
-[TRACE]{2020-10-20 22:17:35} File size: 32(bytes)
-[INFO]{2020-10-20 22:17:58} Main Frame Created: 0.097809(sec), 97.808800(ms)
-[TRACE]{2020-10-20 22:18:02} Opened Filepath: C:\Users\Ramadhan\OneDrive\UNIVERSITAS INDONESIA\PASSWORD UI.txt
-[TRACE]{2020-10-20 22:18:02} File size: 32(bytes)
-[TRACE]{2020-10-20 22:18:09} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:18:09} File size: 17085(bytes)
-[INFO]{2020-10-20 22:19:10} Main Frame Created: 0.100244(sec), 100.244003(ms)
-[TRACE]{2020-10-20 22:19:30} Opened Filepath: D:\Users\Ramadhan\Documents\WB Games\Shadow of Mordor\settings.cfg
-[TRACE]{2020-10-20 22:19:30} File size: 265(bytes)
-[TRACE]{2020-10-20 22:19:35} Opened Filepath: D:\Users\Ramadhan\Documents\WB Games\Shadow of Mordor\render.cfg
-[TRACE]{2020-10-20 22:19:35} File size: 691(bytes)
-[TRACE]{2020-10-20 22:19:39} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:19:39} File size: 17085(bytes)
-[INFO]{2020-10-20 22:20:50} Main Frame Created: 0.092713(sec), 92.712799(ms)
-[TRACE]{2020-10-20 22:20:56} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:20:56} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:21:11} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:21:11} File size: 16766(bytes)
-[TRACE]{2020-10-20 22:21:15} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:21:15} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:22:33} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:22:33} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:22:43} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:22:43} File size: 16766(bytes)
-[INFO]{2020-10-20 22:24:16} Main Frame Created: 0.097534(sec), 97.534203(ms)
-[INFO]{2020-10-20 22:26:08} Main Frame Created: 0.086169(sec), 86.169403(ms)
-[INFO]{2020-10-20 22:26:40} Main Frame Created: 0.082826(sec), 82.826492(ms)
-[TRACE]{2020-10-20 22:26:51} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:26:51} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:26:55} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:26:55} File size: 16766(bytes)
-[TRACE]{2020-10-20 22:27:11} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-20 22:27:11} File size: 16766(bytes)
-[INFO]{2020-10-20 22:29:58} Main Frame Created: 0.087918(sec), 87.917503(ms)
-[TRACE]{2020-10-20 22:30:05} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:30:05} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:30:16} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:30:16} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:30:34} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:30:34} File size: 17085(bytes)
-[TRACE]{2020-10-20 22:30:42} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
-[TRACE]{2020-10-20 22:30:42} File size: 17085(bytes)
-[INFO]{2020-10-20 22:33:21} Main Frame Created: 0.099939(sec), 99.938896(ms)
-[INFO]{2020-10-20 22:40:06} Main Frame Created: 0.095383(sec), 95.383003(ms)
-[INFO]{2020-10-20 22:40:32} Main Frame Created: 0.088270(sec), 88.269798(ms)
-[INFO]{2020-10-20 22:41:35} Main Frame Created: 0.087271(sec), 87.271400(ms)
-[INFO]{2020-10-20 22:42:54} Main Frame Created: 1.982261(sec), 1982.261353(ms)
-[INFO]{2020-10-20 22:43:53} Main Frame Created: 0.098451(sec), 98.450600(ms)
-[INFO]{2020-10-20 22:44:41} Main Frame Created: 0.108850(sec), 108.849602(ms)
-[TRACE]{2020-10-20 22:45:03} Opened Filepath: D:\Users\Ramadhan\Documents\GitHub\ML_EMBLEM_CALC\emblem.h
-[TRACE]{2020-10-20 22:45:03} File size: 961(bytes)
-[TRACE]{2020-10-20 22:45:08} Opened Filepath: D:\Users\Ramadhan\Documents\GitHub\ML_EMBLEM_CALC\emblem.o
-[TRACE]{2020-10-20 22:45:08} File size: 22690(bytes)
-[TRACE]{2020-10-20 22:45:20} Opened Filepath: D:\Users\Ramadhan\Documents\GitHub\ML_EMBLEM_CALC\emblem.h
-[TRACE]{2020-10-20 22:45:20} File size: 961(bytes)
-[TRACE]{2020-10-20 22:45:47} Opened Filepath: D:\Users\Ramadhan\Documents\GitHub\ML_EMBLEM_CALC\emblem.h
-[TRACE]{2020-10-20 22:45:47} File size: 961(bytes)
-[TRACE]{2020-10-20 22:45:53} Opened Filepath: D:\Users\Ramadhan\Documents\GitHub\ML_EMBLEM_CALC\emblem.c
-[TRACE]{2020-10-20 22:45:53} File size: 21002(bytes)
-[INFO]{2020-10-20 22:48:41} Main Frame Created: 0.091180(sec), 91.179695(ms)
-[TRACE]{2020-10-21 09:18:03} Opened Filepath: C:\Users\Ramadhan\Desktop\JadwalKuliah.jpg
-[TRACE]{2020-10-21 09:18:03} File size: 148951(bytes)
-[TRACE]{2020-10-21 09:19:28} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-21 09:19:28} File size: 16766(bytes)
-[TRACE]{2020-10-21 09:20:55} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
-[TRACE]{2020-10-21 09:20:55} File size: 16766(bytes)
-[TRACE]{2020-10-21 09:21:14} Opened Filepath: C:\Users\Ramadhan\AMD_RyzenMaster.log
-[TRACE]{2020-10-21 09:21:14} File size: 2716230(bytes)
-[TRACE]{2020-10-21 09:22:36} Opened Filepath: C:\Users\Ramadhan\quartus2.ini
-[TRACE]{2020-10-21 09:22:36} File size: 89(bytes)
-[TRACE]{2020-10-21 09:22:47} Opened Filepath: C:\Users\Ramadhan\Device_ID.log
-[TRACE]{2020-10-21 09:22:47} File size: 57745(bytes)
-[TRACE]{2020-10-21 09:23:30} Opened Filepath: C:\Users\Ramadhan\Device_ID.log
-[TRACE]{2020-10-21 09:23:30} File size: 57745(bytes)
-[TRACE]{2020-10-21 09:23:41} Opened Filepath: C:\Users\Ramadhan\AMDRM_Install.log
-[TRACE]{2020-10-21 09:23:41} File size: 3964(bytes)
-[TRACE]{2020-10-21 09:25:59} Opened Filepath: D:\Users\Ramadhan\Downloads\2 - SE concept-210920-rfs.ppt
-[TRACE]{2020-10-21 09:25:59} File size: 6288384(bytes)
-[TRACE]{2020-10-21 09:26:52} Opened Filepath: D:\Users\Ramadhan\Downloads\Code for VirtualBox.txt
-[TRACE]{2020-10-21 09:26:52} File size: 771(bytes)
+[TRACE]{2020-10-21 11:34:56} Temporary file amount: 3
+[INFO]{2020-10-21 11:34:56} Application Created: 0.132302(sec), 132.302002(ms)
+[TRACE]{2020-10-21 11:35:38} Temporary file amount: 3
+[INFO]{2020-10-21 11:35:39} Application Created: 0.141830(sec), 141.830200(ms)
+[TRACE]{2020-10-21 11:36:03} Temporary file amount: 3
+[INFO]{2020-10-21 11:36:03} Application Created: 0.134464(sec), 134.463501(ms)
+[TRACE]{2020-10-21 11:36:10} Temporary file amount: 3
+[INFO]{2020-10-21 11:36:10} Application Created: 0.129873(sec), 129.873505(ms)
+[TRACE]{2020-10-21 11:57:03} Temporary file amount: 3
+[INFO]{2020-10-21 11:57:03} Application Created: 0.126743(sec), 126.743111(ms)
+[TRACE]{2020-10-21 11:57:49} Temporary file amount: 3
+[INFO]{2020-10-21 11:57:49} Application Created: 0.144290(sec), 144.290405(ms)
+[TRACE]{2020-10-21 11:58:13} Temporary file amount: 5
+[INFO]{2020-10-21 11:58:13} Application Created: 0.144865(sec), 144.865494(ms)
+[TRACE]{2020-10-21 11:59:16} Temporary file amount: 5
+[INFO]{2020-10-21 11:59:16} Application Created: 0.147881(sec), 147.880981(ms)
+[TRACE]{2020-10-21 12:01:19} Temporary file amount: 5
+[INFO]{2020-10-21 12:01:19} Application Created: 0.147382(sec), 147.382095(ms)
+[TRACE]{2020-10-21 12:01:25} Saving temporary file: temp\new1.tmp
+[TRACE]{2020-10-21 12:01:25} Saving temporary file: temp\new2.tmp
+[TRACE]{2020-10-21 12:01:25} Saving temporary file: temp\new3.tmp
+[TRACE]{2020-10-21 12:01:25} Saving temporary file: temp\new4.tmp
+[TRACE]{2020-10-21 12:01:25} Saving temporary file: temp\new5.tmp
+[TRACE]{2020-10-21 12:04:53} Temporary file amount: 5
+[INFO]{2020-10-21 12:04:53} Application Created: 0.130957(sec), 130.956711(ms)
+[TRACE]{2020-10-21 12:08:42} Temporary file amount: 5
+[INFO]{2020-10-21 12:08:42} Application Created: 0.139482(sec), 139.481903(ms)
+[TRACE]{2020-10-21 12:15:05} Temporary file amount: 5
+[INFO]{2020-10-21 12:15:05} Application Created: 0.138899(sec), 138.898895(ms)
+[TRACE]{2020-10-21 12:15:20} Temporary file amount: 5
+[INFO]{2020-10-21 12:15:20} Application Created: 0.159491(sec), 159.491302(ms)
+[TRACE]{2020-10-21 12:20:41} Temporary file amount: 5
+[INFO]{2020-10-21 12:20:41} Application Created: 0.154866(sec), 154.866104(ms)
+[TRACE]{2020-10-21 12:24:10} Temporary file amount: 5
+[INFO]{2020-10-21 12:24:10} Application Created: 0.136086(sec), 136.085800(ms)
+[TRACE]{2020-10-21 12:24:13} Temporary file amount: 5
+[INFO]{2020-10-21 12:24:13} Application Created: 0.151846(sec), 151.846497(ms)
+[TRACE]{2020-10-21 12:24:18} Temporary file amount: 5
+[INFO]{2020-10-21 12:24:18} Application Created: 0.152194(sec), 152.194199(ms)
+[TRACE]{2020-10-21 12:25:13} Temporary file amount: 5
+[INFO]{2020-10-21 12:25:13} Application Created: 0.145973(sec), 145.973206(ms)
+[TRACE]{2020-10-21 12:27:47} Temporary file amount: 5
+[INFO]{2020-10-21 12:27:47} Application Created: 0.140519(sec), 140.518509(ms)
+[TRACE]{2020-10-21 12:28:31} Temporary file amount: 6
+[INFO]{2020-10-21 12:28:31} Application Created: 0.153209(sec), 153.208618(ms)
+[TRACE]{2020-10-21 12:28:40} Temporary file amount: 6
+[INFO]{2020-10-21 12:28:40} Application Created: 0.139929(sec), 139.929199(ms)
+[TRACE]{2020-10-21 12:28:49} Temporary file amount: 6
+[INFO]{2020-10-21 12:28:49} Application Created: 0.146036(sec), 146.035904(ms)
+[TRACE]{2020-10-21 12:28:53} Temporary file amount: 6
+[INFO]{2020-10-21 12:28:53} Application Created: 0.162753(sec), 162.752701(ms)
+[TRACE]{2020-10-21 12:34:15} Temporary file amount: 8
+[INFO]{2020-10-21 12:34:15} Application Created: 0.183801(sec), 183.800690(ms)
+[TRACE]{2020-10-21 12:34:27} Temporary file amount: 1
+[INFO]{2020-10-21 12:34:27} Application Created: 0.115246(sec), 115.246201(ms)
+[TRACE]{2020-10-21 13:21:01} Temporary file amount: 1
+[INFO]{2020-10-21 13:21:01} Application Created: 0.084343(sec), 84.342796(ms)
+[TRACE]{2020-10-21 13:21:35} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 13:21:35} File size: 15(bytes)
+[TRACE]{2020-10-21 13:23:02} Temporary file amount: 2
+[INFO]{2020-10-21 13:23:02} Application Created: 0.082698(sec), 82.697502(ms)
+[TRACE]{2020-10-21 13:23:09} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 13:23:09} File size: 15(bytes)
+[TRACE]{2020-10-21 13:23:13} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 13:23:13} File size: 15(bytes)
+[TRACE]{2020-10-21 13:23:24} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 13:23:24} File size: 15(bytes)
+[TRACE]{2020-10-21 13:23:49} Opened Filepath: C:\Users\Ramadhan\Desktop\Ramdan.txt
+[TRACE]{2020-10-21 13:23:49} File size: 15(bytes)
