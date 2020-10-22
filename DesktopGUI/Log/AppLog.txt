@@ -313,3 +313,202 @@
 [INFO]{2020-10-21 17:42:58} Application Created: 0.120506(sec), 120.506096(ms)
 [TRACE]{2020-10-21 17:43:10} Temporary file amount: 1
 [INFO]{2020-10-21 17:43:10} Application Created: 0.122308(sec), 122.308205(ms)
+[TRACE]{2020-10-22 18:19:12} Temporary file amount: 1
+[INFO]{2020-10-22 18:19:12} Application Created: 0.073240(sec), 73.240494(ms)
+[TRACE]{2020-10-22 18:19:21} Temporary file amount: 1
+[INFO]{2020-10-22 18:19:21} Application Created: 0.139102(sec), 139.101593(ms)
+[TRACE]{2020-10-22 18:19:30} Opened Filepath: C:\Users\Ramadhan\Desktop\dasasd.txt
+[INFO]{2020-10-22 18:19:34} File saved: C:\Users\Ramadhan\Desktop\dasasd.txt
+[TRACE]{2020-10-22 18:41:42} Temporary file amount: 1
+[INFO]{2020-10-22 18:41:42} Application Created: 0.157046(sec), 157.046005(ms)
+[TRACE]{2020-10-22 18:41:51} Opened Filepath: C:\Users\Ramadhan\Desktop\dasasd.txt
+[TRACE]{2020-10-22 18:41:51} File size: 19(bytes)
+[TRACE]{2020-10-22 18:41:56} Temporary file amount: 1
+[INFO]{2020-10-22 18:41:56} Application Created: 0.122854(sec), 122.854492(ms)
+[TRACE]{2020-10-22 18:42:05} Opened Filepath: C:\Users\Ramadhan\Desktop\dasasd.txt
+[TRACE]{2020-10-22 18:42:05} File size: 19(bytes)
+[TRACE]{2020-10-22 18:42:20} Rename file to: aku.txt
+[INFO]{2020-10-22 18:42:40} File saved as: C:\Users\Ramadhan\Desktop\new.txt
+[TRACE]{2020-10-22 18:42:52} Opened Filepath: C:\Users\Ramadhan\Desktop\aku.txt
+[TRACE]{2020-10-22 18:42:52} File size: 19(bytes)
+[TRACE]{2020-10-22 18:42:57} Rename file to: void
+[TRACE]{2020-10-22 18:43:04} Opened Filepath: C:\Users\Ramadhan\Desktop\void
+[TRACE]{2020-10-22 18:43:04} File size: 19(bytes)
+[TRACE]{2020-10-22 18:43:14} Opened Filepath: C:\Users\Ramadhan\Desktop\aku.txt
+[TRACE]{2020-10-22 18:43:14} File size: 19(bytes)
+[TRACE]{2020-10-22 19:11:41} Temporary file amount: 1
+[INFO]{2020-10-22 19:11:41} Application Created: 0.123834(sec), 123.833900(ms)
+[TRACE]{2020-10-22 19:12:33} Temporary file amount: 1
+[INFO]{2020-10-22 19:12:33} Application Created: 0.128248(sec), 128.248001(ms)
+[TRACE]{2020-10-22 19:14:42} Temporary file amount: 2
+[INFO]{2020-10-22 19:14:42} Application Created: 0.128627(sec), 128.626801(ms)
+[TRACE]{2020-10-22 19:17:45} Temporary file amount: 2
+[INFO]{2020-10-22 19:17:45} Application Created: 0.137831(sec), 137.831009(ms)
+[TRACE]{2020-10-22 19:26:02} Temporary file amount: 2
+[INFO]{2020-10-22 19:26:02} Application Created: 0.140166(sec), 140.166489(ms)
+[TRACE]{2020-10-22 19:26:17} Temporary file amount: 1
+[INFO]{2020-10-22 19:26:17} Application Created: 0.116805(sec), 116.805107(ms)
+[TRACE]{2020-10-22 19:28:24} Temporary file amount: 1
+[INFO]{2020-10-22 19:28:24} Application Created: 0.142014(sec), 142.014206(ms)
+[TRACE]{2020-10-22 19:39:26} Temporary file amount: 2
+[INFO]{2020-10-22 19:39:26} Application Created: 0.124224(sec), 124.223503(ms)
+[TRACE]{2020-10-22 19:41:53} Temporary file amount: 1
+[INFO]{2020-10-22 19:41:53} Application Created: 0.119406(sec), 119.405693(ms)
+[INFO]{2020-10-22 19:42:35} ======== Program exited ========
+[TRACE]{2020-10-22 19:46:18} Temporary file amount: 1
+[INFO]{2020-10-22 19:46:18} Application Created: 0.117836(sec), 117.835899(ms)
+[TRACE]{2020-10-22 19:46:48} Temporary file amount: 1
+[INFO]{2020-10-22 19:46:48} Application Created: 0.124614(sec), 124.613800(ms)
+[TRACE]{2020-10-22 19:48:56} Temporary file amount: 1
+[INFO]{2020-10-22 19:48:56} Application Created: 0.128079(sec), 128.079300(ms)
+[TRACE]{2020-10-22 19:50:21} Temporary file amount: 1
+[INFO]{2020-10-22 19:50:21} Application Created: 0.136839(sec), 136.839111(ms)
+[TRACE]{2020-10-22 19:52:37} Temporary file amount: 1
+[INFO]{2020-10-22 19:52:37} Application Created: 0.127015(sec), 127.015099(ms)
+[TRACE]{2020-10-22 20:10:59} Temporary file amount: 1
+[INFO]{2020-10-22 20:10:59} Application Created: 0.128552(sec), 128.552307(ms)
+[INFO]{2020-10-22 20:11:09} ============ Program Exited ============
+[TRACE]{2020-10-22 20:11:09} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:12:02} Temporary file amount: 1
+[INFO]{2020-10-22 20:12:02} Application Created: 0.131380(sec), 131.379501(ms)
+[INFO]{2020-10-22 20:12:15} ============ Program Exited ============
+[TRACE]{2020-10-22 20:12:15} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:13:24} Temporary file amount: 1
+[INFO]{2020-10-22 20:13:24} Application Created: 0.126182(sec), 126.182091(ms)
+[INFO]{2020-10-22 20:13:34} ============ Program Exited ============
+[TRACE]{2020-10-22 20:13:34} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:14:10} Temporary file amount: 1
+[INFO]{2020-10-22 20:14:10} Application Created: 0.134753(sec), 134.752792(ms)
+[TRACE]{2020-10-22 20:14:19} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:14:19} All temporary file saved!
+[INFO]{2020-10-22 20:14:19} ============ Program Exited ============
+[INFO]{2020-10-22 20:14:19} ======== OnExit Routine Success ========
+[TRACE]{2020-10-22 20:14:21} Temporary file amount: 1
+[INFO]{2020-10-22 20:14:21} Application Created: 0.113931(sec), 113.931107(ms)
+[INFO]{2020-10-22 20:14:23} ============ Program Exited ============
+[TRACE]{2020-10-22 20:14:23} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:14:28} Temporary file amount: 1
+[INFO]{2020-10-22 20:14:28} Application Created: 0.116720(sec), 116.719505(ms)
+[INFO]{2020-10-22 20:14:29} ============ Program Exited ============
+[TRACE]{2020-10-22 20:14:29} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:15:03} Temporary file amount: 1
+[INFO]{2020-10-22 20:15:03} Application Created: 0.145401(sec), 145.401398(ms)
+[TRACE]{2020-10-22 20:15:05} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:15:05} All temporary file saved!
+[INFO]{2020-10-22 20:15:05} ============ Program Exited ============
+[INFO]{2020-10-22 20:15:05} ======== OnExit Routine Success ========
+[TRACE]{2020-10-22 20:15:07} Temporary file amount: 1
+[INFO]{2020-10-22 20:15:07} Application Created: 0.125468(sec), 125.468002(ms)
+[TRACE]{2020-10-22 20:15:15} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:15:15} All temporary file saved!
+[INFO]{2020-10-22 20:15:15} ============ Program Exited ============
+[INFO]{2020-10-22 20:15:15} ======== OnExit Routine Success ========
+[TRACE]{2020-10-22 20:15:16} Temporary file amount: 1
+[INFO]{2020-10-22 20:15:16} Application Created: 0.117063(sec), 117.062897(ms)
+[TRACE]{2020-10-22 20:15:20} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:15:20} All temporary file saved!
+[INFO]{2020-10-22 20:15:20} ============ Program Exited ============
+[INFO]{2020-10-22 20:15:20} ======== OnExit Routine Success ========
+[TRACE]{2020-10-22 20:15:22} Temporary file amount: 1
+[INFO]{2020-10-22 20:15:22} Application Created: 0.140387(sec), 140.387299(ms)
+[INFO]{2020-10-22 20:15:27} ============ Program Exited ============
+[TRACE]{2020-10-22 20:15:27} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:15:35} Temporary file amount: 1
+[INFO]{2020-10-22 20:15:35} Application Created: 0.127826(sec), 127.826500(ms)
+[INFO]{2020-10-22 20:15:37} ============ Program Exited ============
+[TRACE]{2020-10-22 20:15:37} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:16:04} Temporary file amount: 1
+[INFO]{2020-10-22 20:16:04} Application Created: 0.120368(sec), 120.367996(ms)
+[INFO]{2020-10-22 20:16:06} ============ Program Exited ============
+[TRACE]{2020-10-22 20:16:06} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:16:14} Temporary file amount: 1
+[INFO]{2020-10-22 20:16:14} Application Created: 0.127991(sec), 127.991005(ms)
+[INFO]{2020-10-22 20:16:15} ============ Program Exited ============
+[TRACE]{2020-10-22 20:16:15} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:16:30} Temporary file amount: 1
+[INFO]{2020-10-22 20:16:30} Application Created: 0.119350(sec), 119.349602(ms)
+[INFO]{2020-10-22 20:16:34} ============ Program Exited ============
+[TRACE]{2020-10-22 20:16:34} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:35:15} Temporary file amount: 1
+[INFO]{2020-10-22 20:35:15} Application Created: 0.133132(sec), 133.132309(ms)
+[INFO]{2020-10-22 20:35:18} ============ Program Exited ============
+[TRACE]{2020-10-22 20:35:20} Temporary file amount: 1
+[INFO]{2020-10-22 20:35:21} Application Created: 0.139198(sec), 139.198502(ms)
+[INFO]{2020-10-22 20:35:23} ============ Program Exited ============
+[TRACE]{2020-10-22 20:35:26} Temporary file amount: 1
+[INFO]{2020-10-22 20:35:26} Application Created: 0.117859(sec), 117.859001(ms)
+[INFO]{2020-10-22 20:35:29} ============ Program Exited ============
+[TRACE]{2020-10-22 20:35:47} Temporary file amount: 1
+[INFO]{2020-10-22 20:35:47} Application Created: 0.121738(sec), 121.738396(ms)
+[INFO]{2020-10-22 20:35:49} ============ Program Exited ============
+[TRACE]{2020-10-22 20:35:49} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:39:45} Temporary file amount: 1
+[INFO]{2020-10-22 20:39:45} Application Created: 0.123928(sec), 123.927910(ms)
+[INFO]{2020-10-22 20:39:46} ============ Program Exited ============
+[TRACE]{2020-10-22 20:39:46} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:40:41} Temporary file amount: 1
+[INFO]{2020-10-22 20:40:41} Application Created: 0.133176(sec), 133.176407(ms)
+[INFO]{2020-10-22 20:40:42} ============ Program Exited ============
+[TRACE]{2020-10-22 20:40:42} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:50:18} Temporary file amount: 1
+[INFO]{2020-10-22 20:50:18} Application Created: 0.134865(sec), 134.865295(ms)
+[TRACE]{2020-10-22 20:50:26} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:50:26} All temporary file saved!
+[TRACE]{2020-10-22 20:52:15} Temporary file amount: 1
+[INFO]{2020-10-22 20:52:15} Application Created: 0.122369(sec), 122.369202(ms)
+[TRACE]{2020-10-22 20:52:18} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:52:18} All temporary file saved!
+[TRACE]{2020-10-22 20:52:59} Temporary file amount: 1
+[INFO]{2020-10-22 20:52:59} Application Created: 0.131659(sec), 131.658707(ms)
+[TRACE]{2020-10-22 20:53:03} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:53:03} All temporary file saved!
+[INFO]{2020-10-22 20:53:03} ============ Program Exited ============
+[TRACE]{2020-10-22 20:53:05} Temporary file amount: 1
+[INFO]{2020-10-22 20:53:05} Application Created: 0.122966(sec), 122.966202(ms)
+[TRACE]{2020-10-22 20:53:08} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:53:08} All temporary file saved!
+[INFO]{2020-10-22 20:53:08} ============ Program Exited ============
+[TRACE]{2020-10-22 20:53:10} Temporary file amount: 1
+[INFO]{2020-10-22 20:53:10} Application Created: 0.136272(sec), 136.272400(ms)
+[TRACE]{2020-10-22 20:53:16} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:53:16} All temporary file saved!
+[INFO]{2020-10-22 20:53:16} ============ Program Exited ============
+[TRACE]{2020-10-22 20:53:18} Temporary file amount: 2
+[INFO]{2020-10-22 20:53:18} Application Created: 0.126842(sec), 126.842308(ms)
+[TRACE]{2020-10-22 20:54:11} Temporary file amount: 1
+[INFO]{2020-10-22 20:54:11} Application Created: 0.130561(sec), 130.561203(ms)
+[TRACE]{2020-10-22 20:54:14} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:54:14} All temporary file saved!
+[TRACE]{2020-10-22 20:54:48} Temporary file amount: 1
+[INFO]{2020-10-22 20:54:48} Application Created: 0.120921(sec), 120.920700(ms)
+[TRACE]{2020-10-22 20:54:51} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:54:51} All temporary file saved!
+[INFO]{2020-10-22 20:54:51} ============ Program Exited ============
+[TRACE]{2020-10-22 20:54:54} Temporary file amount: 1
+[INFO]{2020-10-22 20:54:54} Application Created: 0.136205(sec), 136.204895(ms)
+[TRACE]{2020-10-22 20:54:58} Program terminated, saving temporary file...
+[TRACE]{2020-10-22 20:54:58} All temporary file saved!
+[INFO]{2020-10-22 20:54:58} ============ Program Exited ============
+[TRACE]{2020-10-22 21:11:04} Temporary file amount: 1
+[INFO]{2020-10-22 21:11:04} Application Created: 0.125091(sec), 125.090790(ms)
+[INFO]{2020-10-22 21:11:06} ============ Program Exited ============
+[TRACE]{2020-10-22 21:11:07} Temporary file amount: 1
+[INFO]{2020-10-22 21:11:07} Application Created: 0.128560(sec), 128.559692(ms)
+[TRACE]{2020-10-22 21:11:21} Opened Filepath: D:\Users\Ramadhan\Documents\ptcsetup.log
+[TRACE]{2020-10-22 21:11:21} File size: 17085(bytes)
+[INFO]{2020-10-22 21:12:05} ============ Program Exited ============
+[TRACE]{2020-10-22 21:12:33} Temporary file amount: 1
+[INFO]{2020-10-22 21:12:33} Application Created: 0.137511(sec), 137.511292(ms)
+[TRACE]{2020-10-22 21:12:37} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
+[TRACE]{2020-10-22 21:12:38} File size: 16766(bytes)
+[TRACE]{2020-10-22 21:13:09} Temporary file amount: 1
+[INFO]{2020-10-22 21:13:09} Application Created: 0.130452(sec), 130.451691(ms)
+[INFO]{2020-10-22 21:13:16} ============ Program Exited ============
+[TRACE]{2020-10-22 21:13:18} Temporary file amount: 1
+[INFO]{2020-10-22 21:13:18} Application Created: 0.126612(sec), 126.612305(ms)
+[TRACE]{2020-10-22 21:13:23} Opened Filepath: D:\Users\Ramadhan\Documents\icp_20200725_194644.log
+[TRACE]{2020-10-22 21:13:23} File size: 16766(bytes)
+[INFO]{2020-10-22 21:14:50} ============ Program Exited ============
+[TRACE]{2020-10-22 21:22:25} Temporary file amount: 1
+[INFO]{2020-10-22 21:22:25} Application Created: 0.136362(sec), 136.362305(ms)
+[INFO]{2020-10-22 21:22:27} ============ Program Exited ============

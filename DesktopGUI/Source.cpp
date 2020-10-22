@@ -2,6 +2,7 @@
 #include "LogGUI.h"
 #include "../Utilities/Filestream.h"
 #include "../Utilities/Timer.h"
+#include "TextField.h"
 
 class MyApp : public wxApp
 {
@@ -32,8 +33,7 @@ bool MyApp::OnInit()
 
 int MyApp::OnExit()
 {
-    Exit();
-    LOGFILE( LEVEL_INFO, "======== Program exited ========", LOG_FILEPATH );
+    LOGFILE( LEVEL_INFO, "============ Program Exited ============", LOG_FILEPATH );
     return 0;
 }
 

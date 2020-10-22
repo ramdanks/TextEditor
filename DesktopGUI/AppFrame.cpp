@@ -6,25 +6,27 @@
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
 
-EVT_MENU( wxID_EXIT, AppFrame::OnExit )
+EVT_MENU( wxID_EXIT, AppFrame::OnClose )
 EVT_MENU( wxID_ABOUT, AppFrame::OnAbout )
 EVT_MENU( ID_DOCUMENTATION, AppFrame::OnDocumentation )
 EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugConsole )
 EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
 EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
-EVT_MENU( ID_TABCLOSE, AppFrame::OnTabClose )
-EVT_MENU( ID_TABCLOSEALL, AppFrame::OnTabCloseAll )
+EVT_MENU( ID_TABCLOSE, AppFrame::OnPageClose )
+EVT_MENU( ID_TABCLOSEALL, AppFrame::OnPageCloseAll )
 EVT_MENU( ID_NEWFILE, AppFrame::OnNewFile )
 EVT_MENU( ID_OPENFILE, AppFrame::OnOpenFile )
 EVT_MENU( ID_SAVEFILE, AppFrame::OnSaveFile )
 EVT_MENU( ID_SAVEFILEAS, AppFrame::OnSaveFileAs )
 EVT_MENU( ID_SAVEFILEALL, AppFrame::OnSaveFileAll )
 EVT_MENU( ID_RENAMEFILE, AppFrame::OnRenameFile )
+
 EVT_AUINOTEBOOK_PAGE_CLOSE( wxID_ANY, AppFrame::OnNotebookPageClose )
+EVT_CLOSE( AppFrame::OnCloseWindow )
 
 wxEND_EVENT_TABLE()
 
-AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size )
+AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID )
     : wxFrame( NULL, 1, title, pos, size )
 {
     #ifdef _DEBUG
@@ -120,16 +122,32 @@ void AppFrame::CreateMenu()
     SetMenuBar( menuBar );
 }
 
-void AppFrame::OnExit( wxCommandEvent& event )
+void AppFrame::OnClose( wxCommandEvent& event )
+{ TextField::SaveTempAll(); Close( false ); }
+
+void AppFrame::OnCloseWindow( wxCloseEvent & event )
 {
-    TextField::OnClose();
-    Close( true );
+    if ( event.CanVeto() )
+    {
+        TextField::SaveTempAll();
+        if ( TextField::ExistAbsoluteFile() )
+        {
+            auto prompt = wxMessageDialog( this, "A non temporary file detected in current Notebook.\n"
+                                           "Please save your work, any changes will be ignored.\n"
+                                           "Sure want to Continue ?",
+                                           "Close Window", wxYES_NO );
+            if ( prompt.ShowModal() == wxID_NO )
+            {
+                event.Veto();
+                return;
+            }
+        }
+    }
+    Destroy();
 }
 
 void AppFrame::OnAbout( wxCommandEvent& event )
-{
-    wxLogMessage( "Memoriser Ver 0.1" );
-}
+{ wxLogMessage( "Memoriser Ver 0.2" ); }
 
 void AppFrame::OnDocumentation( wxCommandEvent& event )
 {
@@ -158,14 +176,14 @@ void AppFrame::OnLogDir( wxCommandEvent& event )
 void AppFrame::OnReportBug( wxCommandEvent& event )
 { }
 
-void AppFrame::OnTabClose( wxCommandEvent& event )
-{ TextField::OnTabClose(); }
+void AppFrame::OnPageClose( wxCommandEvent& event )
+{ TextField::OnPageClose(); }
 
-void AppFrame::OnTabCloseAll( wxCommandEvent& event )
-{ TextField::OnTabCloseAll(); }
+void AppFrame::OnPageCloseAll( wxCommandEvent& event )
+{ TextField::OnPageCloseAll(); }
 
 void AppFrame::OnNotebookPageClose( wxAuiNotebookEvent & evt )
-{ TextField::OnTabClose( evt ); }
+{ evt.Veto(); TextField::OnPageClose(); } //veto event, because we handle event ourself
 
 void AppFrame::OnNewFile( wxCommandEvent& event )
 { TextField::OnNewFile(); }

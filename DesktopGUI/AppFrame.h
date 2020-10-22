@@ -6,20 +6,21 @@
 class AppFrame : public wxFrame
 {
 public:
-    AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size );
+    AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID = 0 );
     ~AppFrame() {}
 
 private:
     //handle main frame
     void CreateMenu();
     void OnNewFile( wxCommandEvent& event );
-    void OnExit( wxCommandEvent& event );
+    void OnClose( wxCommandEvent& event );
+    void OnCloseWindow( wxCloseEvent& event );
     void OnAbout( wxCommandEvent& event );
     void OnDocumentation( wxCommandEvent& event );
     void OnLogDir( wxCommandEvent& event );
     void OnReportBug( wxCommandEvent& event );
-    void OnTabClose( wxCommandEvent& event );
-    void OnTabCloseAll( wxCommandEvent& event );
+    void OnPageClose( wxCommandEvent& event );
+    void OnPageCloseAll( wxCommandEvent& event );
     void OnNotebookPageClose( wxAuiNotebookEvent& evt );
 
     void OnOpenFile( wxCommandEvent& event );

@@ -10,29 +10,28 @@ public:
 	static void InitFilehandle( wxWindow* parent );
 	static void FetchTempFile();
 	static void CreateTempFile( const std::string& name );
+	static void SaveTempAll();
+	static bool ExistAbsoluteFile();
 
 	static void OnNewFile();
 	static void OnRenameFile();
 	static void OnOpenFile();
-	static void OnTabClose();
-	static void OnTabClose( wxAuiNotebookEvent& evt );
-	static void OnTabCloseAll();
-	static void OnClose();
-
+	static void OnPageClose();
+	static void OnPageCloseAll();
 	static void OnSaveFile();
 	static void OnSaveFileAll();
 	static bool OnSaveFileAs();
 
 private:
 	static void AddNewTab( const std::string& name );
+	static void ClearPage( size_t page, const std::string& name = std::string() );
 
 	static wxWindow* mParent;
-	static wxAuiNotebook* mTab;
+	static wxAuiNotebook* mNotebook;
 
 	static std::vector<wxStyledTextCtrl*> mTextField;
 	static std::vector<std::string> mPathAbsolute;
 	static std::vector<std::string> mPathTemporary;
 
-	static bool Init;
 	static std::string SupportedFormat;
 };
