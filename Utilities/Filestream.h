@@ -1,6 +1,7 @@
 #pragma once
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
 class Filestream
 {
@@ -90,15 +91,25 @@ public:
 		return std::string();
 	}
 
+	static std::vector<std::string> ParseString( const std::string& str, char delimiter )
+	{
+		std::stringstream ss( str );
+		std::string item;
+		std::vector<std::string> elems;
+		while ( std::getline( ss, item, delimiter ) ) 
+			elems.push_back( item );
+
+		return elems;
+	}
+
 	static std::string getFileName( std::string filePath, bool withExtension = true, char seperator = '\\' )
 	{
 		// Get last dot position
 		std::size_t dotPos = filePath.rfind( '.' );
 		std::size_t sepPos = filePath.rfind( seperator );
 		if ( sepPos != std::string::npos )
-		{
 			return filePath.substr( sepPos + 1, filePath.size() - ( withExtension || dotPos != std::string::npos ? 1 : dotPos ) );
-		}
+		
 		return "";
 	}
 };

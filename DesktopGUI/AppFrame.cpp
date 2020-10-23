@@ -3,26 +3,33 @@
 #include "../Utilities/Timer.h"
 #include "../Utilities/Filestream.h"
 #include "TextField.h"
+#include "Config.h"
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
 
-EVT_MENU( wxID_EXIT, AppFrame::OnClose )
-EVT_MENU( wxID_ABOUT, AppFrame::OnAbout )
-EVT_MENU( ID_DOCUMENTATION, AppFrame::OnDocumentation )
-EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugConsole )
-EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
-EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
-EVT_MENU( ID_TABCLOSE, AppFrame::OnPageClose )
-EVT_MENU( ID_TABCLOSEALL, AppFrame::OnPageCloseAll )
-EVT_MENU( ID_NEWFILE, AppFrame::OnNewFile )
-EVT_MENU( ID_OPENFILE, AppFrame::OnOpenFile )
-EVT_MENU( ID_SAVEFILE, AppFrame::OnSaveFile )
-EVT_MENU( ID_SAVEFILEAS, AppFrame::OnSaveFileAs )
-EVT_MENU( ID_SAVEFILEALL, AppFrame::OnSaveFileAll )
-EVT_MENU( ID_RENAMEFILE, AppFrame::OnRenameFile )
-
-EVT_AUINOTEBOOK_PAGE_CLOSE( wxID_ANY, AppFrame::OnNotebookPageClose )
-EVT_CLOSE( AppFrame::OnCloseWindow )
+EVT_MENU(                   ID_NEWFILE,                 AppFrame::OnNewFile )
+EVT_MENU(                   ID_OPENFILE,                AppFrame::OnOpenFile )
+EVT_MENU(                   ID_SAVEFILE,                AppFrame::OnSaveFile )
+EVT_MENU(                   ID_SAVEFILEAS,              AppFrame::OnSaveFileAs )
+EVT_MENU(                   ID_SAVEFILEALL,             AppFrame::OnSaveFileAll )
+EVT_MENU(                   ID_RENAMEFILE,              AppFrame::OnRenameFile )
+EVT_MENU(                   ID_TABCLOSE,                AppFrame::OnPageClose )
+EVT_MENU(                   ID_TABCLOSEALL,             AppFrame::OnPageCloseAll )
+                                                        
+EVT_MENU(                   ID_ZOOMIN,                  AppFrame::OnZoomIn )
+EVT_MENU(                   ID_ZOOMOUT,                 AppFrame::OnZoomOut )
+EVT_MENU(                   ID_ZOOMRESTORE,             AppFrame::OnZoomRestore )
+EVT_MENU(                   ID_DEBUGCONSOLE,            AppFrame::OnDebugConsole )
+                                                        
+EVT_MENU(                   wxID_ABOUT,                 AppFrame::OnAbout )
+EVT_MENU(                   ID_DOCUMENTATION,           AppFrame::OnDocumentation )
+EVT_MENU(                   ID_LOGDIR,                  AppFrame::OnLogDir )
+EVT_MENU(                   ID_REPORTBUG,               AppFrame::OnReportBug )
+                                                        
+EVT_MENU(                   wxID_EXIT,                  AppFrame::OnClose )
+EVT_CLOSE(                                              AppFrame::OnCloseWindow )
+                                                        
+EVT_AUINOTEBOOK_PAGE_CLOSE( wxID_ANY,                   AppFrame::OnNotebookPageClose )
 
 wxEND_EVENT_TABLE()
 
@@ -32,7 +39,7 @@ AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& siz
     #ifdef _DEBUG
     CreateDebugFrame(); //create debug frame for logging on GUI
     #endif
-
+    
     TextField::InitFilehandle( this );
     TextField::FetchTempFile();
     CreateMenu();
@@ -89,9 +96,9 @@ void AppFrame::CreateMenu()
 
     wxMenu* menuView = new wxMenu;
     menuView->Append( wxID_ANY, "Always on Top" );
-    menuView->Append( wxID_ANY, "Zoom In\tCtrl+Num +" );
-    menuView->Append( wxID_ANY, "Zoom Out\tCtrl+Num -" );
-    menuView->Append( wxID_ANY, "Restore Zoom\tCtrl+Num /" );
+    menuView->Append( ID_ZOOMIN, "Zoom In (Ctrl+Mousewheel)\tCtrl+Num +" );
+    menuView->Append( ID_ZOOMOUT, "Zoom Out (Ctrl+Mousewheel)\tCtrl+Num -" );
+    menuView->Append( ID_ZOOMRESTORE, "Restore Zoom\tCtrl+Num /" );
     menuView->AppendSeparator();
     menuView->Append( wxID_ANY, "Text Summary" );
     menuView->Append( wxID_ANY, "Compression Summary" );
@@ -123,13 +130,18 @@ void AppFrame::CreateMenu()
 }
 
 void AppFrame::OnClose( wxCommandEvent& event )
-{ TextField::SaveTempAll(); Close( false ); }
+{ 
+    TextField::SaveTempAll();
+    Config::SaveConfiguration();
+    Close( false ); 
+}
 
 void AppFrame::OnCloseWindow( wxCloseEvent & event )
 {
     if ( event.CanVeto() )
     {
         TextField::SaveTempAll();
+        Config::SaveConfiguration();
         if ( TextField::ExistAbsoluteFile() )
         {
             auto prompt = wxMessageDialog( this, "A non temporary file detected in current Notebook.\n"
@@ -202,6 +214,15 @@ void AppFrame::OnSaveFileAll( wxCommandEvent& event )
 
 void AppFrame::OnRenameFile( wxCommandEvent& event )
 { TextField::OnRenameFile(); }
+
+void AppFrame::OnZoomIn( wxCommandEvent & event )
+{ TextField::OnZoom( true, false ); }
+
+void AppFrame::OnZoomOut( wxCommandEvent& event )
+{ TextField::OnZoom( false, false ); }
+
+void AppFrame::OnZoomRestore( wxCommandEvent& event )
+{ TextField::OnZoom( false, true ); }
 
 void AppFrame::OnDebugConsole( wxCommandEvent& event )
 {

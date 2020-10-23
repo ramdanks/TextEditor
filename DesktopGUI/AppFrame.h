@@ -29,6 +29,10 @@ private:
     void OnSaveFileAll ( wxCommandEvent& event );
     void OnRenameFile( wxCommandEvent& event );
 
+    void OnZoomIn( wxCommandEvent& event );
+    void OnZoomOut( wxCommandEvent& event );
+    void OnZoomRestore( wxCommandEvent& event );
+
     //handle debug frame
     void CreateDebugFrame();
     void OnDebugConsole( wxCommandEvent& event );
@@ -62,5 +66,8 @@ enum menu
     ID_SAVEFILEALL,
     ID_TABCLOSE,
     ID_TABCLOSEALL,
-    ID_NEWFILE
+    ID_NEWFILE,
+    ID_ZOOMIN,
+    ID_ZOOMOUT,
+    ID_ZOOMRESTORE
 };

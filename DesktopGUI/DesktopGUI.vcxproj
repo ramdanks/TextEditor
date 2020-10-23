@@ -172,6 +172,7 @@
     <ClCompile Include="..\Utilities\Logging.cpp" />
     <ClCompile Include="..\Utilities\Timer.cpp" />
     <ClCompile Include="AppFrame.cpp" />
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="TextField.cpp" />
     <ClCompile Include="LogGUI.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -182,8 +183,22 @@
     <ClInclude Include="..\Utilities\Logging.h" />
     <ClInclude Include="..\Utilities\Timer.h" />
     <ClInclude Include="AppFrame.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="TextField.h" />
     <ClInclude Include="LogGUI.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">wxWidgets/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">wxWidgets/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">wxWidgets/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">wxWidgets/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\Resource\icon.png" />
+    <Image Include="..\Resource\splash.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,6 +22,8 @@ public:
 	static void OnSaveFileAll();
 	static bool OnSaveFileAs();
 
+	static void OnZoom( bool zoomIn, bool reset );
+
 private:
 	static void AddNewTab( const std::string& name );
 	static void ClearPage( size_t page, const std::string& name = std::string() );

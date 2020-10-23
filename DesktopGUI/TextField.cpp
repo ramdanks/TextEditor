@@ -3,17 +3,19 @@
 #include "LogGUI.h"
 #include "../Utilities/Err.h"
 #include "../Utilities/Filestream.h"
+#include "Config.h"
 
 //contain only one tab or textfield, already temporary, and no content
 #define IF_FIELD_UNOCCUPIED if ( mTextField.size() == 1 && mPathAbsolute[0].empty() && mTextField[0]->IsEmpty() )
 #define IF_TEMPORARY_FIELD(x) if ( mPathAbsolute[x].empty() )
 
-std::string TextField::SupportedFormat = "";
-wxWindow* TextField::mParent = nullptr;
-wxAuiNotebook* TextField::mNotebook = nullptr;
-std::vector<wxStyledTextCtrl*> TextField::mTextField;
-std::vector<std::string> TextField::mPathAbsolute;
-std::vector<std::string> TextField::mPathTemporary;
+//translation unit for static member
+std::string                         TextField::SupportedFormat = "";
+wxWindow*                           TextField::mParent = nullptr;
+wxAuiNotebook*                      TextField::mNotebook = nullptr;
+std::vector<wxStyledTextCtrl*>      TextField::mTextField;
+std::vector<std::string>            TextField::mPathAbsolute;
+std::vector<std::string>            TextField::mPathTemporary;
 
 void TextField::InitFilehandle( wxWindow* parent )
 {
@@ -285,6 +287,24 @@ bool TextField::OnSaveFileAs()
         return false;
     }
     return true;
+}
+
+void TextField::OnZoom( bool zoomIn, bool reset )
+{
+    auto currentPage = mNotebook->GetSelection();
+    if ( reset )
+        mTextField[currentPage]->SetZoom( Config::mZoomDefault );
+
+    if ( zoomIn )
+    {
+        if ( mTextField[currentPage]->GetZoom() >= Config::mZoomMax ) return;
+        mTextField[currentPage]->ZoomIn();
+    }
+    else
+    {
+        if ( mTextField[currentPage]->GetZoom() <= Config::mZoomMin ) return;
+        mTextField[currentPage]->ZoomOut();
+    }
 }
 
 void TextField::AddNewTab( const std::string& name )
