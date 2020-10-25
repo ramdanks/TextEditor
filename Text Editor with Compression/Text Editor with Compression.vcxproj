@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Utilities\Err.cpp" />
     <ClCompile Include="..\Utilities\Logging.cpp" />
     <ClCompile Include="..\Utilities\Timer.cpp" />
     <ClCompile Include="Command.cpp" />

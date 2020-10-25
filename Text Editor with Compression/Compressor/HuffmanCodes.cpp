@@ -206,7 +206,7 @@ void HuffmanCodes::Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, c
 
 uint8_t* HuffmanCodes::Uncompressed( sCompressInfo info )
 {
-	this->DecompressedSize = 1 + info.SizeSource;
+	this->CompressedSize = 1 + info.SizeSource;
 	uint8_t* pUncompressed = (uint8_t*) malloc( 1 + info.SizeSource );
 	sCompressHeader header;
 	header.DataLength = 8;

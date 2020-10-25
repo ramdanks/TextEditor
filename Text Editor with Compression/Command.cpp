@@ -10,7 +10,7 @@
 #define THIRD_SPACING 35
 
 Util::Timer tm( "", MS, false );
-Util::Logging clog( { FORMAT_LEVEL, FORMAT_TIME, FORMAT_MSG } );
+Util::Logging clog( { FORMAT_LEVEL, FORMAT_TIME, FORMAT_SPACE, FORMAT_MSG } );
 
 void CMD::Init()
 {
@@ -120,7 +120,7 @@ void CMD::Handle_Compression( int argc, const char* argv[], bool compress )
 	catch ( Util::Err& error )
 	{
 		printf( "Unhandled Exception:%s\n", error.Seek() );
-		if ( !FileErr.empty() ) error.Log( LEVEL_ERROR, FileErr );
+		if ( !FileErr.empty() ) Util::Log( error, FileErr );
 	}
 }
 
@@ -166,7 +166,7 @@ void CMD::Handle_Benchmark( int argc, const char* argv[] )
 	catch ( Util::Err& error )
 	{
 		printf( "Unhandled Exception:%s\n", error.Seek() );
-		if ( !FileErr.empty() ) error.Log( LEVEL_ERROR, FileErr );
+		if ( !FileErr.empty() ) Util::Log( error, FileErr );
 	}
 }
 
@@ -211,7 +211,7 @@ void CMD::Handle_Readsize( const char* fileread )
 		catch ( Util::Err& error )
 		{
 			printf( "Unhandled Exception:%s\n", error.Seek() );
-			if ( !FileErr.empty() ) error.Log( LEVEL_ERROR, FileErr );
+			if ( !FileErr.empty() ) Util::Log( error, FileErr );
 		}
 	}
 

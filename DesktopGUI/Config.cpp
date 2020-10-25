@@ -4,13 +4,14 @@
 #include "LogGUI.h"
 
 //translation unit for static member
-uint32_t                          Config::mUseSplash;
-uint32_t                          Config::mFontSize;
-uint32_t                          Config::mFontID;
-uint32_t                          Config::mLanguageID;
-uint32_t                          Config::mZoomMin;
-uint32_t                          Config::mZoomMax;
-uint32_t                          Config::mZoomDefault;
+int                               Config::mUseSplash;
+int                               Config::mAutosaveInterval;
+int                               Config::mFontSize;
+int                               Config::mFontID;
+int                               Config::mLanguageID;
+int                               Config::mZoomMin;
+int                               Config::mZoomMax;
+int                               Config::mZoomDefault;
 std::vector<sConfigReference>     Config::mConfTemplate;
 
 void Config::FetchConfiguration()
@@ -30,23 +31,23 @@ void Config::FetchConfiguration()
 		std::string sRead = (const char*) &vRead[0];
 		auto vBuffer = Filestream::ParseString( sRead, '\n' );
 
-		for ( uint32_t i = 0; i < mConfTemplate.size(); i++ )
+		for ( int i = 0; i < mConfTemplate.size(); i++ )
 		{
 			auto vConfig = Filestream::ParseString( vBuffer[i], '=' );
 			THROW_ERR_IF( vConfig[0] != mConfTemplate[i].Tag, "Config file is compromised!" );
 			*mConfTemplate[i].RefData = std::stoi( vConfig[1] );
 		}
 		
-		LOGALL( LEVEL_INFO, "Loading configuration file success!", LOG_FILEPATH );
+		LOGALL( LEVEL_INFO, "Loading configuration file success!" );
 	}
 	catch ( Util::Err& e )
 	{
-		LOGALL( LEVEL_WARN, e.Seek(), LOG_FILEPATH );
+		LOGALL( LEVEL_WARN, e.Seek() );
 		LoadDefaultConfiguration();
 	}
 	catch ( ... )
 	{
-		LOGALL( LEVEL_WARN, "Unhandled Exception found in FethConfiguration()!", LOG_FILEPATH );
+		LOGALL( LEVEL_WARN, "Unknown Exception found in FethConfiguration()!" );
 		LoadDefaultConfiguration();
 	}
 }
@@ -55,12 +56,13 @@ void Config::LoadDefaultConfiguration()
 {
 	mUseSplash = 1;
 	mLanguageID = 0;
+	mAutosaveInterval = 30;
 	mFontID = 0;
 	mFontSize = 10;
-	mZoomMin = 5;
-	mZoomMax = 20;
-	mZoomDefault = 10;
-	LOGALL( LEVEL_INFO, "Loading default configuration file!", LOG_FILEPATH );
+	mZoomMin = -5;
+	mZoomMax = 10;
+	mZoomDefault = 2;
+	LOGALL( LEVEL_INFO, "Loading default configuration file!" );
 }
 
 void Config::SaveConfiguration()
@@ -79,7 +81,7 @@ void Config::SaveConfiguration()
 	}
 	catch ( Util::Err& e )
 	{
-		LOGALL( LEVEL_WARN, e.Seek(), LOG_FILEPATH );
+		LOGALL( LEVEL_WARN, e.Seek() );
 	}
 }
 
@@ -87,6 +89,7 @@ void Config::MakeTemplate()
 {
 	mConfTemplate.push_back( sConfigReference( "mSplashScreen",      &mUseSplash ) );
 	mConfTemplate.push_back( sConfigReference( "mSystemLanguage",    &mLanguageID ) );
+	mConfTemplate.push_back( sConfigReference( "mAutosaveInterval",  &mAutosaveInterval ) );
 	mConfTemplate.push_back( sConfigReference( "mFontID",            &mFontID ) );
 	mConfTemplate.push_back( sConfigReference( "mFontSize",          &mFontSize ) );
 	mConfTemplate.push_back( sConfigReference( "mZoomMin",           &mZoomMin ) );

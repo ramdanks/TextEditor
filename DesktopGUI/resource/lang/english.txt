@@ -1,0 +1,46 @@
+English
+Welcome to Mémoriser
+Mémoriser - Debug Console
+File
+New
+Save
+save As
+Save All
+Open
+Rename
+Close
+Close All
+New Dictionary
+Open Dictionary
+Exit
+Edit
+Undo
+Redo
+Cut
+Copy
+Paste
+Delete
+Select All
+Search
+Find
+Select and Search Next
+Select and Search Previous
+Replace
+Goto
+View
+Always on Top
+Zoom In
+Zoom Out
+Restore Zoom
+Text Summary
+Compression Summary
+Debug Console
+Settings
+Preferences
+Style Configuration
+Help
+Report Bug
+Open Log Directory
+See Documentation
+About
+[EOF]

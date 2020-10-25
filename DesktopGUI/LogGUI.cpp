@@ -1,27 +1,55 @@
 #include "LogGUI.h"
+#include "../Utilities/Filestream.h"
 
-Util::Logging* LogGUI::sLog;
-wxStyledTextCtrl* LogGUI::sDebugTextField;
+wxBEGIN_EVENT_TABLE( LogGUI, wxFrame )
+EVT_CLOSE( LogGUI::OnClose )
+wxEND_EVENT_TABLE()
 
-void LogGUI::SetDebugTextField( wxStyledTextCtrl* debugTextField )
+LogGUI* LogGUI::LGUI;
+
+LogGUI::LogGUI( wxWindow* parent )
+	: wxFrame( parent, wxID_ANY, "Mémoriser - Debug Console", wxDefaultPosition, wxSize( 600, 300 ) )
 {
-	LogGUI::sDebugTextField = debugTextField;
+	std::vector<uint8_t> Format = { FORMAT_LEVEL, FORMAT_TIME, FORMAT_SPACE, FORMAT_MSG };
+	mLog = new Util::Logging( Format );
+	mDebugTextField = new wxStyledTextCtrl( this, wxID_ANY, wxDefaultPosition, wxSize( 600, 300 ) );
+	mDebugTextField->SetEditable( false );
+
+	Filestream::Create_Directories( "log" );
+	mLogFile = LOG_FILEPATH;
+	mErrFile = ERR_FILEPATH;
 }
 
-void LogGUI::SetLog( std::vector<Util::LogFormat> format )
+void LogGUI::SetLogFile( const std::string& filepath )
 {
-	LogGUI::sLog = new Util::Logging( format );
+	mLogFile = filepath;
 }
 
-Util::Logging* LogGUI::GetLog()
+void LogGUI::SetErrFile( const std::string& filepath )
 {
-	return LogGUI::sLog;
+	mErrFile = filepath;
 }
 
-void LogGUI::PrintDebug( Util::LogLevel l, const std::string& str )
+void LogGUI::SetLogFormat( const std::vector<uint8_t>& format )
 {
-	if ( LogGUI::sDebugTextField == nullptr ) return;
-	LogGUI::sDebugTextField->SetEditable( true );
-	LogGUI::sDebugTextField->AppendText( sLog->Log_String( l, str ) );
-	LogGUI::sDebugTextField->SetEditable( false );
+	mLog->Set_Format( format );
+}
+
+void LogGUI::LogFile( Util::LogLevel l, const std::string& msg )
+{
+	if ( !mLogFile.empty() )
+		mLog->Log_File( l, msg, mLogFile );
+}
+
+void LogGUI::LogConsole( Util::LogLevel l, const std::string& msg )
+{
+	if ( mDebugTextField == nullptr ) return;
+	mDebugTextField->SetEditable( true );
+	mDebugTextField->AppendText( mLog->Log_String( l, msg ) );
+	mDebugTextField->SetEditable( false );
+}
+
+void LogGUI::OnClose( wxCloseEvent& event )
+{
+	this->Show( false );
 }

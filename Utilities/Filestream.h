@@ -3,6 +3,8 @@
 #include <fstream>
 #include <sstream>
 
+#define TO_STR(x) std::to_string(x)
+
 class Filestream
 {
 	Filestream() {}
@@ -96,7 +98,7 @@ public:
 		std::stringstream ss( str );
 		std::string item;
 		std::vector<std::string> elems;
-		while ( std::getline( ss, item, delimiter ) ) 
+		while ( std::getline( ss, item, delimiter ) )	
 			elems.push_back( item );
 
 		return elems;

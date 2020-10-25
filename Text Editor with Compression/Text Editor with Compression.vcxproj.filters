@@ -27,9 +27,6 @@
     <ClCompile Include="Command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Utilities\Err.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Utilities\Logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,9 +44,6 @@
     <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Utilities\Err.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Utilities\Filestream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -57,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Utilities\Timer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Utilities\Err.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

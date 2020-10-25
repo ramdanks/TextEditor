@@ -168,11 +168,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Utilities\Err.cpp" />
     <ClCompile Include="..\Utilities\Logging.cpp" />
     <ClCompile Include="..\Utilities\Timer.cpp" />
     <ClCompile Include="AppFrame.cpp" />
+    <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="PreferencesFrame.cpp" />
+    <ClCompile Include="Language.cpp" />
+    <ClCompile Include="StyleFrame.cpp" />
     <ClCompile Include="TextField.cpp" />
     <ClCompile Include="LogGUI.cpp" />
     <ClCompile Include="Source.cpp" />
@@ -183,8 +186,11 @@
     <ClInclude Include="..\Utilities\Logging.h" />
     <ClInclude Include="..\Utilities\Timer.h" />
     <ClInclude Include="AppFrame.h" />
+    <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="PreferencesFrame.h" />
+    <ClInclude Include="Language.h" />
+    <ClInclude Include="StyleFrame.h" />
     <ClInclude Include="TextField.h" />
     <ClInclude Include="LogGUI.h" />
   </ItemGroup>
@@ -198,7 +204,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\Resource\icon.png" />
-    <Image Include="..\Resource\splash.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

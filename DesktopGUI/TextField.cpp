@@ -4,6 +4,7 @@
 #include "../Utilities/Err.h"
 #include "../Utilities/Filestream.h"
 #include "Config.h"
+#include <mutex>
 
 //contain only one tab or textfield, already temporary, and no content
 #define IF_FIELD_UNOCCUPIED if ( mTextField.size() == 1 && mPathAbsolute[0].empty() && mTextField[0]->IsEmpty() )
@@ -20,7 +21,7 @@ std::vector<std::string>            TextField::mPathTemporary;
 void TextField::InitFilehandle( wxWindow* parent )
 {
     mParent = parent;
-    mNotebook = new wxAuiNotebook( parent, wxID_ANY );
+    mNotebook = new wxAuiNotebook( parent );
     Filestream::Create_Directories( "temp" );
 
     SupportedFormat = "All types (*.*)|*.*";
@@ -46,7 +47,7 @@ void TextField::FetchTempFile()
             if ( !vRead.empty() ) mTextField.back()->AppendText( wxString( &vRead[0], vRead.size() ) );
         }
     }
-    LOGALL( LEVEL_TRACE, "Temporary file amount: " + std::to_string( mPathTemporary.size() ), LOG_FILEPATH );
+    LOGALL( LEVEL_TRACE, "Temporary file amount: " + std::to_string( mPathTemporary.size() ) );
 }
 
 void TextField::CreateTempFile( const std::string& name )
@@ -91,7 +92,7 @@ void TextField::OnRenameFile()
         }
         Filestream::Rename_File( oldPath + newName, mPathAbsolute[currentPage] );
         mNotebook->SetPageText( currentPage, mRenameDlg->GetValue() );
-        LOGALL( LEVEL_TRACE, "Rename file to: " + newName, LOG_FILEPATH );
+        LOGALL( LEVEL_TRACE, "Rename file to: " + newName );
     }
 }
 
@@ -121,23 +122,21 @@ void TextField::OnOpenFile()
             mPathAbsolute.push_back( filepath );
             mPathTemporary.push_back( std::string() ); //no temporary file
         }
-        LOGALL( LEVEL_TRACE, std::string( "Opened Filepath: " + mPathAbsolute.back() ), LOG_FILEPATH );
+        LOGALL( LEVEL_TRACE, std::string( "Opened Filepath: " + mPathAbsolute.back() ) );
         
-        auto vRead = Filestream::Read_Bin( mPathAbsolute.back() );
+        auto vRead = FormatOpen( filepath );
         THROW_ERR_IF( vRead.empty(), std::string( "Cannot open file " + mPathAbsolute.back() ) );
-
-        auto format = Filestream::FileExtension( filepath );
 
         if ( !mTextField.back()->IsEmpty() ) AddNewTab( Filestream::getFileName( filepath ) );
         else mNotebook->SetPageText( mTextField.size() - 1, Filestream::getFileName( filepath ) );
         mTextField.back()->AppendText( wxString::FromUTF8( (const char*) &vRead[0], vRead.size() ) );
 
         std::string readSize = "File size: " + std::to_string( vRead.size() ) + "(bytes)";
-        LOGALL( LEVEL_TRACE, readSize, LOG_FILEPATH );
+        LOGALL( LEVEL_TRACE, readSize );
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_ERROR, e.Seek(), ERR_FILEPATH );
+        LOGALL( LEVEL_ERROR, e.Seek() );
     }
 }
 
@@ -172,7 +171,7 @@ void TextField::OnPageClose()
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_ERROR, e.Seek(), LOG_FILEPATH );
+        LOGALL( LEVEL_ERROR, e.Seek() );
     }
 }
 
@@ -204,17 +203,20 @@ void TextField::OnPageCloseAll()
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_ERROR, e.Seek(), LOG_FILEPATH );
+        LOGALL( LEVEL_ERROR, e.Seek() );
     }
 }
 
 void TextField::SaveTempAll()
 {
+    auto mutex = std::mutex();
+    mutex.lock();
     for ( uint32_t i = 0; i < mNotebook->GetPageCount(); i++ )
     {
         std::string temp = std::string( mTextField[i]->GetText().mb_str( wxConvUTF8 ) );
         Filestream::Write_Bin( temp.c_str(), temp.size(), mPathTemporary[i] );
     }
+    mutex.unlock();
 }
 
 bool TextField::ExistAbsoluteFile()
@@ -235,12 +237,13 @@ void TextField::OnSaveFile()
         IF_TEMPORARY_FIELD( currentPage ) { OnSaveFileAs(); return; }
 
         std::string pData = std::string( mTextField[currentPage]->GetText().mb_str( wxConvUTF8 ) );
-        Filestream::Write_Bin( pData.c_str(), pData.size(), mPathAbsolute[currentPage] );
-        LOGALL( LEVEL_INFO, "File saved: " + mPathAbsolute[currentPage], LOG_FILEPATH );
+
+        FormatSave( pData, mPathAbsolute[currentPage] );
+        LOGALL( LEVEL_INFO, "File saved: " + mPathAbsolute[currentPage] );
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_ERROR, e.Seek(), LOG_FILEPATH );
+        LOGALL( LEVEL_ERROR, e.Seek() );
     }
 }
 
@@ -274,19 +277,61 @@ bool TextField::OnSaveFileAs()
         std::string filepath = std::string( openFileDialog.GetPath().mb_str() );
         mPathAbsolute[currentPage] = filepath;
         mPathTemporary[currentPage] = std::string();
-        
-        Filestream::Write_Bin( pData.c_str(), pData.size(), filepath );    
+     
+        FormatSave( pData, filepath );
         THROW_ERR_IFNOT( Filestream::Is_Exist( filepath ), "Problem saving a file, please contact developer!" );
         mNotebook->SetPageText( currentPage, openFileDialog.GetFilename() );
 
-        LOGALL( LEVEL_INFO, "File saved as: " + filepath, LOG_FILEPATH );
+        LOGALL( LEVEL_INFO, "File saved as: " + filepath );
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_ERROR, e.Seek(), LOG_FILEPATH );
+        LOGALL( LEVEL_ERROR, e.Seek() );
         return false;
     }
     return true;
+}
+
+void TextField::OnUndo()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->Undo();
+}
+
+void TextField::OnRedo()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->Undo();
+}
+
+void TextField::OnCut()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->Cut();
+}
+
+void TextField::OnCopy()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->Copy();
+}
+
+void TextField::OnPaste()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->Paste();
+}
+
+void TextField::OnDelete()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->DeleteBack();
+}
+
+void TextField::OnSelectAll()
+{
+    auto currentPage = mNotebook->GetSelection();
+    mTextField[currentPage]->SelectAll();
 }
 
 void TextField::OnZoom( bool zoomIn, bool reset )
@@ -310,11 +355,66 @@ void TextField::OnZoom( bool zoomIn, bool reset )
 void TextField::AddNewTab( const std::string& name )
 {
     mTextField.push_back( new wxStyledTextCtrl( mNotebook, wxID_ANY ) );
+    mTextField.back()->SetZoom( Config::mZoomDefault );
     mNotebook->AddPage( mTextField.back(), name, true );
+    LoadStyle();
 }
 
 void TextField::ClearPage( size_t page, const std::string& name )
 {
     if ( !name.empty() ) mNotebook->SetPageText( page, name );
     mTextField[page]->ClearAll();
+}
+
+void TextField::LoadStyle()
+{
+    mTextField.back()->StyleSetForeground( wxSTC_STYLE_DEFAULT, *wxWHITE ); //foreground such as text
+    mTextField.back()->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( 30, 30, 30 ) ); //background for field
+    mTextField.back()->StyleClearAll();
+    mTextField.back()->SetMarginWidth( 0, 35 );
+    mTextField.back()->SetMarginType( 0, wxSTC_MARGIN_NUMBER );
+    mTextField.back()->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( 60, 60, 60 ) ); //linenumber margin color
+    mTextField.back()->StyleSetSpec( wxSTC_STYLE_LINENUMBER, "fore:#dd96cc" ); //linenumber color
+}
+
+void TextField::FormatSave( const std::string& sData, const std::string& filepath )
+{
+    auto format = Filestream::FileExtension( filepath );
+    if ( format == "mtx" )
+    {
+        Filestream::Write_Bin( sData.c_str(), sData.size(), "temp/out" );
+        #if defined( __WIN32__ )
+        std::string cmd = "Compressor -c temp/out " + filepath + " -mt";
+        #elif defined ( __linux__ )
+        std::string cmd = "./Compressor -c temp/out " + filepath + " -mt";
+        #endif
+        system( cmd.c_str() );
+        Filestream::Delete_Dir_File( "temp/out" );
+    }
+    else
+    {
+        Filestream::Write_Bin( sData.c_str(), sData.size() + 1, filepath );
+    }
+}
+
+std::vector<uint8_t> TextField::FormatOpen( const std::string& filepath )
+{
+    auto format = Filestream::FileExtension( filepath );
+    std::vector<uint8_t> vRead;
+    if ( format == "mtx" )
+    {
+        #if defined( __WIN32__ )
+        std::string cmd = "Compressor -d " + filepath + " temp/in -mt";
+        #elif defined ( __linux__ )
+        std::string cmd = "./Compressor -d " + filepath + " temp/in -mt";
+        #endif
+        system( cmd.c_str() );
+        vRead = Filestream::Read_Bin( "temp/in" );
+        Filestream::Delete_Dir_File( "temp/in" );
+    }
+    else
+    {
+       vRead = Filestream::Read_Bin( filepath );
+    }
+    return vRead;
 }

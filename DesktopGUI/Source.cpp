@@ -1,13 +1,17 @@
 #include <wx/icon.h>
 #include <wx/splash.h>
-#include "AppFrame.h"
-#include "LogGUI.h"
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Timer.h"
 #include "TextField.h"
 #include "Config.h"
+#include "AutoSaver.h"
+#include "../Utilities/Filestream.h"
+#include "../Utilities/Timer.h"
+#include "../Utilities/Err.h"
+#include "AppFrame.h"
+#include "LogGUI.h"
+#include "Language.h"
 
-#define SplashScreenFile "resource/splash.bmp"
+#define APPNAME "Mémoriser"
+#define SLASHSCR_FILEPATH "resource/splash.bmp"
 
 class MyApp : public wxApp
 {
@@ -15,12 +19,13 @@ public:
     bool OnInit() override;
     int OnExit() override;
 
-    void InitLog();
     AppFrame* MainFrame;
 
 private:
+    void InitRoutine();
     void ShowSplashScreen();
     wxSplashScreen* mSplash;
+    AutoSaver* mSaver;
 }; 
 
 wxIMPLEMENT_APP( MyApp ); //entry point for program handled by wxWidgets
@@ -28,43 +33,75 @@ wxIMPLEMENT_APP( MyApp ); //entry point for program handled by wxWidgets
 bool MyApp::OnInit()
 {
     Util::Timer Init( "Init", MS, false );
+    try
+    {
+        //initialization
+        LogGUI::LGUI = new LogGUI( NULL );
+        Config::FetchConfiguration();
+        if ( Config::mUseSplash ) ShowSplashScreen();
 
-    InitLog();
-    Config::FetchConfiguration();
-    if ( Config::mUseSplash ) ShowSplashScreen();
+        InitRoutine();
 
-    this->MainFrame = new AppFrame( "Memoriser", wxPoint( 50, 50 ), wxSize( 800, 600 ) );
-    this->MainFrame->SetIcon( wxICON( APPICON ) );
-    if ( mSplash != nullptr ) mSplash->Destroy();
-    this->MainFrame->Show( true );
-
-    float ms = Init.Toc();
-    LOGALL( LEVEL_INFO, "Application Created: " + std::to_string( ms ) + "(ms)", LOG_FILEPATH );
-
+        //finally
+        if ( mSplash != nullptr ) mSplash->Destroy();
+        this->MainFrame->Show();
+        this->MainFrame->Raise();
+        this->MainFrame->SetFocus();
+        LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + "(ms)" );
+    }
+    catch ( Util::Err& e )
+    {
+        LOGFILE( LEVEL_FATAL, e.Seek() );
+        return false;
+    }
+    catch ( ... )
+    {
+        LOGFILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
+        return false;
+    }
     return true;
 }
 
 int MyApp::OnExit()
 {
-    LOGFILE( LEVEL_INFO, "============ Program Exited ============", LOG_FILEPATH );
     return 0;
 }
 
-void MyApp::InitLog()
+void MyApp::InitRoutine()
 {
-    Filestream::Create_Directories( "log" );
-    std::vector<Util::LogFormat> format = { FORMAT_LEVEL, FORMAT_TIME, FORMAT_SPACE, FORMAT_MSG };
-    LogGUI::SetLog( format );
+    //load language from configuration
+    auto successLoadLang = Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) );
+    if ( successLoadLang )
+    {
+        LOGALL( LEVEL_INFO, "Language imported from configuration: " + MSG_LANG );
+    }
+    else
+    {
+        LOGALL( LEVEL_INFO, "Language wont import with ID: " + TO_STR( Config::mLanguageID ) );
+    }
+
+    //create main frame
+    this->MainFrame = new AppFrame( APPNAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
+    THROW_ERR_IFNULLPTR( MainFrame, "Problem creating Application Frame OnInit wxApp!" );
+    this->MainFrame->SetIcon( wxICON( APPICON ) );
+
+    //launching autosave feature
+    mSaver = new AutoSaver( Config::mAutosaveInterval );
+    auto sucessDeploy = mSaver->Deploy();
+    if ( !sucessDeploy )
+    {
+        LOGALL( LEVEL_WARN, "Thread wont deploy, disabling AutoSave feature!" );
+    }
 }
 
 void MyApp::ShowSplashScreen()
 {
     wxBitmap bitmap;
-    if ( bitmap.LoadFile( SplashScreenFile, wxBITMAP_TYPE_ANY ) )
+    if ( bitmap.LoadFile( SLASHSCR_FILEPATH, wxBITMAP_TYPE_ANY ) )
     {
-        mSplash = new wxSplashScreen( bitmap, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT, 
+        mSplash = new wxSplashScreen( bitmap, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
                                       6000, NULL, -1, wxDefaultPosition, wxDefaultSize,
                                       wxBORDER_SIMPLE | wxSTAY_ON_TOP );
-        Sleep( 2000 );
+        //std::this_thread::sleep_for( std::chrono::seconds( 2 ) );
     }
 }

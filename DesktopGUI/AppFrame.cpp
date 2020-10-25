@@ -4,6 +4,7 @@
 #include "../Utilities/Filestream.h"
 #include "TextField.h"
 #include "Config.h"
+#include "Language.h"
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
 
@@ -15,116 +16,117 @@ EVT_MENU(                   ID_SAVEFILEALL,             AppFrame::OnSaveFileAll 
 EVT_MENU(                   ID_RENAMEFILE,              AppFrame::OnRenameFile )
 EVT_MENU(                   ID_TABCLOSE,                AppFrame::OnPageClose )
 EVT_MENU(                   ID_TABCLOSEALL,             AppFrame::OnPageCloseAll )
-                                                        
+EVT_MENU(                   wxID_EXIT,                  AppFrame::OnClose )
+
+EVT_MENU(                   ID_UNDO,                    AppFrame::OnUndo )
+EVT_MENU(                   ID_REDO,                    AppFrame::OnRedo )
+EVT_MENU(                   ID_CUT,                     AppFrame::OnCut )
+EVT_MENU(                   ID_COPY,                    AppFrame::OnCopy )
+EVT_MENU(                   ID_PASTE,                   AppFrame::OnPaste )
+EVT_MENU(                   ID_DELETE,                  AppFrame::OnDelete )
+EVT_MENU(                   ID_SELECTALL,               AppFrame::OnSelectAll )
+
+EVT_MENU(                   ID_STAYONTOP,               AppFrame::OnStayOnTop )
 EVT_MENU(                   ID_ZOOMIN,                  AppFrame::OnZoomIn )
 EVT_MENU(                   ID_ZOOMOUT,                 AppFrame::OnZoomOut )
 EVT_MENU(                   ID_ZOOMRESTORE,             AppFrame::OnZoomRestore )
-EVT_MENU(                   ID_DEBUGCONSOLE,            AppFrame::OnDebugConsole )
+EVT_MENU(                   ID_DEBUGCONSOLE,            AppFrame::OnDebugShow )
                                                         
 EVT_MENU(                   wxID_ABOUT,                 AppFrame::OnAbout )
 EVT_MENU(                   ID_DOCUMENTATION,           AppFrame::OnDocumentation )
 EVT_MENU(                   ID_LOGDIR,                  AppFrame::OnLogDir )
 EVT_MENU(                   ID_REPORTBUG,               AppFrame::OnReportBug )
-                                                        
-EVT_MENU(                   wxID_EXIT,                  AppFrame::OnClose )
-EVT_CLOSE(                                              AppFrame::OnCloseWindow )
+
+EVT_MENU(                   ID_PREFERENCES,             AppFrame::OnPreferences )
+EVT_MENU(                   ID_STYLECONFIG,             AppFrame::OnStyleConfig )                                                    
                                                         
 EVT_AUINOTEBOOK_PAGE_CLOSE( wxID_ANY,                   AppFrame::OnNotebookPageClose )
+EVT_CLOSE( AppFrame::OnCloseWindow )
 
 wxEND_EVENT_TABLE()
 
+StyleFrame* mStyleFrame;
+PreferencesFrame* mPreferencesFrame;
+
 AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID )
-    : wxFrame( NULL, 1, title, pos, size )
+    : wxFrame( NULL, wxID_ANY, title, pos, size )
 {
-    #ifdef _DEBUG
-    CreateDebugFrame(); //create debug frame for logging on GUI
-    #endif
-    
     TextField::InitFilehandle( this );
     TextField::FetchTempFile();
     CreateMenu();
+
+    mStyleFrame = new StyleFrame( this );
+    mPreferencesFrame = new PreferencesFrame( this );
     
     this->mStatusBar = CreateStatusBar();
-    this->mStatusBar->SetStatusText( "Welcome to Memoriser!" );
-}
-
-void AppFrame::CreateDebugFrame()
-{
-    mDebugFrame = new wxFrame( this, wxID_ANY, "Memoriser - Debug Console", wxDefaultPosition, wxSize( 600, 300 ) );
-    mDebugFrame->Bind( wxEVT_CLOSE_WINDOW, &AppFrame::OnDebugExit, this ); //handle close window event (dont exit, just hide)
-    mDebugTextField = new wxStyledTextCtrl( this->mDebugFrame, wxID_ANY, wxDefaultPosition );
-    mDebugTextField->SetEditable( false );
-    LogGUI::SetDebugTextField( this->mDebugTextField ); //LogFile static file for logging
-    
-    mDebugFrame->Show( true );
-    mDebugTextField->Show( true );
+    this->mStatusBar->SetStatusText( MSG_STATUSBAR );
 }
 
 void AppFrame::CreateMenu()
 {
     wxMenu* menuFile = new wxMenu;
-    menuFile->Append( ID_NEWFILE, "&New\tCtrl-N" );
-    menuFile->Append( ID_SAVEFILE, "&Save\tCtrl-S" );
-    menuFile->Append( ID_SAVEFILEAS, "&Save As\tCtrl-Alt-S" );
-    menuFile->Append( ID_SAVEFILEALL, "&Save All\tCtrl-Shift-S" );
-    menuFile->Append( ID_OPENFILE, "&Open\tCtrl-O" );
-    menuFile->Append( ID_RENAMEFILE, "&Rename" );
-    menuFile->Append( ID_TABCLOSE, "&Close\tCtrl-W" );
-    menuFile->Append( ID_TABCLOSEALL, "&Close All\tCtrl-Shift-W" );
-    menuFile->AppendSeparator();
-    menuFile->Append( wxID_ANY, "&New Dictionary" );
-    menuFile->Append( wxID_ANY, "&Open Dictionary" );
-    menuFile->AppendSeparator();
-    menuFile->Append( wxID_EXIT );
-
-    wxMenu* menuEdit = new wxMenu;
-    menuEdit->Append( wxID_ANY, "Undo\tCtrl-Z" );
-    menuEdit->Append( wxID_ANY, "Redo\tCtrl-Y" );
-    menuEdit->AppendSeparator();
-    menuEdit->Append( wxID_ANY, "Cut\tCtrl-Y" );
-    menuEdit->Append( wxID_ANY, "Copy\tCtrl-C" );
-    menuEdit->Append( wxID_ANY, "Paste\tCtrl-V" );
-    menuEdit->Append( wxID_ANY, "Delete\tDel" );
-    menuEdit->Append( wxID_ANY, "Select All\tCtrl-A" );
-
-    wxMenu* menuSearch = new wxMenu;
-    menuSearch->Append( wxID_ANY, "Find\t\tCtrl-F" );
-    menuSearch->Append( wxID_ANY, "Select and Find Next\t\tCtrl-F3" );
-    menuSearch->Append( wxID_ANY, "Select and Find Previous\t\tCtrl-Shift-F3" );
-    menuSearch->Append( wxID_ANY, "Replace\t\tCtrl-H" );
-    menuSearch->Append( wxID_ANY, "Goto\t\tCtrl-G" );
-
-    wxMenu* menuView = new wxMenu;
-    menuView->Append( wxID_ANY, "Always on Top" );
-    menuView->Append( ID_ZOOMIN, "Zoom In (Ctrl+Mousewheel)\tCtrl+Num +" );
-    menuView->Append( ID_ZOOMOUT, "Zoom Out (Ctrl+Mousewheel)\tCtrl+Num -" );
-    menuView->Append( ID_ZOOMRESTORE, "Restore Zoom\tCtrl+Num /" );
-    menuView->AppendSeparator();
-    menuView->Append( wxID_ANY, "Text Summary" );
-    menuView->Append( wxID_ANY, "Compression Summary" );
-    #ifdef _DEBUG
-    menuView->AppendSeparator();
-    menuView->Append( ID_DEBUGCONSOLE, "Debug Console" );
-    #endif
-
-    wxMenu* menuSettings = new wxMenu;
-    menuSettings->Append( wxID_ANY, "Preferences" );
-    menuSettings->Append( wxID_ANY, "Style Configuration" );
-
-    wxMenu* menuHelp = new wxMenu;
-    menuHelp->Append( ID_REPORTBUG, "Report Bug" );
-    menuHelp->Append( ID_LOGDIR, "Open Log Directory" );
-    menuHelp->AppendSeparator();
-    menuHelp->Append( ID_DOCUMENTATION, "See Documentation" );
-    menuHelp->Append( wxID_ABOUT );
+    menuFile->Append( ID_NEWFILE,         MSG_NEW             + "\tCtrl-N"             );
+    menuFile->Append( ID_SAVEFILE,        MSG_SAVE            + "\tCtrl-S"             );
+    menuFile->Append( ID_SAVEFILEAS,      MSG_SAVEAS          + "\tCtrl-Alt-S"         );
+    menuFile->Append( ID_SAVEFILEALL,     MSG_SAVEALL         + "\tCtrl-Shift-S"       );
+    menuFile->Append( ID_OPENFILE,        MSG_OPEN            + "\tCtrl-O"             );
+    menuFile->Append( ID_RENAMEFILE,      MSG_RENAME                                   );
+    menuFile->Append( ID_TABCLOSE,        MSG_CLOSE           + "\tCtrl-W"             );
+    menuFile->Append( ID_TABCLOSEALL,     MSG_CLOSEALL        + "\tCtrl-Shift-W"       );
+    menuFile->AppendSeparator();                                                       
+    menuFile->Append( wxID_ANY,           MSG_NEWDICT                                  );
+    menuFile->Append( wxID_ANY,           MSG_OPENDICT                                 );
+    menuFile->AppendSeparator();                                                       
+    menuFile->Append( wxID_EXIT,          MSG_EXIT            + "\tAlt+F4"             );
+                                                                                      
+    wxMenu* menuEdit = new wxMenu;                                                    
+    menuEdit->Append( ID_UNDO,            MSG_UNDO           + "\tCtrl-Z"              );
+    menuEdit->Append( ID_REDO,            MSG_REDO           + "\tCtrl-Y"              );
+    menuEdit->AppendSeparator();                                                       
+    menuEdit->Append( ID_CUT,             MSG_CUT            + "\tCtrl-X"              );
+    menuEdit->Append( ID_COPY,            MSG_COPY           + "\tCtrl-C"              );
+    menuEdit->Append( ID_PASTE,           MSG_PASTE          + "\tCtrl-V"              );
+    menuEdit->Append( ID_DELETE,          MSG_DELETE         + "\tDel"                 );
+    menuEdit->Append( ID_SELECTALL,       MSG_SELECTALL      + "\tCtrl-A"              );
+                                                                                       
+    wxMenu* menuSearch = new wxMenu;                                                   
+    menuSearch->Append( wxID_ANY,         MSG_FIND           + "\tCtrl-F"              );
+    menuSearch->Append( wxID_ANY,         MSG_SELECTFNEXT    + "\tCtrl-F3"             );
+    menuSearch->Append( wxID_ANY,         MSG_SELECTFPREV    + "\tCtrl-Shift-F3"       );
+    menuSearch->Append( wxID_ANY,         MSG_REPLACE        + "\tCtrl-H"              );
+    menuSearch->Append( wxID_ANY,         MSG_GOTO           + "\tCtrl-G"              );
+                                                             
+    wxMenu* menuView = new wxMenu;                           
+    menuView->Append( ID_STAYONTOP, MSG_AOT, wxEmptyString, wxITEM_CHECK );
+    menuView->Append( ID_ZOOMIN,          MSG_ZOOMIN         + "\tCtrl+Num +"          );
+    menuView->Append( ID_ZOOMOUT,         MSG_ZOOMOUT        + "\tCtrl+Num -"          );
+    menuView->Append( ID_ZOOMRESTORE,     MSG_ZOOMRESTORE    + "\tCtrl+Num /"          );
+    menuView->AppendSeparator();                                                       
+    menuView->Append( wxID_ANY,           MSG_TEXTSUM                                  );
+    menuView->Append( wxID_ANY,           MSG_COMPRESSIONSUM                           );
+    #ifdef _DEBUG                                                                      
+    menuView->AppendSeparator();                                                       
+    menuView->Append( ID_DEBUGCONSOLE,    MSG_DEBUGCONSOLE                             );
+    #endif                                                                            
+                                                                                      
+    wxMenu* menuSettings = new wxMenu;                                                
+    menuSettings->Append( ID_PREFERENCES, MSG_PREFERENCES                              );
+    menuSettings->Append( ID_STYLECONFIG, MSG_STYLECONFIG                              );
+                                                                                      
+    wxMenu* menuHelp = new wxMenu;                                                    
+    menuHelp->Append( ID_REPORTBUG,       MSG_REPORTBUG                                );
+    menuHelp->Append( ID_LOGDIR,          MSG_OPENLOGDIR                               );
+    menuHelp->AppendSeparator();                                                       
+    menuHelp->Append( ID_DOCUMENTATION,   MSG_SEEDOC                                   );
+    menuHelp->Append( wxID_ABOUT,         MSG_ABOUT                                    );
 
     wxMenuBar* menuBar = new wxMenuBar;
-    menuBar->Append( menuFile, "&File" );
-    menuBar->Append( menuEdit, "&Edit" );
-    menuBar->Append( menuSearch, "&Search" );
-    menuBar->Append( menuView, "&View" );
-    menuBar->Append( menuSettings, "&Settings" );
-    menuBar->Append( menuHelp, "&Help" );
+    menuBar->Append( menuFile, MSG_FILE );
+    menuBar->Append( menuEdit, MSG_EDIT );
+    menuBar->Append( menuSearch, MSG_SEARCH );
+    menuBar->Append( menuView, MSG_VIEW );
+    menuBar->Append( menuSettings, MSG_SETTINGS );
+    menuBar->Append( menuHelp, MSG_HELP );
 
     SetMenuBar( menuBar );
 }
@@ -133,6 +135,7 @@ void AppFrame::OnClose( wxCommandEvent& event )
 { 
     TextField::SaveTempAll();
     Config::SaveConfiguration();
+    LogGUI::LGUI->HandleDestroy();
     Close( false ); 
 }
 
@@ -155,11 +158,17 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
             }
         }
     }
+    LOGALL( LEVEL_INFO, "==(PROGRAM EXITED)==" );
+    LogGUI::LGUI->Destroy();
+    mStyleFrame->Destroy();
+    mPreferencesFrame->Destroy();
     Destroy();
 }
 
 void AppFrame::OnAbout( wxCommandEvent& event )
-{ wxLogMessage( "Memoriser Ver 0.2" ); }
+{
+    wxLogMessage( APP_VER ); 
+}
 
 void AppFrame::OnDocumentation( wxCommandEvent& event )
 {
@@ -189,46 +198,127 @@ void AppFrame::OnReportBug( wxCommandEvent& event )
 { }
 
 void AppFrame::OnPageClose( wxCommandEvent& event )
-{ TextField::OnPageClose(); }
-
-void AppFrame::OnPageCloseAll( wxCommandEvent& event )
-{ TextField::OnPageCloseAll(); }
-
-void AppFrame::OnNotebookPageClose( wxAuiNotebookEvent & evt )
-{ evt.Veto(); TextField::OnPageClose(); } //veto event, because we handle event ourself
-
-void AppFrame::OnNewFile( wxCommandEvent& event )
-{ TextField::OnNewFile(); }
-
-void AppFrame::OnOpenFile( wxCommandEvent& event )
-{ TextField::OnOpenFile(); }
-
-void AppFrame::OnSaveFile( wxCommandEvent& event )
-{ TextField::OnSaveFile(); }
-
-void AppFrame::OnSaveFileAs( wxCommandEvent& event )
-{ TextField::OnSaveFileAs(); }
-
-void AppFrame::OnSaveFileAll( wxCommandEvent& event )
-{ TextField::OnSaveFileAll(); }
-
-void AppFrame::OnRenameFile( wxCommandEvent& event )
-{ TextField::OnRenameFile(); }
-
-void AppFrame::OnZoomIn( wxCommandEvent & event )
-{ TextField::OnZoom( true, false ); }
-
-void AppFrame::OnZoomOut( wxCommandEvent& event )
-{ TextField::OnZoom( false, false ); }
-
-void AppFrame::OnZoomRestore( wxCommandEvent& event )
-{ TextField::OnZoom( false, true ); }
-
-void AppFrame::OnDebugConsole( wxCommandEvent& event )
-{
-    mDebugFrame->Show( true );
-    mDebugFrame->Raise();
+{ 
+    TextField::OnPageClose(); 
 }
 
-void AppFrame::OnDebugExit( wxCloseEvent& event )
-{ mDebugFrame->Show( false ); } //hide instead of closing
+void AppFrame::OnPageCloseAll( wxCommandEvent& event )
+{ 
+    TextField::OnPageCloseAll(); 
+}
+
+void AppFrame::OnNotebookPageClose( wxAuiNotebookEvent & evt )
+{ 
+    evt.Veto(); //veto event, because we handle event ourself
+    TextField::OnPageClose(); 
+} 
+
+void AppFrame::OnNewFile( wxCommandEvent& event )
+{ 
+    TextField::OnNewFile(); 
+}
+
+void AppFrame::OnOpenFile( wxCommandEvent& event )
+{ 
+    TextField::OnOpenFile(); 
+}
+
+void AppFrame::OnSaveFile( wxCommandEvent& event )
+{ 
+    TextField::OnSaveFile(); 
+}
+
+void AppFrame::OnSaveFileAs( wxCommandEvent& event )
+{ 
+    TextField::OnSaveFileAs(); 
+}
+
+void AppFrame::OnSaveFileAll( wxCommandEvent& event )
+{ 
+    TextField::OnSaveFileAll(); 
+}
+
+void AppFrame::OnRenameFile( wxCommandEvent& event )
+{ 
+    TextField::OnRenameFile(); 
+}
+
+void AppFrame::OnUndo( wxCommandEvent & event )
+{
+    TextField::OnUndo();
+}
+
+void AppFrame::OnRedo( wxCommandEvent& event )
+{
+    TextField::OnRedo();
+}
+
+void AppFrame::OnCut( wxCommandEvent& event )
+{
+    TextField::OnCut();
+}
+
+void AppFrame::OnCopy( wxCommandEvent& event )
+{
+    TextField::OnCopy();
+}
+
+void AppFrame::OnPaste( wxCommandEvent& event )
+{
+    TextField::OnPaste();
+}
+
+void AppFrame::OnDelete( wxCommandEvent& event )
+{
+    TextField::OnDelete();
+}
+
+void AppFrame::OnSelectAll( wxCommandEvent& event )
+{
+    TextField::OnSelectAll();
+}
+
+void AppFrame::OnStayOnTop( wxCommandEvent& event )
+{
+    static bool AlwaysOnTop = false;
+    if ( AlwaysOnTop )
+    {
+        this->SetWindowStyleFlag( wxDEFAULT_FRAME_STYLE );
+        AlwaysOnTop = false;
+    }
+    else
+    {
+        this->SetWindowStyleFlag( wxDEFAULT_FRAME_STYLE | wxSTAY_ON_TOP );
+        AlwaysOnTop = true;
+    }
+}
+
+void AppFrame::OnZoomIn( wxCommandEvent & event )
+{ 
+    TextField::OnZoom( true, false ); 
+}
+
+void AppFrame::OnZoomOut( wxCommandEvent& event )
+{ 
+    TextField::OnZoom( false, false ); 
+}
+
+void AppFrame::OnZoomRestore( wxCommandEvent& event )
+{ 
+    TextField::OnZoom( false, true ); 
+}
+
+void AppFrame::OnPreferences( wxCommandEvent& event )
+{
+    mPreferencesFrame->ShowAndFocus( true, true );
+}
+
+void AppFrame::OnStyleConfig( wxCommandEvent& event )
+{
+    mStyleFrame->ShowAndFocus( true, true );
+}
+
+void AppFrame::OnDebugShow( wxCommandEvent& event )
+{
+    LogGUI::LGUI->Show( true );
+}

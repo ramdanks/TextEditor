@@ -22,11 +22,22 @@ public:
 	static void OnSaveFileAll();
 	static bool OnSaveFileAs();
 
+	static void OnUndo();
+	static void OnRedo();
+	static void OnCut();
+	static void OnCopy();
+	static void OnPaste();
+	static void OnDelete();
+	static void OnSelectAll();
+
 	static void OnZoom( bool zoomIn, bool reset );
 
 private:
 	static void AddNewTab( const std::string& name );
 	static void ClearPage( size_t page, const std::string& name = std::string() );
+	static void LoadStyle();
+	static void FormatSave( const std::string& sData, const std::string& filepath );
+	static std::vector<uint8_t> FormatOpen( const std::string& filepath );
 
 	static wxWindow* mParent;
 	static wxAuiNotebook* mNotebook;

@@ -1,28 +1,38 @@
 #pragma once
 #include "../Utilities/Logging.h"
+#include <wx/wxprec.h>
 #include <wx/stc/stc.h>
 
 #define ERR_FILEPATH	"log/AppError.txt"
 #define LOG_FILEPATH	"log/AppLog.txt"
 
-class LogGUI
+class LogGUI : public wxFrame
 {
 public:
-	static void SetDebugTextField( wxStyledTextCtrl* debugTextField );
-	static void SetLog( std::vector<Util::LogFormat> format );
+	static LogGUI* LGUI; 
+	LogGUI( wxWindow* parent );
+	
+	void SetLogFile( const std::string& filepath );
+	void SetErrFile( const std::string& filepath );
+	void SetLogFormat( const std::vector<uint8_t>& format );
 
-	static Util::Logging* GetLog();
-	static void PrintDebug( Util::LogLevel l, const std::string& str );
+	void LogFile( Util::LogLevel l, const std::string& msg );
+	void LogConsole( Util::LogLevel l, const std::string& msg );
 
 private:
-	static Util::Logging* sLog;
-	static wxStyledTextCtrl* sDebugTextField;
+	void OnClose( wxCloseEvent& event );
+	wxDECLARE_EVENT_TABLE();
+	
+	std::string mErrFile;
+	std::string mLogFile;
+	Util::Logging* mLog;
+	wxStyledTextCtrl* mDebugTextField;
 };
 
-#define LOGFILE(l,msg,file)  LogGUI::GetLog()->Log_File(l,msg,file)
-#if defined( _DEBUG )
-#define LOGCONSOLE(l,msg)    LogGUI::PrintDebug(l,msg)
+#define LOGFILE(l,msg)		LogGUI::LGUI->LogFile(l,msg)
+#if defined( _DEBUG )		
+#define LOGCONSOLE(l,msg)   LogGUI::LGUI->LogConsole(l,msg)
 #else
 #define LOGCONSOLE(l,msg)
 #endif
-#define LOGALL(l,msg,file)   LOGFILE(l,msg,file); LOGCONSOLE(l,msg)
+#define LOGALL(l,msg)       LOGFILE(l,msg); LOGCONSOLE(l,msg)
