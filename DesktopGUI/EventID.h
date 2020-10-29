@@ -1,0 +1,35 @@
+#pragma once
+#ifndef EVT_ID
+#define EVT_ID
+enum menu
+{
+    ID_HELLO,
+    ID_HELP,
+    ID_DOCUMENTATION,
+    ID_DEBUGCONSOLE,
+    ID_SETONTOP,
+    ID_LOGDIR,
+    ID_REPORTBUG,
+    ID_OPENFILE,
+    ID_RENAMEFILE,
+    ID_SAVEFILE,
+    ID_SAVEFILEAS,
+    ID_SAVEFILEALL,
+    ID_TABCLOSE,
+    ID_TABCLOSEALL,
+    ID_NEWFILE,
+    ID_STAYONTOP,
+    ID_ZOOMIN,
+    ID_ZOOMOUT,
+    ID_ZOOMRESTORE,
+    ID_UNDO,
+    ID_REDO,
+    ID_CUT,
+    ID_COPY,
+    ID_PASTE,
+    ID_DELETE,
+    ID_SELECTALL,
+    ID_PREFERENCES,
+    ID_STYLECONFIG
+};
+#endif

@@ -4,7 +4,7 @@ Mémoriser - Debug Console
 File
 New
 Save
-save As
+Save As
 Save All
 Open
 Rename

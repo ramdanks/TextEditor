@@ -112,13 +112,13 @@ bool Language::LoadMessage( LanguageID id )
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_ERROR, e.Seek(), LOG_FILEPATH );
+        LOGALL( LEVEL_WARN, e.Seek(), LOG_FILEPATH );
         LoadMessageDefault();
         return false;
     }
     catch ( ... )
     {
-        LOGALL( LEVEL_ERROR, "Unknown Exception when processing language file from LoadMessage()!", LOG_FILEPATH );
+        LOGALL( LEVEL_WARN, "Unknown Exception when processing language file from LoadMessage()!", LOG_FILEPATH );
         LoadMessageDefault();
         return false;
     }

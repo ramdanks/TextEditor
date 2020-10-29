@@ -2,58 +2,34 @@
 #include "LogGUI.h"
 #include "../Utilities/Timer.h"
 #include "../Utilities/Filestream.h"
-#include "TextField.h"
 #include "Config.h"
 #include "Language.h"
+#include "EventID.h"
+#include "TextField.h"
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
-
-EVT_MENU(                   ID_NEWFILE,                 AppFrame::OnNewFile )
-EVT_MENU(                   ID_OPENFILE,                AppFrame::OnOpenFile )
-EVT_MENU(                   ID_SAVEFILE,                AppFrame::OnSaveFile )
-EVT_MENU(                   ID_SAVEFILEAS,              AppFrame::OnSaveFileAs )
-EVT_MENU(                   ID_SAVEFILEALL,             AppFrame::OnSaveFileAll )
-EVT_MENU(                   ID_RENAMEFILE,              AppFrame::OnRenameFile )
-EVT_MENU(                   ID_TABCLOSE,                AppFrame::OnPageClose )
-EVT_MENU(                   ID_TABCLOSEALL,             AppFrame::OnPageCloseAll )
-EVT_MENU(                   wxID_EXIT,                  AppFrame::OnClose )
-
-EVT_MENU(                   ID_UNDO,                    AppFrame::OnUndo )
-EVT_MENU(                   ID_REDO,                    AppFrame::OnRedo )
-EVT_MENU(                   ID_CUT,                     AppFrame::OnCut )
-EVT_MENU(                   ID_COPY,                    AppFrame::OnCopy )
-EVT_MENU(                   ID_PASTE,                   AppFrame::OnPaste )
-EVT_MENU(                   ID_DELETE,                  AppFrame::OnDelete )
-EVT_MENU(                   ID_SELECTALL,               AppFrame::OnSelectAll )
-
-EVT_MENU(                   ID_STAYONTOP,               AppFrame::OnStayOnTop )
-EVT_MENU(                   ID_ZOOMIN,                  AppFrame::OnZoomIn )
-EVT_MENU(                   ID_ZOOMOUT,                 AppFrame::OnZoomOut )
-EVT_MENU(                   ID_ZOOMRESTORE,             AppFrame::OnZoomRestore )
-EVT_MENU(                   ID_DEBUGCONSOLE,            AppFrame::OnDebugShow )
                                                         
-EVT_MENU(                   wxID_ABOUT,                 AppFrame::OnAbout )
-EVT_MENU(                   ID_DOCUMENTATION,           AppFrame::OnDocumentation )
-EVT_MENU(                   ID_LOGDIR,                  AppFrame::OnLogDir )
-EVT_MENU(                   ID_REPORTBUG,               AppFrame::OnReportBug )
-
-EVT_MENU(                   ID_PREFERENCES,             AppFrame::OnPreferences )
-EVT_MENU(                   ID_STYLECONFIG,             AppFrame::OnStyleConfig )                                                    
-                                                        
-EVT_AUINOTEBOOK_PAGE_CLOSE( wxID_ANY,                   AppFrame::OnNotebookPageClose )
-EVT_CLOSE( AppFrame::OnCloseWindow )
+EVT_MENU( wxID_ABOUT,        AppFrame::OnAbout )
+EVT_MENU( ID_DOCUMENTATION,  AppFrame::OnDocumentation )
+EVT_MENU( ID_LOGDIR,         AppFrame::OnLogDir )
+EVT_MENU( ID_REPORTBUG,      AppFrame::OnReportBug )
+EVT_MENU( ID_STAYONTOP,      AppFrame::OnStayOnTop )
+EVT_MENU( ID_DEBUGCONSOLE,   AppFrame::OnDebugShow )
+EVT_MENU( ID_PREFERENCES,    AppFrame::OnPreferences )
+EVT_MENU( ID_STYLECONFIG,    AppFrame::OnStyleConfig )                                                                                      
+EVT_MENU( wxID_EXIT,         AppFrame::OnClose )
+EVT_CLOSE(                   AppFrame::OnCloseWindow )
 
 wxEND_EVENT_TABLE()
-
-StyleFrame* mStyleFrame;
-PreferencesFrame* mPreferencesFrame;
 
 AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID )
     : wxFrame( NULL, wxID_ANY, title, pos, size )
 {
-    TextField::InitFilehandle( this );
+    TextField::Init( this );
     TextField::FetchTempFile();
+
     CreateMenu();
+    BindMenu();
 
     mStyleFrame = new StyleFrame( this );
     mPreferencesFrame = new PreferencesFrame( this );
@@ -131,10 +107,32 @@ void AppFrame::CreateMenu()
     SetMenuBar( menuBar );
 }
 
+void AppFrame::BindMenu()
+{
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnNewFile, ID_NEWFILE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnSaveFile, ID_SAVEFILE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnSaveFileAs, ID_SAVEFILEAS );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnSaveFileAll, ID_SAVEFILEALL );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnOpenFile, ID_OPENFILE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnRenameFile, ID_RENAMEFILE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPageClose, ID_TABCLOSE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPageCloseAll, ID_TABCLOSEALL );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnUndo, ID_UNDO );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnRedo, ID_REDO );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnCut, ID_CUT );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnCopy, ID_COPY );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPaste, ID_PASTE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnDelete, ID_DELETE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnSelectAll, ID_SELECTALL );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomIn, ID_ZOOMIN );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomOut, ID_ZOOMOUT );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomRestore, ID_ZOOMRESTORE );
+    Bind( wxEVT_STC_ZOOM, TextField::OnSTCZoom );
+}                                                            
+
 void AppFrame::OnClose( wxCommandEvent& event )
 { 
     TextField::SaveTempAll();
-    Config::SaveConfiguration();
     LogGUI::LGUI->HandleDestroy();
     Close( false ); 
 }
@@ -144,7 +142,6 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
     if ( event.CanVeto() )
     {
         TextField::SaveTempAll();
-        Config::SaveConfiguration();
         if ( TextField::ExistAbsoluteFile() )
         {
             auto prompt = wxMessageDialog( this, "A non temporary file detected in current Notebook.\n"
@@ -195,87 +192,7 @@ void AppFrame::OnLogDir( wxCommandEvent& event )
 }
 
 void AppFrame::OnReportBug( wxCommandEvent& event )
-{ }
-
-void AppFrame::OnPageClose( wxCommandEvent& event )
-{ 
-    TextField::OnPageClose(); 
-}
-
-void AppFrame::OnPageCloseAll( wxCommandEvent& event )
-{ 
-    TextField::OnPageCloseAll(); 
-}
-
-void AppFrame::OnNotebookPageClose( wxAuiNotebookEvent & evt )
-{ 
-    evt.Veto(); //veto event, because we handle event ourself
-    TextField::OnPageClose(); 
-} 
-
-void AppFrame::OnNewFile( wxCommandEvent& event )
-{ 
-    TextField::OnNewFile(); 
-}
-
-void AppFrame::OnOpenFile( wxCommandEvent& event )
-{ 
-    TextField::OnOpenFile(); 
-}
-
-void AppFrame::OnSaveFile( wxCommandEvent& event )
-{ 
-    TextField::OnSaveFile(); 
-}
-
-void AppFrame::OnSaveFileAs( wxCommandEvent& event )
-{ 
-    TextField::OnSaveFileAs(); 
-}
-
-void AppFrame::OnSaveFileAll( wxCommandEvent& event )
-{ 
-    TextField::OnSaveFileAll(); 
-}
-
-void AppFrame::OnRenameFile( wxCommandEvent& event )
-{ 
-    TextField::OnRenameFile(); 
-}
-
-void AppFrame::OnUndo( wxCommandEvent & event )
 {
-    TextField::OnUndo();
-}
-
-void AppFrame::OnRedo( wxCommandEvent& event )
-{
-    TextField::OnRedo();
-}
-
-void AppFrame::OnCut( wxCommandEvent& event )
-{
-    TextField::OnCut();
-}
-
-void AppFrame::OnCopy( wxCommandEvent& event )
-{
-    TextField::OnCopy();
-}
-
-void AppFrame::OnPaste( wxCommandEvent& event )
-{
-    TextField::OnPaste();
-}
-
-void AppFrame::OnDelete( wxCommandEvent& event )
-{
-    TextField::OnDelete();
-}
-
-void AppFrame::OnSelectAll( wxCommandEvent& event )
-{
-    TextField::OnSelectAll();
 }
 
 void AppFrame::OnStayOnTop( wxCommandEvent& event )
@@ -291,21 +208,6 @@ void AppFrame::OnStayOnTop( wxCommandEvent& event )
         this->SetWindowStyleFlag( wxDEFAULT_FRAME_STYLE | wxSTAY_ON_TOP );
         AlwaysOnTop = true;
     }
-}
-
-void AppFrame::OnZoomIn( wxCommandEvent & event )
-{ 
-    TextField::OnZoom( true, false ); 
-}
-
-void AppFrame::OnZoomOut( wxCommandEvent& event )
-{ 
-    TextField::OnZoom( false, false ); 
-}
-
-void AppFrame::OnZoomRestore( wxCommandEvent& event )
-{ 
-    TextField::OnZoom( false, true ); 
 }
 
 void AppFrame::OnPreferences( wxCommandEvent& event )

@@ -188,6 +188,7 @@
     <ClInclude Include="AppFrame.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Config.h" />
+    <ClInclude Include="EventID.h" />
     <ClInclude Include="PreferencesFrame.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="StyleFrame.h" />

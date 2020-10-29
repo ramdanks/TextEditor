@@ -1,19 +1,19 @@
 #include "AutoSaver.h"
 #include "LogGUI.h"
 #include <sstream>
+#include "TextField.h"
 
 void Routine( AutoSaver* as );
 
-AutoSaver::AutoSaver( uint32_t interval )
+AutoSaver::AutoSaver()
 {
-	mMutex = new std::mutex;
-	mTimeInterval = interval;
 }
 
-bool AutoSaver::Deploy()
+bool AutoSaver::Deploy( uint32_t interval )
 {
-	if ( mTimeInterval == 0 )
-		mTimeInterval = 60;
+	
+	if ( interval == 0 ) mTimeInterval = 60;
+	else mTimeInterval = interval;
 
 	mThread = new std::thread( &Routine, this );
 

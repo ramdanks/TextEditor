@@ -19,6 +19,7 @@ void Config::FetchConfiguration()
 	if ( !Filestream::Is_Exist( CONFIG_FILEPATH ) )
 	{
 		LoadDefaultConfiguration();
+		Config::SaveConfiguration();
 		return;
 	}
 	if ( mConfTemplate.empty() ) MakeTemplate();
@@ -44,11 +45,13 @@ void Config::FetchConfiguration()
 	{
 		LOGALL( LEVEL_WARN, e.Seek() );
 		LoadDefaultConfiguration();
+		Config::SaveConfiguration();
 	}
 	catch ( ... )
 	{
 		LOGALL( LEVEL_WARN, "Unknown Exception found in FethConfiguration()!" );
 		LoadDefaultConfiguration();
+		Config::SaveConfiguration();
 	}
 }
 
@@ -59,8 +62,8 @@ void Config::LoadDefaultConfiguration()
 	mAutosaveInterval = 30;
 	mFontID = 0;
 	mFontSize = 10;
-	mZoomMin = -5;
-	mZoomMax = 10;
+	mZoomMin = -3;
+	mZoomMax = 15;
 	mZoomDefault = 2;
 	LOGALL( LEVEL_INFO, "Loading default configuration file!" );
 }

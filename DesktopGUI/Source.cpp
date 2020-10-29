@@ -22,8 +22,10 @@ public:
     AppFrame* MainFrame;
 
 private:
-    void InitRoutine();
-    void ShowSplashScreen();
+    inline void InitRoutine();
+    inline void ShowSplashScreen();
+    inline void HideSplashScreen();
+    inline void DestroySplashScreen();
     wxSplashScreen* mSplash;
     AutoSaver* mSaver;
 }; 
@@ -43,11 +45,9 @@ bool MyApp::OnInit()
         InitRoutine();
 
         //finally
-        if ( mSplash != nullptr ) mSplash->Destroy();
+        if ( Config::mUseSplash ) DestroySplashScreen();
         this->MainFrame->Show();
         this->MainFrame->Raise();
-        this->MainFrame->SetFocus();
-        LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + "(ms)" );
     }
     catch ( Util::Err& e )
     {
@@ -59,6 +59,7 @@ bool MyApp::OnInit()
         LOGFILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
+    LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + "(ms)" );
     return true;
 }
 
@@ -81,13 +82,13 @@ void MyApp::InitRoutine()
     }
 
     //create main frame
-    this->MainFrame = new AppFrame( APPNAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
+    MainFrame = new AppFrame( APPNAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
     THROW_ERR_IFNULLPTR( MainFrame, "Problem creating Application Frame OnInit wxApp!" );
-    this->MainFrame->SetIcon( wxICON( APPICON ) );
+    MainFrame->SetIcon( wxICON( APPICON ) );
 
     //launching autosave feature
-    mSaver = new AutoSaver( Config::mAutosaveInterval );
-    auto sucessDeploy = mSaver->Deploy();
+    mSaver = new AutoSaver;
+    auto sucessDeploy = mSaver->Deploy( Config::mAutosaveInterval );
     if ( !sucessDeploy )
     {
         LOGALL( LEVEL_WARN, "Thread wont deploy, disabling AutoSave feature!" );
@@ -104,4 +105,14 @@ void MyApp::ShowSplashScreen()
                                       wxBORDER_SIMPLE | wxSTAY_ON_TOP );
         //std::this_thread::sleep_for( std::chrono::seconds( 2 ) );
     }
+}
+
+void MyApp::HideSplashScreen()
+{
+    mSplash->Show( false );
+}
+
+inline void MyApp::DestroySplashScreen()
+{
+    mSplash->Destroy();
 }
