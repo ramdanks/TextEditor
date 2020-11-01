@@ -1,7 +1,6 @@
 #pragma once
-#ifndef EVT_ID
-#define EVT_ID
-enum menu
+
+enum Menu
 {
     ID_HELLO,
     ID_HELP,
@@ -18,6 +17,8 @@ enum menu
     ID_TABCLOSE,
     ID_TABCLOSEALL,
     ID_NEWFILE,
+    ID_SELECTFNEXT,
+    ID_SELECTFPREV,
     ID_STAYONTOP,
     ID_ZOOMIN,
     ID_ZOOMOUT,
@@ -29,7 +30,11 @@ enum menu
     ID_PASTE,
     ID_DELETE,
     ID_SELECTALL,
+    ID_FIND,
+    ID_REPLACE,
+    ID_GOTO,
+    ID_TEXTSUM,
+    ID_COMPSUM,
     ID_PREFERENCES,
     ID_STYLECONFIG
 };
-#endif

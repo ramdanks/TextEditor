@@ -23,8 +23,8 @@ Delete
 Select All
 Search
 Find
-Select and Search Next
-Select and Search Previous
+Select and Find Next
+Select and Find Previous
 Replace
 Goto
 View

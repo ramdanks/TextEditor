@@ -5,20 +5,21 @@
 class AutoSaver
 {
 public:
-	//thread sleep interval in second
-	AutoSaver();
-
+	static void Init( uint32_t interval );
 	uint32_t GetTotalAction();
-	bool Deploy( uint32_t interval = 0 );
-	void Destroy();
-
+	//thread sleep in second
+	static bool Deploy();
+	static void Destroy();
+	static void Halt();
+	static void Continue();
 	//thread sleep interval in second
-	void SetInterval( uint32_t interval );
+	static void SetInterval( uint32_t interval );
 
 private:
-	friend void Routine( AutoSaver* as );
+	static void Routine();
 
-	uint32_t mTotalAction;
-	uint32_t mTimeInterval;
-	std::thread* mThread;
+	static bool isHalted;
+	static uint32_t mTotalAction;
+	static uint32_t mTimeInterval;
+	static std::thread* mThread;
 };

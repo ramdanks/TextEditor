@@ -6,6 +6,7 @@
 //translation unit for static member
 int                               Config::mUseSplash;
 int                               Config::mAutosaveInterval;
+int                               Config::mUseAutosave;
 int                               Config::mFontSize;
 int                               Config::mFontID;
 int                               Config::mLanguageID;
@@ -57,9 +58,10 @@ void Config::FetchConfiguration()
 
 void Config::LoadDefaultConfiguration()
 {
-	mUseSplash = 1;
+	mUseSplash = true;
 	mLanguageID = 0;
 	mAutosaveInterval = 30;
+	mUseAutosave = true;
 	mFontID = 0;
 	mFontSize = 10;
 	mZoomMin = -3;
@@ -79,7 +81,7 @@ void Config::SaveConfiguration()
 			ConfigText += t.Tag + '=' + std::to_string( *t.RefData ) + '\n';
 		ConfigText.pop_back();
 	
-		Filestream::Write_Bin( ConfigText.c_str(), ConfigText.size() + 1, CONFIG_FILEPATH );
+		Filestream::Write_Bin( ConfigText.c_str(), ConfigText.size(), CONFIG_FILEPATH );
 		THROW_ERR_IFNOT( Filestream::Is_Exist( CONFIG_FILEPATH ), "Cannot save configuration file!" );
 	}
 	catch ( Util::Err& e )
@@ -93,6 +95,7 @@ void Config::MakeTemplate()
 	mConfTemplate.push_back( sConfigReference( "mSplashScreen",      &mUseSplash ) );
 	mConfTemplate.push_back( sConfigReference( "mSystemLanguage",    &mLanguageID ) );
 	mConfTemplate.push_back( sConfigReference( "mAutosaveInterval",  &mAutosaveInterval ) );
+	mConfTemplate.push_back( sConfigReference( "mUseAutosave",       &mUseAutosave ) );
 	mConfTemplate.push_back( sConfigReference( "mFontID",            &mFontID ) );
 	mConfTemplate.push_back( sConfigReference( "mFontSize",          &mFontSize ) );
 	mConfTemplate.push_back( sConfigReference( "mZoomMin",           &mZoomMin ) );

@@ -8,17 +8,17 @@
 #include "TextField.h"
 
 wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
-                                                        
-EVT_MENU( wxID_ABOUT,        AppFrame::OnAbout )
-EVT_MENU( ID_DOCUMENTATION,  AppFrame::OnDocumentation )
-EVT_MENU( ID_LOGDIR,         AppFrame::OnLogDir )
-EVT_MENU( ID_REPORTBUG,      AppFrame::OnReportBug )
-EVT_MENU( ID_STAYONTOP,      AppFrame::OnStayOnTop )
-EVT_MENU( ID_DEBUGCONSOLE,   AppFrame::OnDebugShow )
-EVT_MENU( ID_PREFERENCES,    AppFrame::OnPreferences )
-EVT_MENU( ID_STYLECONFIG,    AppFrame::OnStyleConfig )                                                                                      
-EVT_MENU( wxID_EXIT,         AppFrame::OnClose )
-EVT_CLOSE(                   AppFrame::OnCloseWindow )
+
+EVT_MENU( wxID_ABOUT, AppFrame::OnAbout )
+EVT_MENU( ID_DOCUMENTATION, AppFrame::OnDocumentation )
+EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
+EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
+EVT_MENU( ID_STAYONTOP, AppFrame::OnStayOnTop )
+EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugShow )
+EVT_MENU( ID_PREFERENCES, AppFrame::OnPreferences )
+EVT_MENU( ID_STYLECONFIG, AppFrame::OnStyleConfig )
+EVT_MENU( wxID_EXIT, AppFrame::OnClose )
+EVT_CLOSE( AppFrame::OnCloseWindow )
 
 wxEND_EVENT_TABLE()
 
@@ -66,20 +66,20 @@ void AppFrame::CreateMenu()
     menuEdit->Append( ID_SELECTALL,       MSG_SELECTALL      + "\tCtrl-A"              );
                                                                                        
     wxMenu* menuSearch = new wxMenu;                                                   
-    menuSearch->Append( wxID_ANY,         MSG_FIND           + "\tCtrl-F"              );
-    menuSearch->Append( wxID_ANY,         MSG_SELECTFNEXT    + "\tCtrl-F3"             );
-    menuSearch->Append( wxID_ANY,         MSG_SELECTFPREV    + "\tCtrl-Shift-F3"       );
-    menuSearch->Append( wxID_ANY,         MSG_REPLACE        + "\tCtrl-H"              );
-    menuSearch->Append( wxID_ANY,         MSG_GOTO           + "\tCtrl-G"              );
+    menuSearch->Append( ID_FIND,          MSG_FIND           + "\tCtrl-F"              );
+    menuSearch->Append( ID_SELECTFNEXT,   MSG_SELECTFNEXT    + "\tCtrl-F3"             );
+    menuSearch->Append( ID_SELECTFPREV,   MSG_SELECTFPREV    + "\tCtrl-Shift-F3"       );
+    menuSearch->Append( ID_REPLACE,       MSG_REPLACE        + "\tCtrl-H"              );
+    menuSearch->Append( ID_GOTO,          MSG_GOTO           + "\tCtrl-G"              );
                                                              
     wxMenu* menuView = new wxMenu;                           
     menuView->Append( ID_STAYONTOP, MSG_AOT, wxEmptyString, wxITEM_CHECK );
-    menuView->Append( ID_ZOOMIN,          MSG_ZOOMIN         + "\tCtrl+Num +"          );
-    menuView->Append( ID_ZOOMOUT,         MSG_ZOOMOUT        + "\tCtrl+Num -"          );
-    menuView->Append( ID_ZOOMRESTORE,     MSG_ZOOMRESTORE    + "\tCtrl+Num /"          );
+    menuView->Append( ID_ZOOMIN,          MSG_ZOOMIN         + "\tCtrl-Num +"          );
+    menuView->Append( ID_ZOOMOUT,         MSG_ZOOMOUT        + "\tCtrl-Num -"          );
+    menuView->Append( ID_ZOOMRESTORE,     MSG_ZOOMRESTORE    + "\tCtrl-Num /"          );
     menuView->AppendSeparator();                                                       
-    menuView->Append( wxID_ANY,           MSG_TEXTSUM                                  );
-    menuView->Append( wxID_ANY,           MSG_COMPRESSIONSUM                           );
+    menuView->Append( ID_TEXTSUM,         MSG_TEXTSUM                                  );
+    menuView->Append( ID_COMPSUM,         MSG_COMPRESSIONSUM                           );
     #ifdef _DEBUG                                                                      
     menuView->AppendSeparator();                                                       
     menuView->Append( ID_DEBUGCONSOLE,    MSG_DEBUGCONSOLE                             );
@@ -127,7 +127,11 @@ void AppFrame::BindMenu()
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomIn, ID_ZOOMIN );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomOut, ID_ZOOMOUT );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomRestore, ID_ZOOMRESTORE );
-    Bind( wxEVT_STC_ZOOM, TextField::OnSTCZoom );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnTextSummary, ID_TEXTSUM );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnCompSummary, ID_COMPSUM );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnGoto, ID_GOTO );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnFind, ID_FIND );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnReplace, ID_REPLACE );
 }                                                            
 
 void AppFrame::OnClose( wxCommandEvent& event )
@@ -142,11 +146,11 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
     if ( event.CanVeto() )
     {
         TextField::SaveTempAll();
-        if ( TextField::ExistAbsoluteFile() )
+        if ( !TextField::SaveToExit() )
         {
-            auto prompt = wxMessageDialog( this, "A non temporary file detected in current Notebook.\n"
-                                           "Please save your work, any changes will be ignored.\n"
-                                           "Sure want to Continue ?",
+            auto prompt = wxMessageDialog( this, "There is non-temporary file which has been modified.\n"
+                                           "Please save your work before exiting, any changes will be ignored.\n"
+                                           "You sure want to Continue ?",
                                            "Close Window", wxYES_NO );
             if ( prompt.ShowModal() == wxID_NO )
             {
@@ -164,7 +168,10 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
 
 void AppFrame::OnAbout( wxCommandEvent& event )
 {
-    wxLogMessage( APP_VER ); 
+    char buf[64];
+    snprintf( buf, sizeof buf, "%s version %s.%s", APP_NAME, MAJOR_VERSION, CHILD_VERSION );
+    auto message = wxMessageDialog( this, buf, APP_NAME, wxSTAY_ON_TOP | wxOK );
+    if ( message.ShowModal() == wxID_OK ) return;
 }
 
 void AppFrame::OnDocumentation( wxCommandEvent& event )

@@ -1,3 +1,4 @@
+Distribution/
 DesktopGUI/temp/
 DesktopGUI/Log/
 DesktopGUI/wxWidgets/
@@ -5,3 +6,6 @@ DesktopGUI/wxWidgets.zip
 Text Editor with Compression/Log/
 x64/
 .vs/
+*.ppt
+*.gitignore
+Resource-Source/

@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <sys/stat.h>
 
 #define TO_STR(x) std::to_string(x)
 
@@ -98,7 +99,7 @@ public:
 		std::stringstream ss( str );
 		std::string item;
 		std::vector<std::string> elems;
-		while ( std::getline( ss, item, delimiter ) )	
+		while ( std::getline( ss, item, delimiter ) )
 			elems.push_back( item );
 
 		return elems;
@@ -111,7 +112,61 @@ public:
 		std::size_t sepPos = filePath.rfind( seperator );
 		if ( sepPos != std::string::npos )
 			return filePath.substr( sepPos + 1, filePath.size() - ( withExtension || dotPos != std::string::npos ? 1 : dotPos ) );
-		
+
 		return "";
+	}
+
+	static std::string GetLastModified( std::string filepath )
+	{
+		struct stat attrib;
+		stat( filepath.c_str(), &attrib );
+		struct tm* time = gmtime( &attrib.st_mtime );
+		char* asctime = std::asctime( time );
+		return std::string( asctime, strlen( asctime ) - 1 );
+	}
+
+	static std::string GetLastCreated( std::string filepath )
+	{
+		struct stat attrib;
+		stat( filepath.c_str(), &attrib );
+		struct tm* time = gmtime( &attrib.st_ctime );
+		char* asctime = std::asctime( time );
+		return std::string( asctime, strlen( asctime ) - 1 );
+	}
+
+	static size_t GetFileSize( std::string filepath )
+	{
+		auto myfile = std::fstream( filepath, std::ios::in | std::ios::binary );
+		myfile.seekg( 0, myfile.end );
+		return size_t( myfile.tellg() );
+	}
+
+	struct sCompressedInfo
+	{
+		size_t ClusterSize;
+		size_t AddressingSize;
+		size_t CompressedSize;
+		size_t OriginalSize;
+	};
+
+	static sCompressedInfo GetCompressedInfo( std::string filepath )
+	{
+		sCompressedInfo info;
+		auto vCompressed = Read_Bin( filepath );
+		info.ClusterSize = 0;
+		info.CompressedSize = vCompressed.size();
+		info.AddressingSize = vCompressed[0];
+
+		if ( info.AddressingSize == 0 ) return info;
+
+		constexpr uint32_t MaskBytes[] = { 0x0, 0xFF, 0xFFFF, 0xFFFFFF, 0xFFFFFFFF };
+		for ( uint32_t readIndex = 1; ; readIndex += info.AddressingSize )
+		{
+			uint32_t readAddress = *(uint32_t*) &vCompressed[readIndex];
+			readAddress = readAddress & MaskBytes[info.AddressingSize];
+			if ( readAddress == 0 ) break;
+			info.ClusterSize++;
+		}
+		return info;
 	}
 };

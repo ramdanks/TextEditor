@@ -173,6 +173,9 @@
     <ClCompile Include="AppFrame.cpp" />
     <ClCompile Include="AutoSaver.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="FindFrame.cpp" />
+    <ClCompile Include="GotoFrame.cpp" />
+    <ClCompile Include="Image.cpp" />
     <ClCompile Include="PreferencesFrame.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="StyleFrame.cpp" />
@@ -183,12 +186,16 @@
   <ItemGroup>
     <ClInclude Include="..\Utilities\Err.h" />
     <ClInclude Include="..\Utilities\Filestream.h" />
+    <ClInclude Include="..\Utilities\FindReplace.h" />
     <ClInclude Include="..\Utilities\Logging.h" />
     <ClInclude Include="..\Utilities\Timer.h" />
     <ClInclude Include="AppFrame.h" />
     <ClInclude Include="AutoSaver.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="EventID.h" />
+    <ClInclude Include="FindFrame.h" />
+    <ClInclude Include="GotoFrame.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="PreferencesFrame.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="StyleFrame.h" />

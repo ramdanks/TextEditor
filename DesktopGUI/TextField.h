@@ -5,6 +5,7 @@
 
 struct sPageData
 {
+	bool isChanged;
 	bool isTemporary;
 	std::string FilePath;
 	wxStyledTextCtrl* TextField;
@@ -17,7 +18,16 @@ public:
 	static void Init( wxWindow* parent );
 	static void FetchTempFile();
 	static void SaveTempAll();
-	static bool ExistAbsoluteFile();
+	static bool ExistTempFile();
+	static bool ExistChangedFile();
+	static bool SaveToExit();
+
+	static void OnTextSummary( wxCommandEvent& event );
+	static void OnCompSummary( wxCommandEvent& event );
+	static void OnFind( wxCommandEvent& event );
+	static void OnReplace( wxCommandEvent& event );
+	static void OnGoto( wxCommandEvent& event );
+	static void OnTextChanged( wxStyledTextEvent& event );
 
 	static void OnNewFile( wxCommandEvent& event );
 	static void OnRenameFile( wxCommandEvent& event );
@@ -50,7 +60,12 @@ private:
 	static void LoadStyle( wxStyledTextCtrl* stc );
 	static void FormatSave( const std::string& sData, const std::string& filepath );
 	static void UpdateParentName();
+	static void UpdateSaveIndicator( bool save );
+
 	static std::vector<uint8_t> FormatOpen( const std::string& filepath );
+
+	//useful for calling function member that has wxCommandEvent param
+	static wxCommandEvent NullCmdEvent;
 
 	static wxWindow* mParent;
 	static wxAuiNotebook* mNotebook;

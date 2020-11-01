@@ -5,8 +5,6 @@
 #include "StyleFrame.h"
 #include "PreferencesFrame.h"
 
-#define APP_VER "Memoriser Ver 0.4"
-
 class AppFrame : public wxFrame
 {
 public:
