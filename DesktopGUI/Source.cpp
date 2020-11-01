@@ -1,15 +1,15 @@
 #include <wx/icon.h>
 #include <wx/splash.h>
-#include "TextField.h"
-#include "Config.h"
 #include "../Utilities/Filestream.h"
 #include "../Utilities/Timer.h"
 #include "../Utilities/Err.h"
-#include "AppFrame.h"
-#include "LogGUI.h"
-#include "Language.h"
-#include "AutoSaver.h"
-#include "Image.h"
+#include "Feature/Config.h"
+#include "Feature/LogGUI.h"
+#include "Feature/Language.h"
+#include "Feature/AutoSaver.h"
+#include "Feature/Image.h"
+#include "Frame/AppFrame.h"
+#include "TextField.h"
 
 class MyApp : public wxApp
 {
@@ -26,7 +26,7 @@ private:
     wxSplashScreen* mSplash;
 }; 
 
-wxIMPLEMENT_APP( MyApp ); //entry point for program handled by wxWidgets
+wxIMPLEMENT_APP( MyApp ); //entry point program
 
 bool MyApp::OnInit()
 {
@@ -75,7 +75,7 @@ bool MyApp::OnInit()
         LOGFILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
-    LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + "(ms)" );
+    LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + " (ms)" );
     return true;
 }
 
@@ -89,7 +89,6 @@ void MyApp::ShowSplashScreen()
    mSplash = new wxSplashScreen( IMG_SPLASH, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
                                  6000, NULL, -1, wxDefaultPosition, wxDefaultSize,
                                  wxBORDER_SIMPLE | wxSTAY_ON_TOP );
-   //std::this_thread::sleep_for( std::chrono::seconds( 2 ) );
 }
 
 void MyApp::HideSplashScreen()

@@ -1,5 +1,5 @@
 #include "StyleFrame.h"
-#include "Language.h"
+#include "../Feature/Language.h"
 
 wxBEGIN_EVENT_TABLE( StyleFrame, wxFrame )
 EVT_CLOSE( StyleFrame::OnClose )

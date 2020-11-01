@@ -1,16 +1,16 @@
 #include "PreferencesFrame.h"
-#include "LogGUI.h"
-#include "Language.h"
 #include <wx/panel.h>
 #include <wx/statbox.h>
 #include <wx/checkbox.h>
+#include "../Feature/LogGUI.h"
+#include "../Feature/Language.h"
 
 wxBEGIN_EVENT_TABLE( PreferencesFrame, wxFrame )
 EVT_CLOSE( PreferencesFrame::OnClose )
 wxEND_EVENT_TABLE()
 
 PreferencesFrame::PreferencesFrame( wxWindow* parent )
-	: wxFrame( parent, wxID_ANY, MSG_PREFERENCES, wxDefaultPosition, wxSize( 600,400 ), 
+	: wxFrame( parent, wxID_ANY, MSG_PREFERENCES, wxDefaultPosition, wxSize( 600,400 ),
 			   wxFRAME_FLOAT_ON_PARENT | wxCLOSE_BOX | wxCAPTION | wxFRAME_TOOL_WINDOW )
 {
 	wxArrayString LanguageList;

@@ -1,7 +1,7 @@
 #pragma once
-#include "../Utilities/Logging.h"
 #include <wx/wxprec.h>
 #include <wx/stc/stc.h>
+#include "../../Utilities/Logging.h"
 
 #define ERR_FILEPATH	"log/AppError.txt"
 #define LOG_FILEPATH	"log/AppLog.txt"

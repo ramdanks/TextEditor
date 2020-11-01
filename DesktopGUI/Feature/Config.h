@@ -2,10 +2,10 @@
 #include <string>
 #include <vector>
 
-#define MAJOR_VERSION "0"
-#define CHILD_VERSION "5"
-#define APP_NAME "Mémoriser"
-#define CONFIG_FILEPATH "config.conf"
+#define MAJOR_VERSION     "0"
+#define CHILD_VERSION     "5"
+#define APP_NAME          "Mémoriser"
+#define CONFIG_FILEPATH   "config.conf"
 
 struct sConfigReference
 {

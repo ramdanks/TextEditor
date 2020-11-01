@@ -1,5 +1,5 @@
 #include "LogGUI.h"
-#include "../Utilities/Filestream.h"
+#include "../../Utilities/Filestream.h"
 
 wxBEGIN_EVENT_TABLE( LogGUI, wxFrame )
 EVT_CLOSE( LogGUI::OnClose )

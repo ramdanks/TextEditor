@@ -1,12 +1,12 @@
 #include "GotoFrame.h"
-#include "Language.h"
 #include <wx/radiobut.h>
 #include <wx/panel.h>
 #include "wx/textctrl.h"
 #include <wx/statbox.h>
 #include <wx/button.h>
-#include "LogGUI.h"
-#include "../Utilities/Err.h"
+#include "../../Utilities/Err.h"
+#include "../Feature/Language.h"
+#include "../Feature/LogGUI.h"
 
 wxWindow* GotoFrame::mParent;
 wxFrame* GotoFrame::mFrame;

@@ -1,9 +1,9 @@
 #include "FindFrame.h"
-#include "Language.h"
-#include "LogGUI.h"
-#include "wx/panel.h"
-#include "../Utilities/Timer.h"
-#include "../Utilities/FindReplace.h"
+#include <wx/panel.h>
+#include "../../Utilities/Timer.h"
+#include "../../Utilities/FindReplace.h"
+#include "../Feature/Language.h"
+#include "../Feature/LogGUI.h"
 
 wxFrame* FindFrame::mFrame;
 wxTextCtrl* FindFrame::mEntryReplace;

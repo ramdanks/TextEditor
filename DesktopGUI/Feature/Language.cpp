@@ -1,10 +1,8 @@
 #include "Language.h"
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Err.h"
-#include "../Utilities/Timer.h"
+#include "../../Utilities/Filestream.h"
+#include "../../Utilities/Err.h"
+#include "../../Utilities/Timer.h"
 #include "LogGUI.h"
-
-#define EMPTY_IDENTIFIER "<NULL>"
 
 //translation unit for static member
 std::string                Language::mTitle;

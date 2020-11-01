@@ -1,15 +1,14 @@
 #include "TextField.h"
+#include <mutex>
 #include <wx/filedlg.h>
-#include "LogGUI.h"
 #include "../Utilities/Err.h"
 #include "../Utilities/Filestream.h"
 #include "../Utilities/Timer.h"
-#include "Config.h"
-#include "Image.h"
-#include "GotoFrame.h"
-#include "FindFrame.h"
-#include <mutex>
-
+#include "Feature/LogGUI.h"
+#include "Feature/Config.h"
+#include "Feature/Image.h"
+#include "Frame/GotoFrame.h"
+#include "Frame/FindFrame.h"
 
 //translation unit for static member
 wxWindow*                       TextField::mParent;

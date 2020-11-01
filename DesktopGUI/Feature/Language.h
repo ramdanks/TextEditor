@@ -38,6 +38,7 @@ private:
 	static std::vector<std::string> mMessage;
 };
 
+#define EMPTY_IDENTIFIER        "<NULL>"
 #define MSG_LANG                Language::getMessage(0)
 #define MSG_STATUSBAR           Language::getMessage(1)
 #define MSG_DEBUGCONSOLE        Language::getMessage(2)

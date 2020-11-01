@@ -170,17 +170,17 @@
   <ItemGroup>
     <ClCompile Include="..\Utilities\Logging.cpp" />
     <ClCompile Include="..\Utilities\Timer.cpp" />
-    <ClCompile Include="AppFrame.cpp" />
-    <ClCompile Include="AutoSaver.cpp" />
-    <ClCompile Include="Config.cpp" />
-    <ClCompile Include="FindFrame.cpp" />
-    <ClCompile Include="GotoFrame.cpp" />
-    <ClCompile Include="Image.cpp" />
-    <ClCompile Include="PreferencesFrame.cpp" />
-    <ClCompile Include="Language.cpp" />
-    <ClCompile Include="StyleFrame.cpp" />
+    <ClCompile Include="Feature\AutoSaver.cpp" />
+    <ClCompile Include="Feature\Config.cpp" />
+    <ClCompile Include="Feature\Image.cpp" />
+    <ClCompile Include="Feature\Language.cpp" />
+    <ClCompile Include="Feature\LogGUI.cpp" />
+    <ClCompile Include="Frame\AppFrame.cpp" />
+    <ClCompile Include="Frame\FindFrame.cpp" />
+    <ClCompile Include="Frame\GotoFrame.cpp" />
+    <ClCompile Include="Frame\PreferencesFrame.cpp" />
+    <ClCompile Include="Frame\StyleFrame.cpp" />
     <ClCompile Include="TextField.cpp" />
-    <ClCompile Include="LogGUI.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -189,18 +189,18 @@
     <ClInclude Include="..\Utilities\FindReplace.h" />
     <ClInclude Include="..\Utilities\Logging.h" />
     <ClInclude Include="..\Utilities\Timer.h" />
-    <ClInclude Include="AppFrame.h" />
-    <ClInclude Include="AutoSaver.h" />
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="EventID.h" />
-    <ClInclude Include="FindFrame.h" />
-    <ClInclude Include="GotoFrame.h" />
-    <ClInclude Include="Image.h" />
-    <ClInclude Include="PreferencesFrame.h" />
-    <ClInclude Include="Language.h" />
-    <ClInclude Include="StyleFrame.h" />
+    <ClInclude Include="Feature\AutoSaver.h" />
+    <ClInclude Include="Feature\Config.h" />
+    <ClInclude Include="Feature\Image.h" />
+    <ClInclude Include="Feature\Language.h" />
+    <ClInclude Include="Feature\LogGUI.h" />
+    <ClInclude Include="Frame\AppFrame.h" />
+    <ClInclude Include="Frame\EventID.h" />
+    <ClInclude Include="Frame\FindFrame.h" />
+    <ClInclude Include="Frame\GotoFrame.h" />
+    <ClInclude Include="Frame\PreferencesFrame.h" />
+    <ClInclude Include="Frame\StyleFrame.h" />
     <ClInclude Include="TextField.h" />
-    <ClInclude Include="LogGUI.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">

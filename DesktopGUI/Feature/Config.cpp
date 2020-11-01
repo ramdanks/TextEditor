@@ -1,19 +1,19 @@
 #include "Config.h"
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Err.h"
+#include "../../Utilities/Filestream.h"
+#include "../../Utilities/Err.h"
 #include "LogGUI.h"
 
 //translation unit for static member
-int                               Config::mUseSplash;
-int                               Config::mAutosaveInterval;
-int                               Config::mUseAutosave;
-int                               Config::mFontSize;
-int                               Config::mFontID;
-int                               Config::mLanguageID;
-int                               Config::mZoomMin;
-int                               Config::mZoomMax;
-int                               Config::mZoomDefault;
-std::vector<sConfigReference>     Config::mConfTemplate;
+int Config::mUseSplash;
+int Config::mAutosaveInterval;
+int Config::mUseAutosave;
+int Config::mFontSize;
+int Config::mFontID;
+int Config::mLanguageID;
+int Config::mZoomMin;
+int Config::mZoomMax;
+int Config::mZoomDefault;
+std::vector<sConfigReference> Config::mConfTemplate;
 
 void Config::FetchConfiguration()
 {

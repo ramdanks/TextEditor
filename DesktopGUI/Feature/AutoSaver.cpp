@@ -1,7 +1,7 @@
 #include "AutoSaver.h"
-#include "LogGUI.h"
 #include <sstream>
-#include "TextField.h"
+#include "LogGUI.h"
+#include "../TextField.h"
 
 bool            AutoSaver::isHalted;
 uint32_t        AutoSaver::mTotalAction;
