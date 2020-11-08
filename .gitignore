@@ -1,9 +1,8 @@
-Distribution/*
 Resource/*
+DesktopGUI/x64/*
 DesktopGUI/temp/*
 DesktopGUI/*.exe
 DesktopGUI/Log/*
-DesktopGUI/reosurce/*
 DesktopGUI/wxWidgets/*
 DesktopGUI/wxWidgets.zip
 x64/*
