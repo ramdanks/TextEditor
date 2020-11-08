@@ -4,6 +4,7 @@
 #include <wx/aui/auibook.h>
 #include "StyleFrame.h"
 #include "PreferencesFrame.h"
+#include "../GridField.h"
 
 class AppFrame : public wxFrame
 {
@@ -21,6 +22,9 @@ private:
     void OnLogDir( wxCommandEvent& event );
     void OnReportBug( wxCommandEvent& event );
 
+    void OnNewDict( wxCommandEvent& event );
+    void OnOpenDict( wxCommandEvent& event );
+
     void OnStayOnTop( wxCommandEvent& event );
     void OnPreferences( wxCommandEvent& event );
     void OnStyleConfig( wxCommandEvent& event );
@@ -32,6 +36,7 @@ private:
     wxDECLARE_EVENT_TABLE();
 
 private:
+    GridField* mGridField;
     wxStatusBar* mStatusBar;
     StyleFrame* mStyleFrame;
     PreferencesFrame* mPreferencesFrame;

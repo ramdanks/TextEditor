@@ -90,6 +90,17 @@ void Config::SaveConfiguration()
 	}
 }
 
+std::string Config::LoadSupportedFormat()
+{
+	std::string supp;
+	supp = "All types (*.*)|*.*";
+	supp += "|Normal text file (*.txt)|*.txt";
+	supp += "|Memoriser file (*.mtx)|*.mtx";
+	supp += "|Memoriser dictionary (*.mdt)|*.mdt";
+	supp += "|Memoriser archive (*.mac)|*.mac";
+	return supp;
+}
+
 void Config::MakeTemplate()
 {
 	mConfTemplate.push_back( sConfigReference( "mSplashScreen",      &mUseSplash ) );

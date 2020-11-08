@@ -53,8 +53,14 @@ void GotoFrame::Init( wxWindow* parent )
 
 void GotoFrame::ShowAndFocus()
 {
+	if ( mFrame == nullptr ) return;
+
+	auto NullCmdEvent = wxCommandEvent( wxEVT_NULL );
+	if ( mButtonLine->GetValue() ) RadioLinePressed( NullCmdEvent );
+	else if ( mButtonPos->GetValue() ) RadioPosPressed( NullCmdEvent );
+
 	mFrame->Show();
-	mFrame->SetFocus();
+	mFrame->SetFocus();	
 }
 
 void GotoFrame::UpdateInfo( wxStyledTextCtrl* tf )
@@ -65,9 +71,6 @@ void GotoFrame::UpdateInfo( wxStyledTextCtrl* tf )
 	mInfo.mMaxPos = tf->GetTextLength();
 	mInfo.mCurrentPos = tf->GetCurrentPos();
 	mInfo.mCurrentLine = tf->GetCurrentLine() + 1;
-	auto NullCmdEvent = wxCommandEvent( wxEVT_NULL );
-	if ( mButtonLine->GetValue() ) RadioLinePressed( NullCmdEvent );
-	else if ( mButtonPos->GetValue() ) RadioPosPressed( NullCmdEvent );
 }
 
 void GotoFrame::RadioLinePressed( wxCommandEvent& event )

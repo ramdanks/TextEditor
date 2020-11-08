@@ -39,16 +39,14 @@ private:
 	static void OnClose( wxCommandEvent& event );
 	static int GetFlags();
 
-	static size_t method1();
-
 	static wxFrame* mFrame;
 	static wxStyledTextCtrl* mTextField;
 
 	static wxNotebook* mNotebook;
 	static wxTextCtrl* mEntryReplace;
 
-	static sPageAttrib mFindAttrib;
-	static sPageAttrib mReplaceAttrib;
+	static sPageAttrib* mFindAttrib;
+	static sPageAttrib* mReplaceAttrib;
 };
 
 enum FindEvent

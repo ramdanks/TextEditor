@@ -3,8 +3,10 @@
 #include <vector>
 
 #define MAJOR_VERSION     "0"
-#define CHILD_VERSION     "5"
+#define CHILD_VERSION     "6"
 #define APP_NAME          "Mémoriser"
+#define DEBUG_NAME        "Mémoriser - Debug Console"
+#define DICT_NAME         "Mémoriser - Dictionary"
 #define CONFIG_FILEPATH   "config.conf"
 
 struct sConfigReference
@@ -20,6 +22,7 @@ public:
 	static void FetchConfiguration();
 	static void LoadDefaultConfiguration();
 	static void SaveConfiguration();
+	static std::string LoadSupportedFormat();
 
 	static int mUseSplash;
 	static int mFontSize;

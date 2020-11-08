@@ -5,12 +5,16 @@
 
 #define ERR_FILEPATH	"log/AppError.txt"
 #define LOG_FILEPATH	"log/AppLog.txt"
+#define TO_STR(data)    std::to_string(data)
+#define CV_STR(str)     std::string(str)
 
 class LogGUI : public wxFrame
 {
 public:
-	static LogGUI* LGUI; 
-	LogGUI( wxWindow* parent );
+	//use this everywhere
+	static LogGUI* LGUI;
+
+	LogGUI( wxWindow* parent, bool GUI = true );
 	
 	void SetLogFile( const std::string& filepath );
 	void SetErrFile( const std::string& filepath );
@@ -22,7 +26,7 @@ public:
 private:
 	void OnClose( wxCloseEvent& event );
 	wxDECLARE_EVENT_TABLE();
-	
+
 	std::string mErrFile;
 	std::string mLogFile;
 	Util::Logging* mLog;
@@ -30,9 +34,9 @@ private:
 };
 
 #define LOGFILE(l,msg)		LogGUI::LGUI->LogFile(l,msg)
-#if defined( _DEBUG )		
 #define LOGCONSOLE(l,msg)   LogGUI::LGUI->LogConsole(l,msg)
+#ifdef _DIST		
+	#define LOGALL(l,msg)       LOGFILE(l,msg)
 #else
-#define LOGCONSOLE(l,msg)
+	#define LOGALL(l,msg)       LOGFILE(l,msg); LOGCONSOLE(l,msg)
 #endif
-#define LOGALL(l,msg)       LOGFILE(l,msg); LOGCONSOLE(l,msg)

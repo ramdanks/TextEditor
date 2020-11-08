@@ -66,6 +66,15 @@
     <ClCompile Include="Feature\LogGUI.cpp">
       <Filter>Feature</Filter>
     </ClCompile>
+    <ClCompile Include="GridField.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Feature\Dictionary.cpp">
+      <Filter>Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="FontEncoding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Utilities\Err.h">
@@ -118,6 +127,15 @@
     </ClInclude>
     <ClInclude Include="Frame\EventID.h">
       <Filter>Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="GridField.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Feature\Dictionary.h">
+      <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="FontEncoding.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

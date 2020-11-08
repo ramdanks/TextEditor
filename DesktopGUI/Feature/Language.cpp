@@ -5,16 +5,16 @@
 #include "LogGUI.h"
 
 //translation unit for static member
-std::string                Language::mTitle;
-std::vector<std::string>   Language::mMessage;
+wxString Language::mTitle;
+std::vector<wxString> Language::mMessage;
 
-std::string Language::whatLanguage()
+wxString Language::whatLanguage()
 {
     if ( mTitle.empty() ) return EMPTY_IDENTIFIER;
     return mTitle;
 }
 
-std::string Language::getMessage( size_t index )
+wxString Language::getMessage( size_t index )
 {
     if ( mMessage.empty() || index >= mMessage.size() ) return EMPTY_IDENTIFIER;
     return mMessage[index];
@@ -77,7 +77,7 @@ void Language::LoadMessageDefault()
     mTitle = mMessage[0];
 }
 
-std::string Language::IdentifyID( LanguageID id )
+wxString Language::IdentifyID( LanguageID id )
 {
     if      ( id == ENGLISH )     return "English";
     else if ( id == BAHASA )      return "Bahasa Indonesia";
@@ -104,8 +104,9 @@ bool Language::LoadMessage( LanguageID id )
         else if ( id == DUTCH )        vRead = Filestream::Read_Bin( LANG_DUTCH_FILEPATH );
         THROW_ERR_IFEMPTY( vRead, "Problem loading a language file from LoadMessage()!" );
 
-        mMessage = Filestream::ParseString( (char*) &vRead[0], '\n' );
-        THROW_ERR_IFEMPTY( mMessage, "Problem parsing a language string from LoadMessage()!" );
+        auto vMsg = Filestream::ParseString( (char*) &vRead[0], '\n' );
+        THROW_ERR_IFEMPTY( vMsg, "Problem parsing a language string from LoadMessage()!" );
+        for ( const auto& i : vMsg ) mMessage.push_back( wxString::FromUTF8( i ) );
         mTitle = mMessage[0];
     }
     catch ( Util::Err& e )

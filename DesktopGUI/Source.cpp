@@ -20,9 +20,9 @@ public:
     AppFrame* MainFrame;
 
 private:
-    inline void ShowSplashScreen();
-    inline void HideSplashScreen();
-    inline void DestroySplashScreen();
+    void ShowSplashScreen();
+    void HideSplashScreen();
+    void DestroySplashScreen();
     wxSplashScreen* mSplash;
 }; 
 
@@ -31,10 +31,14 @@ wxIMPLEMENT_APP( MyApp ); //entry point program
 bool MyApp::OnInit()
 {
     Util::Timer Init( "Init", MS, false );
+#ifndef _DIST 
+    LogGUI::LGUI = new LogGUI( NULL, true );  
+#else
+    LogGUI::LGUI = new LogGUI( NULL, false );
+#endif
     try
     {
         //initialization
-        LogGUI::LGUI = new LogGUI( NULL );
         Config::FetchConfiguration();
         Image::Init();
 
@@ -42,14 +46,11 @@ bool MyApp::OnInit()
 
         //load language from configuration
         auto successLoadLang = Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) );
+        
         if ( successLoadLang )
-        {
-            LOGALL( LEVEL_INFO, "Language imported from configuration: " + MSG_LANG );
-        }
+        { LOGALL( LEVEL_INFO, "Language imported from configuration: " + CV_STR( MSG_LANG ) ); }
         else
-        {
-            LOGALL( LEVEL_INFO, "Language wont import with ID: " + TO_STR( Config::mLanguageID ) );
-        }
+        {  LOGALL( LEVEL_INFO, "Language wont import with ID: " + TO_STR( Config::mLanguageID ) ); }
 
         //create main frame
         MainFrame = new AppFrame( APP_NAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
@@ -75,7 +76,7 @@ bool MyApp::OnInit()
         LOGFILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
-    LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + " (ms)" );
+    LOGALL( LEVEL_TRACE, "Application Created: " + TO_STR( Init.Toc() ) + " (ms)" );
     return true;
 }
 

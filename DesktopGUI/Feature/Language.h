@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <string>
+#include <wx/string.h>
 
 #define LANG_ENGLISH_FILEPATH      "resource/lang/english.txt"
 #define LANG_BAHASA_FILEPATH       "resource/lang/bahasa.txt"
@@ -28,14 +28,14 @@ class Language
 public:
 	static bool LoadMessage( LanguageID id );
 
-	static std::string whatLanguage();
-	static std::string getMessage( size_t index );
+	static wxString whatLanguage();
+	static wxString getMessage( size_t index );
 
 private:
 	static void LoadMessageDefault();
-	static std::string IdentifyID( LanguageID id );
-	static std::string mTitle;
-	static std::vector<std::string> mMessage;
+	static wxString IdentifyID( LanguageID id );
+	static wxString mTitle;
+	static std::vector<wxString> mMessage;
 };
 
 #define EMPTY_IDENTIFIER        "<NULL>"

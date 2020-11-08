@@ -6,55 +6,42 @@
 namespace Util
 {
 	Timer::Timer()
-		:
-		mTitle(""),
-		mTime(SEC),
-		mPrintOnDestroy(false)
+		: mTitle(""), mTime(SEC), mPrintOnDestroy(false)
 	{
 		Tic();
 	}
 
 	Timer::Timer( std::string Title, TimerPoint TP, bool PrintOnDestroy )
+		: mTitle(Title), mTime(TP), mPrintOnDestroy(PrintOnDestroy)
 	{
-		this->Setting( Title, TP, PrintOnDestroy );
 		Tic();
 	}
 
 	Timer::~Timer()
 	{
+		float res = Toc();
 		if ( mPrintOnDestroy )
 		{
-			float res = Toc();
 			std::string spec;
-			if ( mTime == ADJUST )
+			TimerPoint tp = mTime;
+			if ( tp == ADJUST )
 			{
-				if ( res > MIN )
-				{
-					res = Adjust_Time( MIN, res );
-					spec = "(min)";
-				}
-				else if ( res > SEC )
-				{
-					res = Adjust_Time( SEC, res );
-					spec = "(sec)";
-				}
-				else if ( res * MS >= 1.0f )
-				{
-					res = Adjust_Time( MS, res );
-					spec = "(ms)";
-				}
-				else if ( res * US >= 1.0f )
-				{
-					res = Adjust_Time( US, res );
-					spec = "(us)";
-				}
-				else
-				{
-					res = Adjust_Time( NS, res );
-					spec = "(ns)";
-				}
+				if      ( res > MIN )        tp = MIN;
+				else if ( res > SEC )        tp = SEC;
+				else if ( res * MS >= 1.0f ) tp = MS;
+				else if ( res * US >= 1.0f ) tp = US;
+				else                         tp = NS;			
+				res = Adjust_Time( tp, res );
 			}
-			std::cout << mTitle << " Time:" << res << spec << std::endl;
+
+			// indicator
+			if      ( tp == MIN ) spec = "(min)";
+			else if ( tp == SEC ) spec = "(sec)";
+			else if ( tp == MS )  spec = "(ms)";
+			else if ( tp == US )  spec = "(us)";
+			else if ( tp == NS )  spec = "(ns)";
+
+			printf( "%s: %f %s\n", mTitle.c_str(), res, spec.c_str() );
 		}
 	}
 
@@ -95,7 +82,7 @@ namespace Util
 		tm tstruct;
 		char buf[64];
 		tstruct = *localtime( &now );
-		strftime( buf, sizeof( buf ), "%Y-%m-%d %X", &tstruct );
+		strftime( buf, sizeof( buf ), "%d-%m-%Y %X", &tstruct );
 		return std::string( buf );
 	}
 

@@ -4,8 +4,6 @@
 #include <sstream>
 #include <sys/stat.h>
 
-#define TO_STR(x) std::to_string(x)
-
 class Filestream
 {
 	Filestream() {}
@@ -94,14 +92,24 @@ public:
 		return std::string();
 	}
 
-	static std::vector<std::string> ParseString( const std::string& str, char delimiter )
+	static std::vector<std::string> ParseString( const std::string& str, char delimiter, uint32_t max_parse = 0 )
 	{
 		std::stringstream ss( str );
 		std::string item;
 		std::vector<std::string> elems;
-		while ( std::getline( ss, item, delimiter ) )
-			elems.push_back( item );
-
+		if ( max_parse == 0 )
+		{
+			while ( std::getline( ss, item, delimiter ) )
+				elems.push_back( item );
+		}
+		else
+		{
+			for ( uint32_t i = 0; i < max_parse; i++ )
+			{
+				std::getline( ss, item, delimiter );
+				elems.push_back( item );
+			}
+		}
 		return elems;
 	}
 
