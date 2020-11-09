@@ -8,13 +8,13 @@
 wxString Language::mTitle;
 std::vector<wxString> Language::mMessage;
 
-wxString Language::whatLanguage()
+wxString Language::WhatLanguage()
 {
     if ( mTitle.empty() ) return EMPTY_IDENTIFIER;
     return mTitle;
 }
 
-wxString Language::getMessage( size_t index )
+wxString Language::GetMessage( size_t index )
 {
     if ( mMessage.empty() || index >= mMessage.size() ) return EMPTY_IDENTIFIER;
     return mMessage[index];
@@ -102,22 +102,27 @@ bool Language::LoadMessage( LanguageID id )
         else if ( id == ITALIAN )      vRead = Filestream::Read_Bin( LANG_ITALIAN_FILEPATH );
         else if ( id == FRENCH )       vRead = Filestream::Read_Bin( LANG_FRENCH_FILEPATH );
         else if ( id == DUTCH )        vRead = Filestream::Read_Bin( LANG_DUTCH_FILEPATH );
+        
+        // load file
         THROW_ERR_IFEMPTY( vRead, "Problem loading a language file from LoadMessage()!" );
 
+        // parsing string by eol
         auto vMsg = Filestream::ParseString( (char*) &vRead[0], '\n' );
         THROW_ERR_IFEMPTY( vMsg, "Problem parsing a language string from LoadMessage()!" );
+
+        // save and convert from utf-8
         for ( const auto& i : vMsg ) mMessage.push_back( wxString::FromUTF8( i ) );
         mTitle = mMessage[0];
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_WARN, e.Seek(), LOG_FILEPATH );
+        LOGALL( LEVEL_WARN, e.Seek() );
         LoadMessageDefault();
         return false;
     }
     catch ( ... )
     {
-        LOGALL( LEVEL_WARN, "Unknown Exception when processing language file from LoadMessage()!", LOG_FILEPATH );
+        LOGALL( LEVEL_WARN, "Unknown Exception when processing language file from LoadMessage()!" );
         LoadMessageDefault();
         return false;
     }

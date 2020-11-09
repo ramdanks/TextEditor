@@ -6,6 +6,7 @@ namespace Util
 {
 	typedef std::string LogLevel;
 
+	// log severity
 	#define LEVEL_INFO "INFO"
 	#define LEVEL_TRACE "TRACE"
 	#define LEVEL_WARN  "WARN"

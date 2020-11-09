@@ -17,14 +17,14 @@ public:
     bool OnInit() override;
     int OnExit() override;
 
-    AppFrame* MainFrame;
-
 private:
     void ShowSplashScreen();
     void HideSplashScreen();
     void DestroySplashScreen();
+
+    AppFrame* mMainFrame;
     wxSplashScreen* mSplash;
-}; 
+};
 
 wxIMPLEMENT_APP( MyApp ); //entry point program
 
@@ -53,9 +53,9 @@ bool MyApp::OnInit()
         {  LOGALL( LEVEL_INFO, "Language wont import with ID: " + TO_STR( Config::mLanguageID ) ); }
 
         //create main frame
-        MainFrame = new AppFrame( APP_NAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
-        THROW_ERR_IFNULLPTR( MainFrame, "Problem creating Application Frame OnInit wxApp!" );
-        MainFrame->SetIcon( wxICON( APPICON ) );
+        mMainFrame = new AppFrame( APP_NAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
+        THROW_ERR_IFNULLPTR( mMainFrame, "Problem creating Application Frame OnInit wxApp!" );
+        mMainFrame->SetIcon( wxICON( APPICON ) );
 
         //autosaver
         AutoSaver::Init( Config::mAutosaveInterval );
@@ -63,8 +63,8 @@ bool MyApp::OnInit()
 
         //finally
         if ( Config::mUseSplash ) DestroySplashScreen();
-        this->MainFrame->Show();
-        this->MainFrame->Raise();
+        mMainFrame->Show();
+        mMainFrame->Raise();
     }
     catch ( Util::Err& e )
     {
@@ -76,7 +76,7 @@ bool MyApp::OnInit()
         LOGFILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
-    LOGALL( LEVEL_TRACE, "Application Created: " + TO_STR( Init.Toc() ) + " (ms)" );
+    LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + " (ms)" );
     return true;
 }
 

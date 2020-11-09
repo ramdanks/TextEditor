@@ -28,10 +28,11 @@ void Config::FetchConfiguration()
 	try
 	{
 		auto vRead = Filestream::Read_Bin( CONFIG_FILEPATH );
-		THROW_ERR_IF( vRead.empty(), "Failed to read configuration file!" );
+		THROW_ERR_IFEMPTY( vRead, "Failed to read configuration file!" );
 		
 		std::string sRead = (const char*) &vRead[0];
 		auto vBuffer = Filestream::ParseString( sRead, '\n' );
+		THROW_ERR_IFEMPTY( vRead, "Failed to read configuration file!" );
 
 		for ( int i = 0; i < mConfTemplate.size(); i++ )
 		{

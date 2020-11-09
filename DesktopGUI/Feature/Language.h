@@ -23,64 +23,69 @@ enum LanguageID
 	DUTCH      = 7,
 };
 
+// singleton pattern
 class Language
 {
 public:
+	Language() = delete;
+	Language( const Language& other ) = delete;
+
 	static bool LoadMessage( LanguageID id );
 
-	static wxString whatLanguage();
-	static wxString getMessage( size_t index );
+	static wxString WhatLanguage();
+	static wxString GetMessage( size_t index );
 
 private:
 	static void LoadMessageDefault();
 	static wxString IdentifyID( LanguageID id );
+
 	static wxString mTitle;
 	static std::vector<wxString> mMessage;
 };
 
 #define EMPTY_IDENTIFIER        "<NULL>"
-#define MSG_LANG                Language::getMessage(0)
-#define MSG_STATUSBAR           Language::getMessage(1)
-#define MSG_DEBUGCONSOLE        Language::getMessage(2)
-#define MSG_FILE                Language::getMessage(3)
-#define MSG_NEW                 Language::getMessage(4)
-#define MSG_SAVE                Language::getMessage(5)
-#define MSG_SAVEAS              Language::getMessage(6)
-#define MSG_SAVEALL             Language::getMessage(7)
-#define MSG_OPEN                Language::getMessage(8)
-#define MSG_RENAME              Language::getMessage(9)
-#define MSG_CLOSE               Language::getMessage(10)
-#define MSG_CLOSEALL            Language::getMessage(11)
-#define MSG_NEWDICT             Language::getMessage(12)
-#define MSG_OPENDICT            Language::getMessage(13)
-#define MSG_EXIT                Language::getMessage(14)
-#define MSG_EDIT                Language::getMessage(15)
-#define MSG_UNDO                Language::getMessage(16)
-#define MSG_REDO                Language::getMessage(17)
-#define MSG_CUT                 Language::getMessage(18)
-#define MSG_COPY                Language::getMessage(19)
-#define MSG_PASTE               Language::getMessage(20)
-#define MSG_DELETE              Language::getMessage(21)
-#define MSG_SELECTALL           Language::getMessage(22)
-#define MSG_SEARCH              Language::getMessage(23)
-#define MSG_FIND                Language::getMessage(24)
-#define MSG_SELECTFNEXT         Language::getMessage(25)
-#define MSG_SELECTFPREV         Language::getMessage(26)
-#define MSG_REPLACE             Language::getMessage(27)
-#define MSG_GOTO                Language::getMessage(28)
-#define MSG_VIEW                Language::getMessage(29)
-#define MSG_AOT                 Language::getMessage(30)
-#define MSG_ZOOMIN              Language::getMessage(31)
-#define MSG_ZOOMOUT             Language::getMessage(32)
-#define MSG_ZOOMRESTORE         Language::getMessage(33)
-#define MSG_TEXTSUM             Language::getMessage(34)
-#define MSG_COMPRESSIONSUM      Language::getMessage(35)
-#define MSG_DEBUGCONSOLE        Language::getMessage(36)
-#define MSG_SETTINGS            Language::getMessage(37)
-#define MSG_PREFERENCES         Language::getMessage(38)
-#define MSG_STYLECONFIG         Language::getMessage(39)
-#define MSG_HELP                Language::getMessage(40)
-#define MSG_REPORTBUG           Language::getMessage(41)
-#define MSG_OPENLOGDIR          Language::getMessage(42)
-#define MSG_SEEDOC              Language::getMessage(43)
-#define MSG_ABOUT               Language::getMessage(44)
+#define MSG_LANG                Language::GetMessage(0)
+#define MSG_STATUSBAR           Language::GetMessage(1)
+#define MSG_DEBUGCONSOLE        Language::GetMessage(2)
+#define MSG_FILE                Language::GetMessage(3)
+#define MSG_NEW                 Language::GetMessage(4)
+#define MSG_SAVE                Language::GetMessage(5)
+#define MSG_SAVEAS              Language::GetMessage(6)
+#define MSG_SAVEALL             Language::GetMessage(7)
+#define MSG_OPEN                Language::GetMessage(8)
+#define MSG_RENAME              Language::GetMessage(9)
+#define MSG_CLOSE               Language::GetMessage(10)
+#define MSG_CLOSEALL            Language::GetMessage(11)
+#define MSG_NEWDICT             Language::GetMessage(12)
+#define MSG_OPENDICT            Language::GetMessage(13)
+#define MSG_EXIT                Language::GetMessage(14)
+#define MSG_EDIT                Language::GetMessage(15)
+#define MSG_UNDO                Language::GetMessage(16)
+#define MSG_REDO                Language::GetMessage(17)
+#define MSG_CUT                 Language::GetMessage(18)
+#define MSG_COPY                Language::GetMessage(19)
+#define MSG_PASTE               Language::GetMessage(20)
+#define MSG_DELETE              Language::GetMessage(21)
+#define MSG_SELECTALL           Language::GetMessage(22)
+#define MSG_SEARCH              Language::GetMessage(23)
+#define MSG_FIND                Language::GetMessage(24)
+#define MSG_SELECTFNEXT         Language::GetMessage(25)
+#define MSG_SELECTFPREV         Language::GetMessage(26)
+#define MSG_REPLACE             Language::GetMessage(27)
+#define MSG_GOTO                Language::GetMessage(28)
+#define MSG_VIEW                Language::GetMessage(29)
+#define MSG_AOT                 Language::GetMessage(30)
+#define MSG_ZOOMIN              Language::GetMessage(31)
+#define MSG_ZOOMOUT             Language::GetMessage(32)
+#define MSG_ZOOMRESTORE         Language::GetMessage(33)
+#define MSG_TEXTSUM             Language::GetMessage(34)
+#define MSG_COMPRESSIONSUM      Language::GetMessage(35)
+#define MSG_DEBUGCONSOLE        Language::GetMessage(36)
+#define MSG_SETTINGS            Language::GetMessage(37)
+#define MSG_PREFERENCES         Language::GetMessage(38)
+#define MSG_STYLECONFIG         Language::GetMessage(39)
+#define MSG_HELP                Language::GetMessage(40)
+#define MSG_REPORTBUG           Language::GetMessage(41)
+#define MSG_OPENLOGDIR          Language::GetMessage(42)
+#define MSG_SEEDOC              Language::GetMessage(43)
+#define MSG_ABOUT               Language::GetMessage(44)
