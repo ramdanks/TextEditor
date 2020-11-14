@@ -30,53 +30,57 @@ wxIMPLEMENT_APP( MyApp ); //entry point program
 
 bool MyApp::OnInit()
 {
-    Util::Timer Init( "Init", MS, false );
+    Util::Timer tm( "Application Init", ADJUST, false );
 #ifndef _DIST 
-    LogGUI::LGUI = new LogGUI( NULL, true );  
+    LogGUI::sLogGUI = new LogGUI( NULL, true ); 
 #else
-    LogGUI::LGUI = new LogGUI( NULL, false );
+    LogGUI::sLogGUI = new LogGUI( NULL, false );
 #endif
     try
     {
         //initialization
-        Config::FetchConfiguration();
-        Image::Init();
+        Config::FetchData();
+        Image::FetchData();
 
-        if ( Config::mUseSplash ) ShowSplashScreen();
+        if ( Config::mUseSplash )
+            ShowSplashScreen();
 
         //load language from configuration
-        auto successLoadLang = Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) );
-        
-        if ( successLoadLang )
-        { LOGALL( LEVEL_INFO, "Language imported from configuration: " + CV_STR( MSG_LANG ) ); }
+        if ( Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) ) )
+        {
+            LOG_ALL( LEVEL_INFO, "Imported language from config: " + CV_STR( MSG_LANG ) );
+        }
         else
-        {  LOGALL( LEVEL_INFO, "Language wont import with ID: " + TO_STR( Config::mLanguageID ) ); }
+        {  
+            LOG_ALL_FORMAT( LEVEL_INFO, "Problem importing language with ID: %d", Config::mLanguageID ); 
+        }
 
         //create main frame
         mMainFrame = new AppFrame( APP_NAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
         THROW_ERR_IFNULLPTR( mMainFrame, "Problem creating Application Frame OnInit wxApp!" );
-        mMainFrame->SetIcon( wxICON( APPICON ) );
+        mMainFrame->SetIcon( wxICON( ICON_APP ) );
 
         //autosaver
-        AutoSaver::Init( Config::mAutosaveInterval );
-        if ( Config::mUseAutosave ) AutoSaver::Deploy();
+        if ( Config::mUseAutosave )
+            AutoSaver::Deploy( Config::mAutosaveInterval );
 
         //finally
-        if ( Config::mUseSplash ) DestroySplashScreen();
+        if ( mSplash != nullptr )
+            DestroySplashScreen();
         mMainFrame->Show();
         mMainFrame->Raise();
     }
     catch ( Util::Err& e )
     {
-        LOGFILE( LEVEL_FATAL, e.Seek() );
+        LOG_FILE( LEVEL_FATAL, e.Seek() );
         return false;
     }
     catch ( ... )
     {
-        LOGFILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
+        LOG_FILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
-    LOGALL( LEVEL_INFO, "Application Created: " + TO_STR( Init.Toc() ) + " (ms)" );
+    LOG_ALL( LEVEL_INFO, tm.Toc_String() );
     return true;
 }
 
@@ -87,9 +91,16 @@ int MyApp::OnExit()
 
 void MyApp::ShowSplashScreen()
 {
-   mSplash = new wxSplashScreen( IMG_SPLASH, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-                                 6000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-                                 wxBORDER_SIMPLE | wxSTAY_ON_TOP );
+    try
+    {
+       mSplash = new wxSplashScreen( IMG_SPLASH, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+                                     6000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+                                     wxBORDER_SIMPLE | wxSTAY_ON_TOP );
+    }
+    catch ( ... )
+    {
+        LOG_ALL( LEVEL_WARN, "Splash screen can not created!" );
+    }
 }
 
 void MyApp::HideSplashScreen()
@@ -97,7 +108,7 @@ void MyApp::HideSplashScreen()
     mSplash->Show( false );
 }
 
-inline void MyApp::DestroySplashScreen()
+void MyApp::DestroySplashScreen()
 {
     mSplash->Destroy();
 }

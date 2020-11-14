@@ -28,6 +28,7 @@ namespace Util
 
 		void Tic();
 		float Toc();
+		std::string Toc_String();
 		void Setting( std::string Title, TimerPoint TP, bool PrintOnDestroy );
 		static float Adjust_Time( TimerPoint TP, float Sec );
 		static std::string Get_Current_Time();

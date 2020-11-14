@@ -1,5 +1,4 @@
 #include "AutoSaver.h"
-#include <sstream>
 #include "LogGUI.h"
 #include "../TextField.h"
 
@@ -8,23 +7,15 @@ uint32_t        AutoSaver::mTotalAction;
 uint32_t        AutoSaver::mTimeInterval;
 std::thread*    AutoSaver::mThread;
 
-void AutoSaver::Init( uint32_t interval )
+bool AutoSaver::Deploy( uint32_t interval )
 {
-	mTimeInterval = interval;
-	isHalted = false;
-}
-
-bool AutoSaver::Deploy()
-{
+	if ( mThread != nullptr ) return false;
 	if ( mTimeInterval == 0 ) mTimeInterval = 60;
 
 	mThread = new std::thread( &Routine );
 	if ( mThread == nullptr ) return false;
-
-	std::ostringstream ss;
-	ss << mThread->get_id();
-	LOGALL( LEVEL_TRACE, "AutoSaver deploying a thread with ID: " + ss.str() );
-
+	
+	LOG_ALL_FORMAT( LEVEL_TRACE, "AutoSaver deploying a thread with ID: %d", mThread->get_id() );
 	return true;
 }
 
@@ -65,7 +56,7 @@ void AutoSaver::Routine()
 		{
 			TextField::SaveTempAll();
 			mTotalAction++;
-			LOGCONSOLE( LEVEL_TRACE, "AutoSave performed! Action: " + std::to_string( mTotalAction ) );
+			LOG_CONSOLE_FORMAT( LEVEL_TRACE, "AutoSave performed! Action: %u", mTotalAction );
 		}
 	}
 }

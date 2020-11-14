@@ -1,18 +1,11 @@
 #include "Language.h"
 #include "../../Utilities/Filestream.h"
-#include "../../Utilities/Err.h"
 #include "../../Utilities/Timer.h"
+#include "../../Utilities/Err.h"
 #include "LogGUI.h"
 
 //translation unit for static member
-wxString Language::mTitle;
 std::vector<wxString> Language::mMessage;
-
-wxString Language::WhatLanguage()
-{
-    if ( mTitle.empty() ) return EMPTY_IDENTIFIER;
-    return mTitle;
-}
 
 wxString Language::GetMessage( size_t index )
 {
@@ -73,8 +66,6 @@ void Language::LoadMessageDefault()
     mMessage.push_back( "Open Log Directory" );
     mMessage.push_back( "See Documentation" );
     mMessage.push_back( "About" );
-
-    mTitle = mMessage[0];
 }
 
 wxString Language::IdentifyID( LanguageID id )
@@ -91,6 +82,8 @@ wxString Language::IdentifyID( LanguageID id )
 
 bool Language::LoadMessage( LanguageID id )
 {
+    Util::Timer tm( "Language Load", ADJUST, false );
+
     try
     {
         std::vector<uint8_t> vRead;
@@ -112,19 +105,20 @@ bool Language::LoadMessage( LanguageID id )
 
         // save and convert from utf-8
         for ( const auto& i : vMsg ) mMessage.push_back( wxString::FromUTF8( i ) );
-        mTitle = mMessage[0];
     }
     catch ( Util::Err& e )
     {
-        LOGALL( LEVEL_WARN, e.Seek() );
+        LOG_ALL( LEVEL_WARN, e.Seek() );
         LoadMessageDefault();
         return false;
     }
     catch ( ... )
     {
-        LOGALL( LEVEL_WARN, "Unknown Exception when processing language file from LoadMessage()!" );
+        LOG_ALL( LEVEL_WARN, "Unknown Exception when processing language file from LoadMessage()!" );
         LoadMessageDefault();
         return false;
     }
+
+    LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
     return true;
 }

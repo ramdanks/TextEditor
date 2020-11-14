@@ -19,30 +19,8 @@ namespace Util
 
 	Timer::~Timer()
 	{
-		float res = Toc();
 		if ( mPrintOnDestroy )
-		{
-			std::string spec;
-			TimerPoint tp = mTime;
-			if ( tp == ADJUST )
-			{
-				if      ( res > MIN )        tp = MIN;
-				else if ( res > SEC )        tp = SEC;
-				else if ( res * MS >= 1.0f ) tp = MS;
-				else if ( res * US >= 1.0f ) tp = US;
-				else                         tp = NS;			
-				res = Adjust_Time( tp, res );
-			}
-
-			// indicator
-			if      ( tp == MIN ) spec = "(min)";
-			else if ( tp == SEC ) spec = "(sec)";
-			else if ( tp == MS )  spec = "(ms)";
-			else if ( tp == US )  spec = "(us)";
-			else if ( tp == NS )  spec = "(ns)";
-
-			printf( "%s: %f %s\n", mTitle.c_str(), res, spec.c_str() );
-		}
+			std::cout << Toc_String().c_str() << std::endl;	
 	}
 
 	void Timer::Tic()
@@ -54,6 +32,32 @@ namespace Util
 	{
 		Duration = std::chrono::high_resolution_clock::now() - TimeLog;
 		return Adjust_Time( this->mTime, Duration.count() );
+	}
+
+	std::string Timer::Toc_String()
+	{
+		auto time = Toc();
+
+		TimerPoint tp = mTime;
+		if ( tp == ADJUST )
+		{
+			if      ( time > MIN )        tp = MIN;
+			else if ( time > SEC )        tp = SEC;
+			else if ( time * MS >= 1.0f ) tp = MS;
+			else if ( time * US >= 1.0f ) tp = US;
+			else                          tp = NS;
+			time = Adjust_Time( tp, time );
+		}
+
+		// indicator
+		std::string spec;
+		if      ( tp == MIN ) spec = " (min)";
+		else if ( tp == SEC ) spec = " (sec)";
+		else if ( tp == MS )  spec = " (ms)";
+		else if ( tp == US )  spec = " (us)";
+		else if ( tp == NS )  spec = " (ns)";
+
+		return mTitle + " Time: " + std::to_string( time ) + spec;
 	}
 
 	void Timer::Setting( std::string Title, TimerPoint TP, bool PrintOnDestroy )

@@ -258,14 +258,17 @@
   <ItemGroup>
     <ClCompile Include="..\Utilities\Logging.cpp" />
     <ClCompile Include="..\Utilities\Timer.cpp" />
+    <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="Feature\AutoSaver.cpp" />
     <ClCompile Include="Feature\Config.cpp" />
     <ClCompile Include="Feature\Dictionary.cpp" />
+    <ClCompile Include="Feature\FilehandleGUI.cpp" />
     <ClCompile Include="Feature\Image.cpp" />
     <ClCompile Include="Feature\Language.cpp" />
     <ClCompile Include="Feature\LogGUI.cpp" />
     <ClCompile Include="FontEncoding.cpp" />
     <ClCompile Include="Frame\AppFrame.cpp" />
+    <ClCompile Include="Frame\DictionaryFrame.cpp" />
     <ClCompile Include="Frame\FindFrame.cpp" />
     <ClCompile Include="Frame\GotoFrame.cpp" />
     <ClCompile Include="Frame\PreferencesFrame.cpp" />
@@ -279,15 +282,19 @@
     <ClInclude Include="..\Utilities\Filestream.h" />
     <ClInclude Include="..\Utilities\FindReplace.h" />
     <ClInclude Include="..\Utilities\Logging.h" />
+    <ClInclude Include="..\Utilities\Random.h" />
     <ClInclude Include="..\Utilities\Timer.h" />
+    <ClInclude Include="DragDrop.h" />
     <ClInclude Include="Feature\AutoSaver.h" />
     <ClInclude Include="Feature\Config.h" />
     <ClInclude Include="Feature\Dictionary.h" />
+    <ClInclude Include="Feature\FilehandleGUI.h" />
     <ClInclude Include="Feature\Image.h" />
     <ClInclude Include="Feature\Language.h" />
     <ClInclude Include="Feature\LogGUI.h" />
     <ClInclude Include="FontEncoding.h" />
     <ClInclude Include="Frame\AppFrame.h" />
+    <ClInclude Include="Frame\DictionaryFrame.h" />
     <ClInclude Include="Frame\EventID.h" />
     <ClInclude Include="Frame\FindFrame.h" />
     <ClInclude Include="Frame\GotoFrame.h" />
@@ -307,7 +314,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\Resource\icon.png" />
+    <Image Include="icon\app.ico" />
+    <Image Include="icon\bug.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,6 @@
 #include "Config.h"
 #include "../../Utilities/Filestream.h"
+#include "../../Utilities/Timer.h"
 #include "../../Utilities/Err.h"
 #include "LogGUI.h"
 
@@ -15,12 +16,14 @@ int Config::mZoomMax;
 int Config::mZoomDefault;
 std::vector<sConfigReference> Config::mConfTemplate;
 
-void Config::FetchConfiguration()
+void Config::FetchData()
 {
+	Util::Timer tm( "Configuration Load", ADJUST, false );
+
 	if ( !Filestream::Is_Exist( CONFIG_FILEPATH ) )
 	{
-		LoadDefaultConfiguration();
-		Config::SaveConfiguration();
+		LoadDefaultConfig();
+		Config::SaveConfig();
 		return;
 	}
 	if ( mConfTemplate.empty() ) MakeTemplate();
@@ -41,23 +44,25 @@ void Config::FetchConfiguration()
 			*mConfTemplate[i].RefData = std::stoi( vConfig[1] );
 		}
 		
-		LOGALL( LEVEL_INFO, "Loading configuration file success!" );
+		LOG_ALL( LEVEL_INFO, "Loading configuration file success!" );
 	}
 	catch ( Util::Err& e )
 	{
-		LOGALL( LEVEL_WARN, e.Seek() );
-		LoadDefaultConfiguration();
-		Config::SaveConfiguration();
+		LOG_ALL( LEVEL_WARN, e.Seek().c_str() );
+		LoadDefaultConfig();
+		Config::SaveConfig();
 	}
 	catch ( ... )
 	{
-		LOGALL( LEVEL_WARN, "Unknown Exception found in FethConfiguration()!" );
-		LoadDefaultConfiguration();
-		Config::SaveConfiguration();
+		LOG_ALL( LEVEL_WARN, "Unknown Exception found in FethConfiguration()!" );
+		LoadDefaultConfig();
+		Config::SaveConfig();
 	}
+
+	LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
 }
 
-void Config::LoadDefaultConfiguration()
+void Config::LoadDefaultConfig()
 {
 	mUseSplash = true;
 	mLanguageID = 0;
@@ -68,10 +73,10 @@ void Config::LoadDefaultConfiguration()
 	mZoomMin = -3;
 	mZoomMax = 15;
 	mZoomDefault = 2;
-	LOGALL( LEVEL_INFO, "Loading default configuration file!" );
+	LOG_ALL( LEVEL_INFO, "Loading default configuration file!" );
 }
 
-void Config::SaveConfiguration()
+void Config::SaveConfig()
 {
 	if ( mConfTemplate.empty() ) MakeTemplate();
 
@@ -87,7 +92,7 @@ void Config::SaveConfiguration()
 	}
 	catch ( Util::Err& e )
 	{
-		LOGALL( LEVEL_WARN, e.Seek() );
+		LOG_ALL( LEVEL_WARN, e.Seek() );
 	}
 }
 

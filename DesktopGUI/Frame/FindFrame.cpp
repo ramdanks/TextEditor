@@ -98,9 +98,8 @@ void FindFrame::OnCount( wxCommandEvent& event )
 
 	SETBUF( "Total words count: %u", count );
 	mFrame->SetStatusText( CharBuf );
-	
-	SETBUF( "Counting (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
-	LOGALL( LEVEL_TRACE, CharBuf );
+
+	LOG_ALL_FORMAT( LEVEL_TRACE, "Counting (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
 }
 
 void FindFrame::OnReplace( wxCommandEvent& event )
@@ -163,8 +162,7 @@ void FindFrame::OnReplaceAll( wxCommandEvent& event )
 	SETBUF( "Total replaced words: %u", count );
 	mFrame->SetStatusText( CharBuf );
 
-	SETBUF( "Replace (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
-	LOGALL( LEVEL_TRACE, CharBuf );
+	LOG_ALL_FORMAT( LEVEL_TRACE, "Replace (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
 }
 
 void FindFrame::IFind( bool reverse )
@@ -221,8 +219,7 @@ void FindFrame::IFind( bool reverse )
 	SETBUF( "Word found at pos: %d, line: %d", atPos, mTextField->GetCurrentLine() + 1 );
 	mFrame->SetStatusText( CharBuf );
 
-	SETBUF( "Find single word: %f (ms)", tm.Toc() );
-	LOGCONSOLE( LEVEL_TRACE, CharBuf );
+	LOG_CONSOLE_FORMAT( LEVEL_TRACE, "Find single word: %f (ms)", tm.Toc() );
 }
 
 void FindFrame::CreateFindPage()

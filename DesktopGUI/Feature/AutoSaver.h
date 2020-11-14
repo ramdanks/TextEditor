@@ -5,10 +5,9 @@
 class AutoSaver
 {
 public:
-	static void Init( uint32_t interval );
+	//thread sleep interval in second
+	static bool Deploy( uint32_t interval = 0 );
 	uint32_t GetTotalAction();
-	//thread sleep in second
-	static bool Deploy();
 	static void Destroy();
 	static void Halt();
 	static void Continue();

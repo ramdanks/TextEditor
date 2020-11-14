@@ -20,8 +20,9 @@ wxStyledTextCtrl* GotoFrame::mTextField;
 
 void GotoFrame::Init( wxWindow* parent )
 {
-	mFrame = new wxFrame( parent, wxID_ANY, MSG_GOTO, wxDefaultPosition, wxSize( 350, 230 ),
+	mFrame = new wxFrame( parent, wxID_ANY, MSG_GOTO, wxDefaultPosition, wxSize( 350, 250 ),
 						  wxFRAME_FLOAT_ON_PARENT | wxCLOSE_BOX | wxCAPTION | wxFRAME_TOOL_WINDOW );
+	mFrame->CreateStatusBar();
 
 	auto panel           = new wxPanel( mFrame );
 	auto SelectBox       = new wxStaticBox( panel, wxID_ANY, "Goto By", wxPoint( 40, 10 ), wxSize( 250, 50 ) );
@@ -59,6 +60,7 @@ void GotoFrame::ShowAndFocus()
 	if ( mButtonLine->GetValue() ) RadioLinePressed( NullCmdEvent );
 	else if ( mButtonPos->GetValue() ) RadioPosPressed( NullCmdEvent );
 
+	mFrame->SetStatusText( wxString() );
 	mFrame->Show();
 	mFrame->SetFocus();	
 }
@@ -103,26 +105,24 @@ void GotoFrame::OnGo( wxCommandEvent& event )
 		auto GotoVal = std::stoi( sVal );
 		if ( mButtonLine->GetValue() )
 		{
+			THROW_ERR_IF( GotoVal > mInfo.mMaxLine || GotoVal <= 0, "" );
 			//line starts at 1 until maxline
-			if ( GotoVal <= mInfo.mMaxLine && GotoVal > 0 )
-			{
-				mTextField->GotoLine( GotoVal-1 );
-				LOGCONSOLE( LEVEL_TRACE, "Goto Line: " + sVal );
-			}
+			mTextField->GotoLine( GotoVal-1 );
+			LOG_CONSOLE_FORMAT( LEVEL_TRACE, "Goto Line: %d", GotoVal );
+			mFrame->SetStatusText( "Goto success: " + sVal );
 		}
 		else if ( mButtonPos->GetValue() )
 		{
+			THROW_ERR_IF( GotoVal > mInfo.mMaxPos || GotoVal < 0, "" );
 			//pos starts at 0 until last char
-			if ( GotoVal <= mInfo.mMaxPos && GotoVal >= 0 )
-			{
-				mTextField->GotoPos( GotoVal );
-				LOGCONSOLE( LEVEL_TRACE, "Goto Position: " + sVal );
-			}
+			mTextField->GotoPos( GotoVal );
+			LOG_CONSOLE_FORMAT( LEVEL_TRACE, "Goto Position: %d", GotoVal );
+			mFrame->SetStatusText( "Goto success: " + sVal );
 		}
 	}
 	catch( ... )
 	{ 
-		LOGCONSOLE( LEVEL_ERROR, "Cannot Goto with Value: " + sVal );
+		LOG_CONSOLE( LEVEL_ERROR, "Cannot Goto with Value: " + sVal );
+		mFrame->SetStatusText( "Cannot Goto with Value: " + sVal );
 	}
-	mFrame->Show( false );
 }

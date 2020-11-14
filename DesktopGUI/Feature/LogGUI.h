@@ -12,7 +12,8 @@ class LogGUI : public wxFrame
 {
 public:
 	//use this everywhere
-	static LogGUI* LGUI;
+	static LogGUI* sLogGUI;
+	static char sCharBuf[256];
 
 	LogGUI( wxWindow* parent, bool GUI = true );
 	
@@ -33,10 +34,19 @@ private:
 	wxStyledTextCtrl* mDebugTextField;
 };
 
-#define LOGFILE(l,msg)		LogGUI::LGUI->LogFile(l,msg)
-#define LOGCONSOLE(l,msg)   LogGUI::LGUI->LogConsole(l,msg)
+// format character buffer for multipurpose use
+#define SET_STR_BUF( msg, ... )     snprintf( LogGUI::sCharBuf, sizeof( LogGUI::sCharBuf ), msg, __VA_ARGS__ )
+
+// logging macros
 #ifdef _DIST		
-	#define LOGALL(l,msg)       LOGFILE(l,msg)
+#define LOG_CONSOLE( l, msg )
+#define LOG_CONSOLE_FORMAT( l, msg, ... )
 #else
-	#define LOGALL(l,msg)       LOGFILE(l,msg); LOGCONSOLE(l,msg)
-#endif
+#define LOG_CONSOLE( l, msg )              LogGUI::sLogGUI->LogConsole( l, msg )
+#define LOG_CONSOLE_FORMAT( l, msg, ... )  SET_STR_BUF( msg, __VA_ARGS__ ); LOG_CONSOLE( l, LogGUI::sCharBuf )
+#endif									   
+#define LOG_FILE( l, msg )		           LogGUI::sLogGUI->LogFile( l, msg )
+#define LOG_FILE_FORMAT( l, msg, ... )     SET_STR_BUF( msg, __VA_ARGS__ ); LOG_FILE( l, LogGUI::sCharBuf )
+										   
+#define LOG_ALL( l, msg )                  LOG_FILE( l, msg ); LOG_CONSOLE( l, msg )
+#define LOG_ALL_FORMAT( l, msg, ... )      SET_STR_BUF( msg, __VA_ARGS__ ); LOG_FILE( l, LogGUI::sCharBuf ); LOG_CONSOLE( l, LogGUI::sCharBuf )

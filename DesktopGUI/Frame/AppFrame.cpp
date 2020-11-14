@@ -27,7 +27,7 @@ wxEND_EVENT_TABLE()
 AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID )
     : wxFrame( NULL, wxAppID, title, pos, size )
 {
-    Util::Timer Tm( std::string(), MS, false );
+    Util::Timer tm( "App Frame Initialization", ADJUST, false );
 
     this->mStatusBar = CreateStatusBar();
     this->mStatusBar->SetStatusText( MSG_STATUSBAR );
@@ -38,51 +38,49 @@ AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& siz
     CreateMenu();
     BindMenu();
 
-    //Remove frame creation at startup reduce launch time
-    //mStyleFrame = new StyleFrame( this );
-    //mPreferencesFrame = new PreferencesFrame( this );   
-
-    //new wxStaticText( mStatusBar, wxID_ANY, MSG_STATUSBAR, wxPoint(5,5) );
-    LOGCONSOLE( LEVEL_TRACE, "App Frame init time: " + TO_STR( Tm.Toc() ) + " (ms)" );
+    LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
 }
 
 void AppFrame::CreateMenu()
 {
     wxMenu* menuFile = new wxMenu;
-    menuFile->Append( ID_NEWFILE,         MSG_NEW             + "\tCtrl-N"         );
-    menuFile->Append( ID_SAVEFILE,        MSG_SAVE            + "\tCtrl-S"         );
-    menuFile->Append( ID_SAVEFILEAS,      MSG_SAVEAS          + "\tCtrl-Alt-S"     );
-    menuFile->Append( ID_SAVEFILEALL,     MSG_SAVEALL         + "\tCtrl-Shift-S"   );
-    menuFile->Append( ID_OPENFILE,        MSG_OPEN            + "\tCtrl-O"         );
-    menuFile->Append( ID_RENAMEFILE,      MSG_RENAME                               );
-    menuFile->Append( ID_TABCLOSE,        MSG_CLOSE           + "\tCtrl-W"         );
-    menuFile->Append( ID_TABCLOSEALL,     MSG_CLOSEALL        + "\tCtrl-Shift-W"   );                                           
-    menuFile->AppendSeparator();                                                   
-    menuFile->Append( wxID_EXIT,          MSG_EXIT            + "\tAlt+F4"         );
-                                                                                  
-    wxMenu* menuEdit = new wxMenu;                                                
-    menuEdit->Append( ID_UNDO,            MSG_UNDO           + "\tCtrl-Z"          );
-    menuEdit->Append( ID_REDO,            MSG_REDO           + "\tCtrl-Y"          );
-    menuEdit->AppendSeparator();                                                   
-    menuEdit->Append( ID_CUT,             MSG_CUT            + "\tCtrl-X"          );
-    menuEdit->Append( ID_COPY,            MSG_COPY           + "\tCtrl-C"          );
-    menuEdit->Append( ID_PASTE,           MSG_PASTE          + "\tCtrl-V"          );
-    menuEdit->Append( ID_DELETE,          MSG_DELETE         + "\tDel"             );
-    menuEdit->Append( ID_SELECTALL,       MSG_SELECTALL      + "\tCtrl-A"          );
-    menuEdit->AppendSeparator();
-
-    wxMenu* subCase = new wxMenu;
-    subCase->Append( -1, "Uppercase" );
-    subCase->Append( -1, "Lowercase" );
-    subCase->Append( -1, "Inverse-case" );
-    subCase->Append( -1, "Random-case" );
-    menuEdit->Append( -1, "Case Conversion", subCase );
+    menuFile->Append( ID_NEWFILE,         MSG_NEW          + "\tCtrl-N"         );
+    menuFile->Append( ID_SAVEFILE,        MSG_SAVE         + "\tCtrl-S"         );
+    menuFile->Append( ID_SAVEFILEAS,      MSG_SAVEAS       + "\tCtrl-Alt-S"     );
+    menuFile->Append( ID_SAVEFILEALL,     MSG_SAVEALL      + "\tCtrl-Shift-S"   );
+    menuFile->Append( ID_OPENFILE,        MSG_OPEN         + "\tCtrl-O"         );
+    menuFile->Append( ID_RENAMEFILE,      MSG_RENAME                            );
+    menuFile->Append( ID_TABCLOSE,        MSG_CLOSE        + "\tCtrl-W"         );
+    menuFile->Append( ID_TABCLOSEALL,     MSG_CLOSEALL     + "\tCtrl-Shift-W"   );                                           
+    menuFile->AppendSeparator();                                                
+    menuFile->Append( ID_EMBEDDICT,       "Embed Dictionary"                    );                                           
+    menuFile->AppendSeparator();                                                
+    menuFile->Append( wxID_EXIT,          MSG_EXIT         + "\tAlt+F4"         );
+                                                                                
+    wxMenu* menuEdit = new wxMenu;                                              
+    menuEdit->Append( ID_UNDO,            MSG_UNDO         + "\tCtrl-Z"         );
+    menuEdit->Append( ID_REDO,            MSG_REDO         + "\tCtrl-Y"         );
+    menuEdit->AppendSeparator();                                                
+    menuEdit->Append( ID_CUT,             MSG_CUT          + "\tCtrl-X"         );
+    menuEdit->Append( ID_COPY,            MSG_COPY         + "\tCtrl-C"         );
+    menuEdit->Append( ID_PASTE,           MSG_PASTE        + "\tCtrl-V"         );
+    menuEdit->Append( ID_DELETE,          MSG_DELETE       + "\tDel"            );
+    menuEdit->Append( ID_SELECTALL,       MSG_SELECTALL    + "\tCtrl-A"         );
+    menuEdit->AppendSeparator();                                                
+                                                                                
+    wxMenu* subCase = new wxMenu;                                               
+    subCase->Append( ID_UPPERCASE,        "Uppercase"                           );
+    subCase->Append( ID_LOWERCASE,        "Lowercase"                           );
+    subCase->Append( ID_INVERSECASE,      "Inverse-case"                        );
+    subCase->Append( ID_RANDOMCASE,       "Random-case"                         );
 
     wxMenu* subEOL = new wxMenu;
-    subEOL->Append( ID_EOL_LF, "Unix (LF)" );
-    subEOL->Append( ID_EOL_CR, "Macintosh (CR)" );
-    subEOL->Append( ID_EOL_CRLF, "Windows (CR-LF)" );
-    menuEdit->Append( -1, "EOL Conversion", subEOL );
+    subEOL->Append( ID_EOL_LF,            "Unix (LF)"                           );
+    subEOL->Append( ID_EOL_CR,            "Macintosh (CR)"                      );
+    subEOL->Append( ID_EOL_CRLF,          "Windows (CR-LF)"                     );
+
+    menuEdit->Append( wxID_ANY,           "Case Conversion",   subCase          );
+    menuEdit->Append( wxID_ANY,           "EOL Conversion",    subEOL           );
                                                                                    
     wxMenu* menuSearch = new wxMenu;                                               
     menuSearch->Append( ID_FIND,          MSG_FIND           + "\tCtrl-F"          );
@@ -107,10 +105,6 @@ void AppFrame::CreateMenu()
     wxMenu* menuSettings = new wxMenu;                                            
     menuSettings->Append( ID_PREFERENCES, MSG_PREFERENCES                          );
     menuSettings->Append( ID_STYLECONFIG, MSG_STYLECONFIG                          );
-
-    wxMenu* menuDictionary = new wxMenu;
-    menuDictionary->Append( -1, "Dictionary" );
-    menuDictionary->Append( -1, "Embed" );
                                                                                   
     wxMenu* menuHelp = new wxMenu;
     menuHelp->Append( ID_REPORTBUG,       MSG_REPORTBUG                            );
@@ -125,7 +119,6 @@ void AppFrame::CreateMenu()
     menuBar->Append( menuSearch, MSG_SEARCH );
     menuBar->Append( menuView, MSG_VIEW );
     menuBar->Append( menuSettings, MSG_SETTINGS );
-    menuBar->Append( menuDictionary, "Dictionary" );
     menuBar->Append( menuHelp, MSG_HELP );
     
     SetMenuBar( menuBar );
@@ -139,8 +132,11 @@ void AppFrame::BindMenu()
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnSaveFileAll, ID_SAVEFILEALL );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnOpenFile, ID_OPENFILE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnRenameFile, ID_RENAMEFILE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnEmbedDict, ID_EMBEDDICT );
+
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPageClose, ID_TABCLOSE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPageCloseAll, ID_TABCLOSEALL );
+
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnUndo, ID_UNDO );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnRedo, ID_REDO );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnCut, ID_CUT );
@@ -148,16 +144,24 @@ void AppFrame::BindMenu()
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPaste, ID_PASTE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnDelete, ID_DELETE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnSelectAll, ID_SELECTALL );
+
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomIn, ID_ZOOMIN );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomOut, ID_ZOOMOUT );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnZoomRestore, ID_ZOOMRESTORE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnTextSummary, ID_TEXTSUM );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnCompSummary, ID_COMPSUM );
+
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnGoto, ID_GOTO );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnFind, ID_FIND );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnReplace, ID_REPLACE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnFindNext, ID_SELECTFNEXT );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnFindPrev, ID_SELECTFPREV );
+
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnUpperCase, ID_UPPERCASE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnLowerCase, ID_LOWERCASE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnInverseCase, ID_INVERSECASE );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnRandomCase, ID_RANDOMCASE );
+
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnEOL_CR, ID_EOL_CR );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnEOL_LF, ID_EOL_LF );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnEOL_CRLF, ID_EOL_CRLF );
@@ -166,7 +170,7 @@ void AppFrame::BindMenu()
 void AppFrame::OnClose( wxCommandEvent& event )
 { 
     TextField::SaveTempAll();
-    if ( LogGUI::LGUI != nullptr ) LogGUI::LGUI->Destroy();
+    if ( LogGUI::sLogGUI != nullptr ) LogGUI::sLogGUI->Destroy();
     Close(); 
 }
 
@@ -188,10 +192,10 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
             }
         }
     }
-    LOGALL( LEVEL_INFO, "==(PROGRAM EXITED)==" );
+    LOG_ALL( LEVEL_INFO, "==(PROGRAM EXITED)==" );
     if ( mStyleFrame != nullptr ) mStyleFrame->Destroy();
-    if ( mPreferencesFrame != nullptr ) mPreferencesFrame->Destroy(); 
-    if ( LogGUI::LGUI != nullptr ) LogGUI::LGUI->Destroy();
+    if ( mPreferencesFrame != nullptr ) mPreferencesFrame->Destroy();
+    if ( LogGUI::sLogGUI != nullptr ) LogGUI::sLogGUI->Destroy();
     Destroy();
 }
 
@@ -274,6 +278,6 @@ void AppFrame::OnStyleConfig( wxCommandEvent& event )
 
 void AppFrame::OnDebugShow( wxCommandEvent& event )
 {
-    LogGUI::LGUI->Show( true );
-    LogGUI::LGUI->Raise();
+    LogGUI::sLogGUI->Show( true );
+    LogGUI::sLogGUI->Raise();
 }

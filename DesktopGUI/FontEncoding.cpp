@@ -1,8 +1,9 @@
 #include "FontEncoding.h"
 #include "../Utilities/Filestream.h"
 #include "../Utilities/Timer.h"
+#include "../Utilities/Random.h"
 #include "Feature/LogGUI.h"
-#include <wx/stc/stc.h>
+#include <wx/stc/stc.h> 
 
 wxString FontEncoding::GetEncodingString( const wxFontEncoding& enc )
 {
@@ -99,14 +100,13 @@ wxString FontEncoding::GetEncodingString( const wxFontEncoding& enc )
     return wxString();
 }
 
-void FontEncoding::AdjustEOLString( wxString& str, int mode )
+bool FontEncoding::ConvertEOLString( wxString& str, int mode )
 {
     Util::Timer Tm( "Adjust EOL", MS, false );
 
-    // find eol type
+    if ( str.empty() ) return true;
     int before = GetEOLMode( str );
-    // if already the same eol type
-    if ( before == mode ) return;
+    if ( before == mode ) return false; // no need to convert if already the same
 
     // remove eol char
     std::vector<std::string> vLines;
@@ -117,31 +117,33 @@ void FontEncoding::AdjustEOLString( wxString& str, int mode )
     else if ( before == wxSTC_EOL_CRLF )
     {
         vLines = Filestream::ParseString( std::string( str ), LF_CHAR ); // parse by LF char
-        for ( auto& line : vLines ) line.pop_back(); // remove CR char
+        for ( uint32_t i = 0; i < vLines.size() - 1; i++ ) vLines[i].pop_back(); // remove CR char0
     }
     
     // create new eol char
     str.clear();
     if ( mode == wxSTC_EOL_CR )
     {
-        for ( const auto& line : vLines )
-            str += line + '\r';   
+        for ( uint32_t i = 0; i < vLines.size() - 1; i++ )
+            str += vLines[i] + '\r';
     }
     else if ( mode == wxSTC_EOL_LF )
     {
-        for ( const auto& line : vLines )
-            str += line + '\n';
+        for ( uint32_t i = 0; i < vLines.size() - 1; i++ )
+            str += vLines[i] + '\n';
     }
     else if ( mode == wxSTC_EOL_CRLF )
     {
-        for ( const auto& line : vLines )
-            str += line + '\r' + '\n';
+        for ( uint32_t i = 0; i < vLines.size() - 1; i++ )
+            str += vLines[i] + "\r\n";
     }
+    str += vLines.back();
 
-    LOGALL( LEVEL_TRACE, "Adjust EOL time: " + TO_STR( Tm.Toc() ), +" (ms)" );
+    LOG_ALL_FORMAT( LEVEL_TRACE, "Adjust EOL time: %f (ms)", Tm.Toc() );
+    return true;
 }
 
-int FontEncoding::GetEOLMode( wxString& str )
+int FontEncoding::GetEOLMode( const wxString& str )
 {
     uint32_t strSize = str.size();
     for ( uint32_t i = 0; i < strSize; i++ )
@@ -153,4 +155,68 @@ int FontEncoding::GetEOLMode( wxString& str )
             return wxSTC_EOL_LF;
     }
     return wxSTC_EOL_CRLF; //default
+}
+
+wxString FontEncoding::GetEOLModeString( const wxString& str )
+{
+    return EOLModeString( GetEOLMode( str ) );
+}
+
+wxString FontEncoding::EOLModeString( int mode )
+{
+    if      ( mode == wxSTC_EOL_CR )   return "Macintosh (CR)";
+    else if ( mode == wxSTC_EOL_LF )   return "Unix (LF)";
+    else if ( mode == wxSTC_EOL_CRLF ) return "Windows (CR-LF)";
+}
+
+void FontEncoding::CaseConversion( wxStyledTextCtrl* stc, const StringCase& sc )
+{
+    wxString buf = stc->GetText();
+    if ( buf.empty() ) return;
+    
+    void ( *func )( wxString&, uint32_t, uint32_t ) = &RandomCase;
+    if      ( sc == CASE_INVERSE ) func = &InverseCase;
+    else if ( sc == CASE_RANDOM )  func = &RandomCase;
+    else if ( sc == CASE_UPPER )   func = &UpperCase;
+    else if ( sc == CASE_LOWER )   func = &LowerCase;
+
+    auto selections = stc->GetSelections();
+    for ( int i = 0; i < selections; i++ )
+    {
+        auto start = stc->GetSelectionNStart( i );
+        auto end = stc->GetSelectionNEnd( i );
+        func( buf, start, end );
+    }
+    stc->SetText( buf );
+}
+
+void FontEncoding::UpperCase( wxString& str, uint32_t from, uint32_t to )
+{
+    std::transform( str.begin() + from, str.begin() + to, str.begin() + from, toupper );
+}
+
+void FontEncoding::LowerCase( wxString& str, uint32_t from, uint32_t to )
+{
+    std::transform( str.begin() + from, str.begin() + to, str.begin() + from, tolower );
+}
+
+void FontEncoding::InverseCase( wxString& str, uint32_t from, uint32_t to )
+{
+    std::transform( str.begin() + from, str.begin() + to, str.begin() + from, ReverseCaseChar );
+}
+
+void FontEncoding::RandomCase( wxString& str, uint32_t from, uint32_t to )
+{
+    std::transform( str.begin() + from, str.begin() + to, str.begin() + from, RandomCaseChar );
+}
+
+char FontEncoding::ReverseCaseChar( char c )
+{
+    const auto uc = static_cast<unsigned char>( c ); // Sic.
+    return ::isupper( uc ) ? ::tolower( uc ) : ::toupper( uc );
+}
+
+char FontEncoding::RandomCaseChar( char c )
+{
+    return Util::Random::Uniform() % 2  == 0 ? ::tolower( c ) : ::toupper( c );
 }

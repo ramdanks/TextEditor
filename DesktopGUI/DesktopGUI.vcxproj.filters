@@ -75,6 +75,15 @@
     <ClCompile Include="FontEncoding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Feature\FilehandleGUI.cpp">
+      <Filter>Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="DragDrop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame\DictionaryFrame.cpp">
+      <Filter>Frame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Utilities\Err.h">
@@ -137,6 +146,18 @@
     <ClInclude Include="FontEncoding.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Utilities\Random.h">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Feature\FilehandleGUI.h">
+      <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="DragDrop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Frame\DictionaryFrame.h">
+      <Filter>Frame</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc">
@@ -144,7 +165,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\Resource\icon.png">
+    <Image Include="icon\app.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icon\bug.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

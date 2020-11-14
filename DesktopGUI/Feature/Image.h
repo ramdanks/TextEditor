@@ -4,7 +4,7 @@
 class Image
 {
 public:
-	static void Init();
+	static void FetchData();
 	static wxBitmap& GetImg( size_t index );
 	static size_t AddImg( const std::string& filepath );
 

@@ -22,6 +22,9 @@ public:
 	static bool ExistChangedFile();
 	static bool SaveToExit();
 
+	// feature
+	static void OnDropFiles( wxDropFilesEvent& event );
+
 	// internal changes
 	static void OnUpdateUI( wxStyledTextEvent& event );
 	static void OnTextChanged( wxStyledTextEvent& event );
@@ -41,6 +44,11 @@ public:
 	static void OnEOL_LF( wxCommandEvent& event );
 	static void OnEOL_CRLF( wxCommandEvent& event );
 
+	static void OnUpperCase( wxCommandEvent& event );
+	static void OnLowerCase( wxCommandEvent& event );
+	static void OnInverseCase( wxCommandEvent& event );
+	static void OnRandomCase( wxCommandEvent& event );
+
 	static void OnNewFile( wxCommandEvent& event );
 	static void OnRenameFile( wxCommandEvent& event );
 	static void OnOpenFile( wxCommandEvent& event );
@@ -49,6 +57,7 @@ public:
 	static void OnSaveFile( wxCommandEvent& event );
 	static void OnSaveFileAll( wxCommandEvent& event );
 	static void OnSaveFileAs( wxCommandEvent& event );
+	static void OnEmbedDict( wxCommandEvent& event );
 
 	static void OnUndo( wxCommandEvent& event );
 	static void OnRedo( wxCommandEvent& event );
@@ -68,7 +77,7 @@ public:
 	static void OnFindPrev( wxCommandEvent& event );
 
 private:
-	static void UpdateEOLString( wxStyledTextCtrl* stc, int mode );
+	static bool UpdateEOLString( wxStyledTextCtrl* stc, int mode );
 
 	static void UpdateStatusEOL( wxStyledTextCtrl* stc );
 	static void UpdateStatusEncoding( wxStyledTextCtrl* stc );
@@ -76,22 +85,19 @@ private:
 
 	static void FindText( wxStyledTextCtrl* stc, bool next );
 	static void MarginAutoAdjust();
-	static void InitFilehandle();
 	static void CreateTempFile( const std::string& name );
+	static bool AlreadyOpened( const std::string& filepath, bool focus );
 
 	static void AddNewTab( sPageData& pd );
 	static void LoadStyle( wxStyledTextCtrl* stc );
-	static void FormatSave( const std::string& sData, const std::string& filepath );
-	static std::vector<uint8_t> FormatOpen( const std::string& filepath );
 	static void UpdateParentName();
-	static void UpdateSaveIndicator( bool save );
+	static void UpdateSaveIndicator( bool save, int index = -1 );
 	
 	static bool isGotoInit;
 	static bool isFindInit;
-
+	static bool isDictInit;
+	
 	static wxFrame* mParent;
 	static wxAuiNotebook* mNotebook;
 	static std::vector<sPageData> mPageData;
-
-	static std::string SupportedFormat;
 };

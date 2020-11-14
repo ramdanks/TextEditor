@@ -3,11 +3,11 @@
 #include <vector>
 
 #define MAJOR_VERSION     "0"
-#define CHILD_VERSION     "6"
+#define CHILD_VERSION     "7"
 #define APP_NAME          "Mémoriser"
 #define DEBUG_NAME        "Mémoriser - Debug Console"
 #define DICT_NAME         "Mémoriser - Dictionary"
-#define CONFIG_FILEPATH   "config.conf"
+#define CONFIG_FILEPATH   "config.cfg"
 
 struct sConfigReference
 {
@@ -19,9 +19,9 @@ struct sConfigReference
 class Config
 {
 public:
-	static void FetchConfiguration();
-	static void LoadDefaultConfiguration();
-	static void SaveConfiguration();
+	static void FetchData();
+	static void LoadDefaultConfig();
+	static void SaveConfig();
 	static std::string LoadSupportedFormat();
 
 	static int mUseSplash;

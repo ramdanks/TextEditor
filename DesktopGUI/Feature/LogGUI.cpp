@@ -1,12 +1,14 @@
 #include "LogGUI.h"
 #include "../../Utilities/Filestream.h"
+#include "../../Utilities/Timer.h"
 #include "Config.h"
 
 wxBEGIN_EVENT_TABLE( LogGUI, wxFrame )
 EVT_CLOSE( LogGUI::OnClose )
 wxEND_EVENT_TABLE()
 
-LogGUI* LogGUI::LGUI;
+LogGUI* LogGUI::sLogGUI;
+char LogGUI::sCharBuf[256];
 
 LogGUI::LogGUI( wxWindow* parent, bool GUI )
 	: wxFrame( parent, wxID_ANY, DEBUG_NAME, wxDefaultPosition, wxSize( 600, 300 ) )
@@ -28,6 +30,7 @@ LogGUI::LogGUI( wxWindow* parent, bool GUI )
 		mDebugTextField->StyleClearAll();
 		mDebugTextField->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( 50, 50, 60 ) ); //linenumber back color
 	}
+	this->SetIcon( wxICON( ICON_BUG ) );
 }
 
 void LogGUI::SetLogFile( const std::string& filepath )

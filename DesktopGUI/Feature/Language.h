@@ -31,15 +31,12 @@ public:
 	Language( const Language& other ) = delete;
 
 	static bool LoadMessage( LanguageID id );
-
-	static wxString WhatLanguage();
 	static wxString GetMessage( size_t index );
 
 private:
 	static void LoadMessageDefault();
 	static wxString IdentifyID( LanguageID id );
 
-	static wxString mTitle;
 	static std::vector<wxString> mMessage;
 };
 

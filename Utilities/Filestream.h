@@ -113,7 +113,7 @@ public:
 		return elems;
 	}
 
-	static std::string getFileName( std::string filePath, bool withExtension = true, char seperator = '\\' )
+	static std::string GetFileName( std::string filePath, bool withExtension = true, char seperator = '\\' )
 	{
 		// Get last dot position
 		std::size_t dotPos = filePath.rfind( '.' );
