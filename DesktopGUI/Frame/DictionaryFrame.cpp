@@ -1,5 +1,5 @@
 #include "DictionaryFrame.h"
-#include "Feature/Language.h"
+#include "../Feature/Language.h"
 #include <wx/icon.h>
 
 wxWindow* DictionaryFrame::mParent;

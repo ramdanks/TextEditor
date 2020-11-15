@@ -1,4 +1,5 @@
 Resource/*
+Vendor/*
 DesktopGUI/x64/*
 DesktopGUI/temp/*
 DesktopGUI/*.exe
