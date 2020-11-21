@@ -81,6 +81,10 @@ public:
 	static void OnFindPrev( wxCommandEvent& event );
 
 private:
+	static void UpdateMenuWindow();
+	static void OnSelectMenuWindow( wxCommandEvent& event );
+	static void OnOpenMenuWindow( wxMenuEvent& event );
+
 	static bool UpdateEOLString( wxStyledTextCtrl* stc, int mode );
 
 	static void UpdateStatusEOL( wxStyledTextCtrl* stc );
@@ -101,9 +105,11 @@ private:
 	static bool isFindInit;
 	static bool isDictInit;
 	
+	static wxMenu* mMenuWnd;
 	static wxFrame* mParent;
 	static wxAuiNotebook* mNotebook;
 	static std::vector<sPageData> mPageData;
+	static std::vector<wxMenuItem*> mWindowItem;
 
 	friend class DictionaryFrame;
 	friend class AutoThread;

@@ -47,5 +47,6 @@ enum Menu
     ID_RANDOMCASE,
     ID_EOL_CR,
     ID_EOL_LF,
-    ID_EOL_CRLF
+    ID_EOL_CRLF,
+    ID_WINDOWSELECT = 1000
 };

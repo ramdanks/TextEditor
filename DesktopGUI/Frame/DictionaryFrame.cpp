@@ -321,7 +321,7 @@ void DictionaryFrame::OnRemoveSelected( wxCommandEvent& event )
 	EraseDict( textPath, dicPath );
 
 	ResetStyling( textPath );
-	StartStyling( dicPath );
+	StartStyling( textPath );
 
 	auto stc = RequestSTC( textPath );
 	if ( stc == nullptr ) return;
@@ -391,9 +391,11 @@ void DictionaryFrame::OnClose( wxCommandEvent& event )
 
 void DictionaryFrame::OnOK( wxCommandEvent& event )
 {
-	auto textPath = mComboBox->GetStringSelection();
-	ResetStyling( textPath );
-	StartStyling( textPath );
+	for ( const auto& pages : mData )
+	{
+		ResetStyling( pages.first );
+		StartStyling( pages.first );
+	}
 	mFrame->Show( false );
 }
 

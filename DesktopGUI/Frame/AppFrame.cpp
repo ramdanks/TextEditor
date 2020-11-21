@@ -31,11 +31,11 @@ AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& siz
     this->mStatusBar = CreateStatusBar();
     this->mStatusBar->SetStatusText( MSG_STATUSBAR );
 
-    TextField::Init( this );
-    TextField::FetchTempFile();
-
     CreateMenu();
     BindMenu();
+
+    TextField::Init( this );
+    TextField::FetchTempFile();
 
     if ( Config::mUseAutoSave ) AutoThread::DeployAutoSave( Config::mSaveInterval );
     if ( Config::mUseAutoHighlight ) AutoThread::DeployAutoHighlight( Config::mHighlightInterval );

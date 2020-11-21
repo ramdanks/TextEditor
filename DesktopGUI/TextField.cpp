@@ -6,17 +6,20 @@
 #include "Feature/LogGUI.h"
 #include "Feature/Config.h"
 #include "Feature/Image.h"
+#include "Frame/DictionaryFrame.h"
 #include "Frame/GotoFrame.h"
 #include "Frame/FindFrame.h"
-#include "Frame/DictionaryFrame.h"
+#include "Frame/EventID.h"
 #include "FontEncoding.h"
 #include <wx/busyinfo.h>
 #include <mutex>
 
 //translation unit for static member
 wxFrame* TextField::mParent;
+wxMenu* TextField::mMenuWnd;
 wxAuiNotebook* TextField::mNotebook;
 std::vector<sPageData> TextField::mPageData;
+std::vector<wxMenuItem*> TextField::mWindowItem;
 bool TextField::isGotoInit = false;
 bool TextField::isFindInit = false;
 bool TextField::isDictInit = false;
@@ -28,7 +31,8 @@ wxCommandEvent NullCmdEvent = wxCommandEvent( wxEVT_NULL );
 void TextField::Init( wxFrame * parent )
 {
     mParent = parent;
-    mNotebook = new wxAuiNotebook( parent );
+    int style = wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE | wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_CLOSE_ON_ACTIVE_TAB | wxAUI_NB_MIDDLE_CLICK_CLOSE;
+    mNotebook = new wxAuiNotebook( parent, -1, wxDefaultPosition, wxDefaultSize, style );
 
     const int statusWidth[] = { -3, -1, 120, -1 };
     mParent->GetStatusBar()->SetFieldsCount( 4 );
@@ -46,7 +50,6 @@ void TextField::Init( wxFrame * parent )
 
 void TextField::Destroy()
 {
-    delete mNotebook;
     mNotebook = nullptr;
 }
 
@@ -175,6 +178,38 @@ void TextField::OnDropFiles( wxDropFilesEvent& event )
     LOG_ALL_FORMAT( LEVEL_TRACE, "Drag n Drop Items: %d, Size: %d, Time: %f (ms)", files.size(), readSizes, tm.Toc() );
 }
 
+void TextField::UpdateMenuWindow()
+{
+    auto menubar = mParent->GetMenuBar();
+    int pos = menubar->FindMenu( "&Window" );
+    if ( pos != wxNOT_FOUND ) menubar->Remove( pos );
+
+    auto count = mNotebook->GetPageCount();
+    mWindowItem.clear();
+    mWindowItem.reserve( count );
+
+    mMenuWnd = new wxMenu;
+    for ( uint32_t i = 0; i < count; i++ )
+    {
+        mWindowItem.emplace_back( mMenuWnd->AppendCheckItem( ID_WINDOWSELECT + i, mNotebook->GetPageText( i ) ) );
+        mParent->Bind( wxEVT_COMMAND_MENU_SELECTED, OnSelectMenuWindow, ID_WINDOWSELECT + i );
+    }
+    menubar->Append( mMenuWnd, "&Window" );
+    mMenuWnd->Bind( wxEVT_MENU_OPEN, OnOpenMenuWindow );
+}
+
+void TextField::OnSelectMenuWindow( wxCommandEvent& event )
+{
+    auto sel = event.GetId() - ID_WINDOWSELECT;
+    mNotebook->ChangeSelection( sel );
+}
+
+void TextField::OnOpenMenuWindow( wxMenuEvent& event )
+{
+    for ( const auto& menu : mWindowItem ) menu->Check( false );
+    mWindowItem[mNotebook->GetSelection()]->Check();
+}
+
 bool TextField::UpdateEOLString( wxStyledTextCtrl* stc, int mode )
 {
     auto str = stc->GetValue();
@@ -287,6 +322,7 @@ void TextField::OnPageDrag( wxAuiNotebookEvent& evt )
         sPageData temp = mPageData[i];
         mPageData.erase( mPageData.begin() + i );
         mPageData.insert( mPageData.begin() + currentPage, temp );
+        UpdateMenuWindow();
     }
     mNotebook->SetSelection( currentPage );
 }
@@ -544,7 +580,8 @@ void TextField::OnPageClose( wxCommandEvent& evt )
              mNotebook->DeletePage( currentPage );
              mPageData.erase( mPageData.begin() + currentPage );
          }
-         UpdateParentName();     
+         UpdateMenuWindow();
+         UpdateParentName();
     }
     catch ( Util::Err& e )
     {
@@ -801,6 +838,8 @@ void TextField::AddNewTab( sPageData& pd )
 
     pd.TextField->DragAcceptFiles( true );
     pd.TextField->Bind( wxEVT_DROP_FILES, TextField::OnDropFiles );
+
+    UpdateMenuWindow();
 }
 
 void TextField::LoadStyle( wxStyledTextCtrl* stc )

@@ -3,7 +3,7 @@
 #include <vector>
 
 #define MAJOR_VERSION     "0"
-#define CHILD_VERSION     "7"
+#define CHILD_VERSION     "8"
 #define APP_NAME          "Mémoriser"
 #define DEBUG_NAME        "Mémoriser - Debug Console"
 #define DICT_NAME         "Mémoriser - Dictionary"

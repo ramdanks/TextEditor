@@ -74,6 +74,8 @@ void AutoThread::RoutineAutoHighlight()
 	static std::hash<wxString> hash;
 
 	auto page = TextField::GetActivePage();
+	if ( page == wxNOT_FOUND ) return;
+
 	auto textPath = TextField::mPageData[page].FilePath;
 	if ( !DictionaryFrame::ExistList( textPath ) ) return;
 
