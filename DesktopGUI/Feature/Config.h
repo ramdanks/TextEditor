@@ -31,8 +31,10 @@ public:
 	static int mZoomMin;
 	static int mZoomMax;
 	static int mZoomDefault;
-	static int mAutosaveInterval;
-	static int mUseAutosave;
+	static int mSaveInterval;
+	static int mUseAutoSave;
+	static int mUseAutoHighlight;
+	static int mHighlightInterval;
 
 private:
 	static void MakeTemplate();

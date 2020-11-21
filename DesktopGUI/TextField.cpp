@@ -44,6 +44,12 @@ void TextField::Init( wxFrame * parent )
     Filestream::Create_Directories( "temp" );
 }
 
+void TextField::Destroy()
+{
+    delete mNotebook;
+    mNotebook = nullptr;
+}
+
 void TextField::MarginAutoAdjust()
 {
     auto currentPage = mNotebook->GetSelection();
@@ -95,9 +101,10 @@ bool TextField::AlreadyOpened( const std::string& filepath, bool focus )
 
 void TextField::SaveTempAll()
 {
+    if ( mNotebook == nullptr ) return;
     auto mutex = std::mutex();
     mutex.lock();
-    for ( uint32_t i = 0; i < mNotebook->GetPageCount(); i++ )
+    for ( uint32_t i = 0; i < mPageData.size(); i++ )
     {
         if ( mPageData[i].isTemporary )
         {
@@ -128,6 +135,12 @@ bool TextField::SaveToExit()
     for ( const auto& i : mPageData )
         if ( !i.isTemporary && i.isChanged ) return false;
     return true;
+}
+
+int TextField::GetActivePage()
+{
+    if ( mNotebook == nullptr ) return -1;
+    return mNotebook->GetSelection();
 }
 
 void TextField::OnDropFiles( wxDropFilesEvent& event )
@@ -504,6 +517,9 @@ void TextField::OnPageClose( wxCommandEvent& evt )
         auto currentPage = mNotebook->GetSelection();
         THROW_ERR_IF( currentPage == wxNOT_FOUND, "Cannot found selected tab. problems during closing tab!" );
 
+        //destroy dictionary list after closing a pages
+        DictionaryFrame::EraseList( mPageData[currentPage].FilePath );
+
         //if that page is changed then ask first
         if ( mPageData[currentPage].isChanged )
         {
@@ -654,7 +670,7 @@ void TextField::OnEmbedDict( wxCommandEvent& event )
     for ( const auto& i : mPageData ) list.push_back( i.FilePath );
 
     auto currentPage = mNotebook->GetSelection();
-    DictionaryFrame::UpdateComboBox( list, currentPage );
+    DictionaryFrame::UpdateComboBox( list, mPageData[currentPage].FilePath );
     DictionaryFrame::ShowAndFocus();
 
     LOG_ALL( LEVEL_TRACE, tm.Toc_String() );

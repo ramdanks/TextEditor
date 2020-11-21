@@ -6,14 +6,17 @@
 
 //translation unit for static member
 int Config::mUseSplash;
-int Config::mAutosaveInterval;
-int Config::mUseAutosave;
+int Config::mSaveInterval;
+int Config::mUseAutoSave;
 int Config::mFontSize;
 int Config::mFontID;
 int Config::mLanguageID;
 int Config::mZoomMin;
 int Config::mZoomMax;
 int Config::mZoomDefault;
+int Config::mUseAutoHighlight;
+int Config::mHighlightInterval;
+
 std::vector<sConfigReference> Config::mConfTemplate;
 
 void Config::FetchData()
@@ -36,6 +39,7 @@ void Config::FetchData()
 		std::string sRead = (const char*) &vRead[0];
 		auto vBuffer = Filestream::ParseString( sRead, '\n' );
 		THROW_ERR_IFEMPTY( vRead, "Failed to read configuration file!" );
+		THROW_ERR_IF( vBuffer.size() != mConfTemplate.size(), "Config file is compromised!" );
 
 		for ( int i = 0; i < mConfTemplate.size(); i++ )
 		{
@@ -66,8 +70,10 @@ void Config::LoadDefaultConfig()
 {
 	mUseSplash = true;
 	mLanguageID = 0;
-	mAutosaveInterval = 30;
-	mUseAutosave = true;
+	mSaveInterval = 3600;
+	mUseAutoSave = true;
+	mHighlightInterval = 100;
+	mUseAutoHighlight = true;
 	mFontID = 0;
 	mFontSize = 10;
 	mZoomMin = -3;
@@ -111,8 +117,10 @@ void Config::MakeTemplate()
 {
 	mConfTemplate.push_back( sConfigReference( "mSplashScreen",      &mUseSplash ) );
 	mConfTemplate.push_back( sConfigReference( "mSystemLanguage",    &mLanguageID ) );
-	mConfTemplate.push_back( sConfigReference( "mAutosaveInterval",  &mAutosaveInterval ) );
-	mConfTemplate.push_back( sConfigReference( "mUseAutosave",       &mUseAutosave ) );
+	mConfTemplate.push_back( sConfigReference( "mUseAutoSave",       &mUseAutoSave ) );
+	mConfTemplate.push_back( sConfigReference( "mSaveInterval",      &mSaveInterval ) );
+	mConfTemplate.push_back( sConfigReference( "mUseAutoHighlight",  &mUseAutoHighlight ) );
+	mConfTemplate.push_back( sConfigReference( "mHighlightInterval", &mHighlightInterval ) );
 	mConfTemplate.push_back( sConfigReference( "mFontID",            &mFontID ) );
 	mConfTemplate.push_back( sConfigReference( "mFontSize",          &mFontSize ) );
 	mConfTemplate.push_back( sConfigReference( "mZoomMin",           &mZoomMin ) );

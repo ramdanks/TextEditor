@@ -51,9 +51,6 @@
     <ClCompile Include="Frame\StyleFrame.cpp">
       <Filter>Frame</Filter>
     </ClCompile>
-    <ClCompile Include="Feature\AutoSaver.cpp">
-      <Filter>Feature</Filter>
-    </ClCompile>
     <ClCompile Include="Feature\Config.cpp">
       <Filter>Feature</Filter>
     </ClCompile>
@@ -78,11 +75,11 @@
     <ClCompile Include="Feature\FilehandleGUI.cpp">
       <Filter>Feature</Filter>
     </ClCompile>
-    <ClCompile Include="DragDrop.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Frame\DictionaryFrame.cpp">
       <Filter>Frame</Filter>
+    </ClCompile>
+    <ClCompile Include="Feature\AutoThread.cpp">
+      <Filter>Feature</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,9 +116,6 @@
     <ClInclude Include="Frame\StyleFrame.h">
       <Filter>Frame</Filter>
     </ClInclude>
-    <ClInclude Include="Feature\AutoSaver.h">
-      <Filter>Feature</Filter>
-    </ClInclude>
     <ClInclude Include="Feature\Config.h">
       <Filter>Feature</Filter>
     </ClInclude>
@@ -152,11 +146,11 @@
     <ClInclude Include="Feature\FilehandleGUI.h">
       <Filter>Feature</Filter>
     </ClInclude>
-    <ClInclude Include="DragDrop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Frame\DictionaryFrame.h">
       <Filter>Frame</Filter>
+    </ClInclude>
+    <ClInclude Include="Feature\AutoThread.h">
+      <Filter>Feature</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

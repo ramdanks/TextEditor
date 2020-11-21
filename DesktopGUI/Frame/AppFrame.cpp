@@ -1,6 +1,7 @@
 #include "AppFrame.h"
 #include "../../Utilities/Timer.h"
 #include "../../Utilities/Filestream.h"
+#include "../Feature/AutoThread.h"
 #include "../Feature/Config.h"
 #include "../Feature/LogGUI.h"
 #include "../Feature/Language.h"
@@ -12,8 +13,6 @@ wxBEGIN_EVENT_TABLE( AppFrame, wxFrame )
 EVT_MENU( wxID_ABOUT, AppFrame::OnAbout )
 EVT_MENU( ID_DOCUMENTATION, AppFrame::OnDocumentation )
 EVT_MENU( ID_LOGDIR, AppFrame::OnLogDir )
-EVT_MENU( ID_NEWDICT, AppFrame::OnNewDict )
-EVT_MENU( ID_OPENDICT, AppFrame::OnOpenDict )
 EVT_MENU( ID_REPORTBUG, AppFrame::OnReportBug )
 EVT_MENU( ID_STAYONTOP, AppFrame::OnStayOnTop )
 EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugShow )
@@ -38,6 +37,9 @@ AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& siz
     CreateMenu();
     BindMenu();
 
+    if ( Config::mUseAutoSave ) AutoThread::DeployAutoSave( Config::mSaveInterval );
+    if ( Config::mUseAutoHighlight ) AutoThread::DeployAutoHighlight( Config::mHighlightInterval );
+
     LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
 }
 
@@ -53,7 +55,8 @@ void AppFrame::CreateMenu()
     menuFile->Append( ID_TABCLOSE,        MSG_CLOSE        + "\tCtrl-W"         );
     menuFile->Append( ID_TABCLOSEALL,     MSG_CLOSEALL     + "\tCtrl-Shift-W"   );                                           
     menuFile->AppendSeparator();                                                
-    menuFile->Append( ID_EMBEDDICT,       "Embed Dictionary"                    );                                           
+    menuFile->Append( ID_EMBEDDICT,       "Text Highlighting"                   );                                           
+    menuFile->Append( ID_REFRESHDICT,     "Refresh\tCtrl-R"        );                                           
     menuFile->AppendSeparator();                                                
     menuFile->Append( wxID_EXIT,          MSG_EXIT         + "\tAlt+F4"         );
                                                                                 
@@ -133,6 +136,7 @@ void AppFrame::BindMenu()
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnOpenFile, ID_OPENFILE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnRenameFile, ID_RENAMEFILE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnEmbedDict, ID_EMBEDDICT );
+    Bind( wxEVT_COMMAND_MENU_SELECTED, DictionaryFrame::OnRefreshDict, ID_REFRESHDICT );
 
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPageClose, ID_TABCLOSE );
     Bind( wxEVT_COMMAND_MENU_SELECTED, TextField::OnPageCloseAll, ID_TABCLOSEALL );
@@ -178,7 +182,6 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
 {
     if ( event.CanVeto() )
     {
-        TextField::SaveTempAll();
         if ( !TextField::SaveToExit() )
         {
             auto prompt = wxMessageDialog( this, "There is non-temporary file which has been modified.\n"
@@ -192,9 +195,12 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
             }
         }
     }
-    LOG_ALL( LEVEL_INFO, "==(PROGRAM EXITED)==" );
+    Show( false );
+    TextField::SaveTempAll();
+    TextField::Destroy();
     if ( mStyleFrame != nullptr ) mStyleFrame->Destroy();
     if ( mPreferencesFrame != nullptr ) mPreferencesFrame->Destroy();
+    LOG_ALL( LEVEL_INFO, "==(PROGRAM EXITED)==" );
     if ( LogGUI::sLogGUI != nullptr ) LogGUI::sLogGUI->Destroy();
     Destroy();
 }
@@ -233,20 +239,6 @@ void AppFrame::OnLogDir( wxCommandEvent& event )
 
 void AppFrame::OnReportBug( wxCommandEvent& event )
 {
-}
-
-void AppFrame::OnNewDict( wxCommandEvent& event )
-{
-    if ( mGridField == nullptr )  mGridField = new GridField( this );
-    mGridField->Show();
-    mGridField->OnNewDict();
-}
-
-void AppFrame::OnOpenDict( wxCommandEvent& event )
-{
-    if ( mGridField == nullptr )  mGridField = new GridField( this );
-    mGridField->Show();
-    mGridField->OnOpenDict();
 }
 
 void AppFrame::OnStayOnTop( wxCommandEvent& event )

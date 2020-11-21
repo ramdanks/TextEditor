@@ -287,7 +287,7 @@ int FindFrame::GetFlags()
 {
 	auto currentPage = mNotebook->GetSelection();
 	sPageAttrib* where = mReplaceAttrib;
-	if      ( currentPage == FIND_PAGE )    where = mFindAttrib;
+	if ( currentPage == FIND_PAGE ) where = mFindAttrib;
 
 	int flags = 0;
 	if ( BOXMW( where )->GetValue() ) flags = flags | wxSTC_FIND_WHOLEWORD;

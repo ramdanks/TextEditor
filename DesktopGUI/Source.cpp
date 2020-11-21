@@ -6,7 +6,6 @@
 #include "Feature/Config.h"
 #include "Feature/LogGUI.h"
 #include "Feature/Language.h"
-#include "Feature/AutoSaver.h"
 #include "Feature/Image.h"
 #include "Frame/AppFrame.h"
 #include "TextField.h"
@@ -59,10 +58,6 @@ bool MyApp::OnInit()
         mMainFrame = new AppFrame( APP_NAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
         THROW_ERR_IFNULLPTR( mMainFrame, "Problem creating Application Frame OnInit wxApp!" );
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
-
-        //autosaver
-        if ( Config::mUseAutosave )
-            AutoSaver::Deploy( Config::mAutosaveInterval );
 
         //finally
         if ( mSplash != nullptr )

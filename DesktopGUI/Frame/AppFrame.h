@@ -22,9 +22,6 @@ private:
     void OnLogDir( wxCommandEvent& event );
     void OnReportBug( wxCommandEvent& event );
 
-    void OnNewDict( wxCommandEvent& event );
-    void OnOpenDict( wxCommandEvent& event );
-
     void OnStayOnTop( wxCommandEvent& event );
     void OnPreferences( wxCommandEvent& event );
     void OnStyleConfig( wxCommandEvent& event );

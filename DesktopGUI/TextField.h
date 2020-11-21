@@ -2,6 +2,7 @@
 #include <wx/wxprec.h>
 #include <wx/aui/auibook.h>
 #include <wx/stc/stc.h>
+#include "Frame/DictionaryFrame.h"
 
 struct sPageData
 {
@@ -16,11 +17,14 @@ class TextField
 {
 public:
 	static void Init( wxFrame* parent );
+	static void Destroy();
+
 	static void FetchTempFile();
 	static void SaveTempAll();
 	static bool ExistTempFile();
 	static bool ExistChangedFile();
 	static bool SaveToExit();
+	static int GetActivePage();
 
 	// feature
 	static void OnDropFiles( wxDropFilesEvent& event );
@@ -100,4 +104,7 @@ private:
 	static wxFrame* mParent;
 	static wxAuiNotebook* mNotebook;
 	static std::vector<sPageData> mPageData;
+
+	friend class DictionaryFrame;
+	friend class AutoThread;
 };

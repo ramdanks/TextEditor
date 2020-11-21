@@ -94,6 +94,8 @@ public:
 
 	static std::vector<std::string> ParseString( const std::string& str, char delimiter, uint32_t max_parse = 0 )
 	{
+		if ( strlen( str.c_str() ) == 0 ) return std::vector<std::string>();
+
 		std::stringstream ss( str );
 		std::string item;
 		std::vector<std::string> elems;
@@ -111,6 +113,32 @@ public:
 			}
 		}
 		return elems;
+	}
+
+	static std::string GetEOLChar( const std::string& str )
+	{
+		for ( uint32_t i = 0; i < str.size(); i++ )
+			if ( str[i] == '\r' )
+				if ( i + 1 < str.size() && str[i + 1] == '\n' ) return "\r\n";
+				else return "\r";
+			else if ( str[i] == '\n' ) return "\n";
+		return std::string();
+	}
+
+	static std::vector<std::string> ParseNewline( const std::string& str )
+	{
+		auto eol = GetEOLChar( str );
+		if ( eol.empty() ) return std::vector<std::string>();
+
+		std::vector<std::string> parse;
+		if ( eol == "\r\n" )
+		{
+			parse = ParseString( str, eol[1] );
+			for ( auto& i : parse ) i.pop_back();
+		}
+		else parse = ParseString( str, eol[0] );
+
+		return parse;
 	}
 
 	static std::string GetFileName( std::string filePath, bool withExtension = true, char seperator = '\\' )

@@ -145,6 +145,8 @@
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,6 +164,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

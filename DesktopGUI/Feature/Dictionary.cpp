@@ -16,26 +16,29 @@ Dictionary::Dictionary( const std::string& filepath )
 	Load( filepath );
 }
 
+std::unordered_map<std::string, std::string> Dictionary::GetContent() const
+{
+	return mContent;
+}
+
 bool Dictionary::Load( const std::string& filepath )
 {
 	//Util::Timer Tm( "Load CSV", ADJUST, true );
+	if ( Filestream::FileExtension( filepath ) != "csv" ) return false;
 
 	auto vRead = Filestream::Read_Bin( filepath );
 	if ( vRead.empty() ) return false;
 
 	std::vector<std::string> line;
-	line = Filestream::ParseString( std::string( (const char*) &vRead[0], vRead.size() ), '\n' );
+	line = Filestream::ParseNewline( std::string( (char*) &vRead[0], vRead.size() ) );
 	if ( line.empty() || line.size() < 2 ) return false;
 	vRead.clear();
 
-	// clear CR-LF format used by DOS and Windows
-	if ( line[0].back() == '\r' )
-		for ( auto& l : line ) l.pop_back();
-	
 	// remove the identifier
 	auto vSetting = Filestream::ParseString( line[1], ',' );
+	if ( vSetting.empty() ) return false;
 	mTitle = vSetting[0];
-	//mColour = vSetting[1];
+	mColour = vSetting[1];
 
 	// get and insert the content
 	for ( uint32_t i = 3; i < line.size(); i++  )
@@ -52,6 +55,16 @@ bool Dictionary::Load( const std::string& filepath )
 void Dictionary::SetTitle( const std::string& title )
 {
 	mTitle = title;
+}
+
+std::string Dictionary::GetTitle() const
+{
+	return mTitle;
+}
+
+std::string Dictionary::GetColour() const
+{
+	return mColour;
 }
 
 void Dictionary::Insert( const sContent& content )
