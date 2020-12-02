@@ -5,6 +5,7 @@
 #include <wx/statbox.h>
 #include <wx/button.h>
 #include "../../Utilities/Err.h"
+#include "../../Utilities/Timer.h"
 #include "../Feature/Language.h"
 #include "../Feature/LogGUI.h"
 
@@ -99,6 +100,8 @@ void GotoFrame::OnClose( wxCommandEvent& event )
 
 void GotoFrame::OnGo( wxCommandEvent& event )
 {
+	TIMER_FUNCTION( timer, MS, false );
+
 	std::string sVal = std::string( mEntryGoLine->GetLineText( 0 ) );
 	try
 	{
@@ -108,7 +111,7 @@ void GotoFrame::OnGo( wxCommandEvent& event )
 			THROW_ERR_IF( GotoVal > mInfo.mMaxLine || GotoVal <= 0, "" );
 			//line starts at 1 until maxline
 			mTextField->GotoLine( GotoVal-1 );
-			LOG_CONSOLE_FORMAT( LEVEL_TRACE, "Goto Line: %d", GotoVal );
+			LOG_DEBUG_FORMAT( LEVEL_TRACE, "Goto Line: %d", GotoVal );
 			mFrame->SetStatusText( "Goto success: " + sVal );
 		}
 		else if ( mButtonPos->GetValue() )
@@ -116,13 +119,15 @@ void GotoFrame::OnGo( wxCommandEvent& event )
 			THROW_ERR_IF( GotoVal > mInfo.mMaxPos || GotoVal < 0, "" );
 			//pos starts at 0 until last char
 			mTextField->GotoPos( GotoVal );
-			LOG_CONSOLE_FORMAT( LEVEL_TRACE, "Goto Position: %d", GotoVal );
+			LOG_DEBUG_FORMAT( LEVEL_TRACE, "Goto Position: %d", GotoVal );
 			mFrame->SetStatusText( "Goto success: " + sVal );
 		}
 	}
 	catch( ... )
 	{ 
-		LOG_CONSOLE( LEVEL_ERROR, "Cannot Goto with Value: " + sVal );
+		LOG_DEBUG( LEVEL_ERROR, "Cannot Goto with Value: " + sVal );
 		mFrame->SetStatusText( "Cannot Goto with Value: " + sVal );
 	}
+
+	LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }

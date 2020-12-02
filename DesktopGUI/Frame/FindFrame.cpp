@@ -219,7 +219,7 @@ void FindFrame::IFind( bool reverse )
 	SETBUF( "Word found at pos: %d, line: %d", atPos, mTextField->GetCurrentLine() + 1 );
 	mFrame->SetStatusText( CharBuf );
 
-	LOG_CONSOLE_FORMAT( LEVEL_TRACE, "Find single word: %f (ms)", tm.Toc() );
+	LOG_DEBUG_FORMAT( LEVEL_TRACE, "Find single word: %f (ms)", tm.Toc() );
 }
 
 void FindFrame::CreateFindPage()

@@ -48,5 +48,6 @@ enum Menu
     ID_EOL_CR,
     ID_EOL_LF,
     ID_EOL_CRLF,
+    ID_SHARE,
     ID_WINDOWSELECT = 1000
 };

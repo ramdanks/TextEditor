@@ -2,14 +2,15 @@
 #include <wx/wxprec.h>
 #include <wx/stc/stc.h>
 #include <wx/aui/auibook.h>
-#include "StyleFrame.h"
 #include "PreferencesFrame.h"
 #include "../GridField.h"
+#include "StyleFrame.h"
+#include "ShareFrame.h"
 
 class AppFrame : public wxFrame
 {
 public:
-    AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID = 0 );
+    AppFrame( const wxPoint& pos, const wxSize& size );
 
 private:
     //handle main frame
@@ -25,6 +26,7 @@ private:
     void OnStayOnTop( wxCommandEvent& event );
     void OnPreferences( wxCommandEvent& event );
     void OnStyleConfig( wxCommandEvent& event );
+    void OnShare( wxCommandEvent& event );
 
     //handle debug frame
     void OnDebugShow( wxCommandEvent& event );
@@ -37,6 +39,7 @@ private:
     wxStatusBar* mStatusBar;
     StyleFrame* mStyleFrame;
     PreferencesFrame* mPreferencesFrame;
+    bool isShareInit;
 
     float AutosaveTime;
 };

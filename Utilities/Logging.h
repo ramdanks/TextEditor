@@ -4,10 +4,10 @@
 
 namespace Util
 {
-	typedef std::string LogLevel;
+	typedef const char* severity;
 
 	// log severity
-	#define LEVEL_INFO "INFO"
+	#define LEVEL_INFO  "INFO"
 	#define LEVEL_TRACE "TRACE"
 	#define LEVEL_WARN  "WARN"
 	#define LEVEL_ERROR "ERROR"
@@ -26,8 +26,8 @@ namespace Util
 		Logging( const std::vector<uint8_t>& format ) : mFormat(format) {}
 		void Set_Format( const std::vector<uint8_t>& format ) { mFormat = format; }
 
-		void Log( LogLevel level, const std::string& str );
-		void Log_File( LogLevel level, const std::string& str, const std::string& path );
-		std::string Log_String( LogLevel level, const std::string& str );
+		void Log( severity level, const std::string& str );
+		void Log_File( severity level, const std::string& str, const std::string& path );
+		std::string Log_String( severity level, const std::string& str );
 	};
 }

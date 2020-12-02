@@ -82,7 +82,7 @@ wxString Language::IdentifyID( LanguageID id )
 
 bool Language::LoadMessage( LanguageID id )
 {
-    Util::Timer tm( "Language Load", ADJUST, false );
+    TIMER_FUNCTION( timer, MS, false );
 
     try
     {
@@ -119,6 +119,6 @@ bool Language::LoadMessage( LanguageID id )
         return false;
     }
 
-    LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
     return true;
 }

@@ -55,7 +55,7 @@ bool MyApp::OnInit()
         }
 
         //create main frame
-        mMainFrame = new AppFrame( APP_NAME, wxPoint( 200, 200 ), wxSize( 800, 600 ) );
+        mMainFrame = new AppFrame( wxPoint( 200, 200 ), wxSize( 800, 600 ) );
         THROW_ERR_IFNULLPTR( mMainFrame, "Problem creating Application Frame OnInit wxApp!" );
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
 
@@ -81,6 +81,7 @@ bool MyApp::OnInit()
 
 int MyApp::OnExit()
 {
+    Config::SaveConfig();
     return 0;
 }
 

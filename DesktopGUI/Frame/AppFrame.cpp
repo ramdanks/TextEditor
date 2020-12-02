@@ -18,15 +18,16 @@ EVT_MENU( ID_STAYONTOP, AppFrame::OnStayOnTop )
 EVT_MENU( ID_DEBUGCONSOLE, AppFrame::OnDebugShow )
 EVT_MENU( ID_PREFERENCES, AppFrame::OnPreferences )
 EVT_MENU( ID_STYLECONFIG, AppFrame::OnStyleConfig )
+EVT_MENU( ID_SHARE, AppFrame::OnShare )
 EVT_MENU( wxID_EXIT, AppFrame::OnClose )
 EVT_CLOSE( AppFrame::OnCloseWindow )
 
 wxEND_EVENT_TABLE()
 
-AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& size, int wxAppID )
-    : wxFrame( NULL, wxAppID, title, pos, size )
+AppFrame::AppFrame( const wxPoint& pos, const wxSize& size )
+    : wxFrame( NULL, -1, APP_NAME, pos, size ), isShareInit(false)
 {
-    Util::Timer tm( "App Frame Initialization", ADJUST, false );
+    TIMER_FUNCTION( timer, MS, false );
 
     this->mStatusBar = CreateStatusBar();
     this->mStatusBar->SetStatusText( MSG_STATUSBAR );
@@ -36,11 +37,13 @@ AppFrame::AppFrame( const wxString& title, const wxPoint& pos, const wxSize& siz
 
     TextField::Init( this );
     TextField::FetchTempFile();
+    ShareFrame::Init( this );
 
+    AutoThread::DeployAutoConnect( Config::mCheckConnectionInterval );
     if ( Config::mUseAutoSave ) AutoThread::DeployAutoSave( Config::mSaveInterval );
     if ( Config::mUseAutoHighlight ) AutoThread::DeployAutoHighlight( Config::mHighlightInterval );
 
-    LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void AppFrame::CreateMenu()
@@ -57,6 +60,8 @@ void AppFrame::CreateMenu()
     menuFile->AppendSeparator();                                                
     menuFile->Append( ID_EMBEDDICT,       "Text Highlighting"                   );                                           
     menuFile->Append( ID_REFRESHDICT,     "Refresh\tCtrl-R"        );                                           
+    menuFile->AppendSeparator();                                                
+    menuFile->Append( ID_SHARE, "Share" );                                             
     menuFile->AppendSeparator();                                                
     menuFile->Append( wxID_EXIT,          MSG_EXIT         + "\tAlt+F4"         );
                                                                                 
@@ -107,14 +112,15 @@ void AppFrame::CreateMenu()
                                                                                   
     wxMenu* menuSettings = new wxMenu;                                            
     menuSettings->Append( ID_PREFERENCES, MSG_PREFERENCES                          );
-    menuSettings->Append( ID_STYLECONFIG, MSG_STYLECONFIG                          );
-                                                                                  
+    menuSettings->Append( ID_STYLECONFIG, MSG_STYLECONFIG                          );                                                                             
+
     wxMenu* menuHelp = new wxMenu;
     menuHelp->Append( ID_REPORTBUG,       MSG_REPORTBUG                            );
     menuHelp->Append( ID_LOGDIR,          MSG_OPENLOGDIR                           );
     menuHelp->AppendSeparator();                                                   
     menuHelp->Append( ID_DOCUMENTATION,   MSG_SEEDOC                               );
     menuHelp->Append( wxID_ABOUT,         MSG_ABOUT                                );
+
 
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append( menuFile, MSG_FILE );
@@ -266,6 +272,11 @@ void AppFrame::OnStyleConfig( wxCommandEvent& event )
 {
     if ( mStyleFrame == nullptr ) mStyleFrame = new StyleFrame( this );
     mStyleFrame->ShowAndFocus( true, true );
+}
+
+void AppFrame::OnShare( wxCommandEvent& event )
+{
+    ShareFrame::ShowAndFocus( true, true );
 }
 
 void AppFrame::OnDebugShow( wxCommandEvent& event )

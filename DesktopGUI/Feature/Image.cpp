@@ -6,14 +6,14 @@ std::vector<wxBitmap> Image::mImageVector;
 
 void Image::FetchData()
 {
-    Util::Timer tm( "Image Load", ADJUST, false );
+    TIMER_FUNCTION( timer, MS, false );
 
     AddImg( IMG_NULL_FILEPATH );
     AddImg( IMG_SPLASH_FILEPATH );
     AddImg( IMG_SAVE_FILEPATH );
     AddImg( IMG_UNSAVE_FILEPATH );
 
-    LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 wxBitmap& Image::GetImg( size_t index )

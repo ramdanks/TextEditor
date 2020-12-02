@@ -1,4 +1,5 @@
 #include "TextField.h"
+#include "TextField.h"
 #include "../Utilities/Err.h"
 #include "../Utilities/Filestream.h"
 #include "../Utilities/Timer.h"
@@ -95,7 +96,7 @@ bool TextField::AlreadyOpened( const std::string& filepath, bool focus )
     for ( uint32_t i = 0; i < mNotebook->GetPageCount(); i++ )
         if ( filepath == mPageData[i].FilePath )
         {   
-            LOG_CONSOLE( LEVEL_INFO, "File is already opened: " + filepath );
+            LOG_DEBUG( LEVEL_INFO, "File is already opened: " + filepath );
             if ( focus ) mNotebook->ChangeSelection( i );
             return true;
         }
@@ -180,6 +181,8 @@ void TextField::OnDropFiles( wxDropFilesEvent& event )
 
 void TextField::UpdateMenuWindow()
 {
+    TIMER_FUNCTION( timer, MS, false );
+
     auto menubar = mParent->GetMenuBar();
     int pos = menubar->FindMenu( "&Window" );
     if ( pos != wxNOT_FOUND ) menubar->Remove( pos );
@@ -196,22 +199,29 @@ void TextField::UpdateMenuWindow()
     }
     menubar->Append( mMenuWnd, "&Window" );
     mMenuWnd->Bind( wxEVT_MENU_OPEN, OnOpenMenuWindow );
+
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnSelectMenuWindow( wxCommandEvent& event )
 {
+    TIMER_FUNCTION( timer, MS, false );
     auto sel = event.GetId() - ID_WINDOWSELECT;
     mNotebook->ChangeSelection( sel );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnOpenMenuWindow( wxMenuEvent& event )
 {
+    TIMER_FUNCTION( timer, MS, false );
     for ( const auto& menu : mWindowItem ) menu->Check( false );
     mWindowItem[mNotebook->GetSelection()]->Check();
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 bool TextField::UpdateEOLString( wxStyledTextCtrl* stc, int mode )
 {
+    TIMER_FUNCTION( timer, MS, false );
     auto str = stc->GetValue();
     if ( FontEncoding::ConvertEOLString( str, mode ) )
     {
@@ -222,31 +232,39 @@ bool TextField::UpdateEOLString( wxStyledTextCtrl* stc, int mode )
         return true;
     }
     return false;
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::UpdateStatusEOL( wxStyledTextCtrl* stc )
 {
+    TIMER_FUNCTION( timer, MS, false );
     mParent->SetStatusText( FontEncoding::EOLModeString( stc->GetEOLMode() ), 2 );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::UpdateStatusEncoding( wxStyledTextCtrl* stc )
 {
+    TIMER_FUNCTION( timer, MS, false );
     wxString status;
     status = FontEncoding::GetEncodingString( stc->GetFont().GetEncoding() );
     mParent->SetStatusText( status, 3 );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::UpdateStatusPos( wxStyledTextCtrl* stc )
 {
+    TIMER_FUNCTION( timer, MS, false );
     wxString status;
     auto line = stc->GetCurrentLine();
     auto pos = stc->GetCurrentPos();
     status = wxString::Format( "Line: %d, Pos: %d", line+1, pos );
     mParent->SetStatusText( status, 1 );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::FindText( wxStyledTextCtrl* stc, bool next )
 {
+    TIMER_FUNCTION( timer, MS, false );
     int flags = wxSTC_FIND_WHOLEWORD | wxSTC_FIND_MATCHCASE;
     auto text = stc->GetSelectedText();
     int selection = stc->GetSelectionStart();
@@ -261,20 +279,25 @@ void TextField::FindText( wxStyledTextCtrl* stc, bool next )
     }
     stc->SetSelection( atPos, atPos + text.size() );
     stc->ScrollToLine( stc->GetCurrentLine() );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnUpdateUI( wxStyledTextEvent& event )
 {
+    TIMER_FUNCTION( timer, MS, false );
     static int beforePos = 0;
     auto currentPage = mNotebook->GetSelection();
     int curPos = mPageData[currentPage].TextField->GetCurrentPos();
     if ( beforePos != curPos ) UpdateStatusPos( mPageData[currentPage].TextField );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnTextChanged( wxStyledTextEvent& event )
 {
+    TIMER_FUNCTION( timer, MS, false );
     UpdateSaveIndicator( false );
     MarginAutoAdjust();
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnSTCZoom( wxStyledTextEvent& event )
@@ -295,6 +318,7 @@ void TextField::OnPageCloseButton( wxAuiNotebookEvent& evt )
 
 void TextField::OnPageChanged( wxAuiNotebookEvent& evt )
 {
+    TIMER_FUNCTION( timer, MS, false );
     auto currentPage = mNotebook->GetSelection();
     // remove page data first before doing notebook deletion
     if ( !mPageData.empty() )
@@ -304,6 +328,7 @@ void TextField::OnPageChanged( wxAuiNotebookEvent& evt )
         UpdateStatusEOL( mPageData[currentPage].TextField );
         UpdateStatusPos( mPageData[currentPage].TextField );
     }
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnPageDrag( wxAuiNotebookEvent& evt )
@@ -329,7 +354,7 @@ void TextField::OnPageDrag( wxAuiNotebookEvent& evt )
 
 void TextField::OnTextSummary( wxCommandEvent& event )
 {
-    Util::Timer tm( "Text Summary Dialog", MS, false );
+    TIMER_FUNCTION( timer, MS, false );
 
     auto currentPage = mNotebook->GetSelection();
     auto pd = mPageData[currentPage];
@@ -353,13 +378,13 @@ void TextField::OnTextSummary( wxCommandEvent& event )
     message += pd.FilePath;
 
     auto SumDialog = wxMessageDialog( mParent, message, "Text Summary", wxOK | wxSTAY_ON_TOP );
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
     SumDialog.ShowModal();
 }
 
 void TextField::OnCompSummary( wxCommandEvent& event )
 {
-    Util::Timer tm( "Compression Summary Dialog", MS, false );
+    TIMER_FUNCTION( timer, MS, false );
 
     auto currentPage = mNotebook->GetSelection();
     auto pd = mPageData[currentPage];
@@ -389,7 +414,7 @@ void TextField::OnCompSummary( wxCommandEvent& event )
     }
 
     auto SumDialog = wxMessageDialog( mParent, message, "Compression Summary", wxOK | wxSTAY_ON_TOP );
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
     SumDialog.ShowModal();
 }
 
@@ -535,6 +560,7 @@ void TextField::OnOpenFile( wxCommandEvent& event )
         UpdateStatusPos( stc );
         UpdateParentName();
         UpdateSaveIndicator( true );
+        UpdateMenuWindow();
 
         LOG_ALL_FORMAT( LEVEL_TRACE, "Document size: %llu (chars)", vRead.size() );
         LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
@@ -825,6 +851,8 @@ void TextField::OnFindPrev( wxCommandEvent& event )
 
 void TextField::AddNewTab( sPageData& pd )
 {
+    TIMER_FUNCTION( timer, MS, false );
+
     pd.TextField = new wxStyledTextCtrl( mNotebook, -1, wxDefaultPosition, wxSize( 0, 0 ) );
     mNotebook->AddPage( pd.TextField, Filestream::GetFileName( pd.FilePath ), true );
 
@@ -840,24 +868,23 @@ void TextField::AddNewTab( sPageData& pd )
     pd.TextField->Bind( wxEVT_DROP_FILES, TextField::OnDropFiles );
 
     UpdateMenuWindow();
+    MarginAutoAdjust();
+
+    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::LoadStyle( wxStyledTextCtrl* stc )
 {
-    stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, *wxWHITE ); //foreground such as text
-    stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( 35, 35, 35 ) ); //background for field
-
+    stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, wxColour( Config::mTextFore ) ); //foreground such as text
+    stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( Config::mTextBack ) ); //background for field
     stc->StyleClearAll();
     stc->SetCaretLineVisible( true ); //set caret line background visible
-    stc->SetCaretLineBackground( wxColour( 70, 70, 70 ) ); //caret line background
-    stc->SetCaretForeground( wxColour( 221, 151, 204 ) ); //caret colour
-
-    stc->SetSelBackground( true, wxColour( 58, 119, 201 ) ); //background of selected text
-
-    stc->SetMarginWidth( 0, 27 );
+    stc->SetCaretLineBackground( wxColour( Config::mLineBack ) ); //caret line background
+    stc->SetCaretForeground( wxColour( Config::mCaret ) ); //caret colour
+    stc->SetSelBackground( true, wxColour( Config::mSelection ) ); //background of selected text
     stc->SetMarginType( 0, wxSTC_MARGIN_NUMBER );
-    stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( 50, 50, 60 ) ); //linenumber back color
-    stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER, wxColour( 221, 151, 204 ) ); //linenumber fore color
+    stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mLinenumBack ) ); //linenumber back color
+    stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mLinenumFore ) ); //linenumber fore color
     //stc->StyleSetSpec( wxSTC_STYLE_LINENUMBER, "fore:#dd96cc,back:#3c3c3c" ); //linenumber color with one func
 }
 

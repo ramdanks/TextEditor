@@ -94,7 +94,7 @@ public:
 
 	static std::vector<std::string> ParseString( const std::string& str, char delimiter, uint32_t max_parse = 0 )
 	{
-		if ( strlen( str.c_str() ) == 0 ) return std::vector<std::string>();
+		if ( str.empty() ) return std::vector<std::string>();
 
 		std::stringstream ss( str );
 		std::string item;

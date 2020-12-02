@@ -16,12 +16,18 @@ int Config::mZoomMax;
 int Config::mZoomDefault;
 int Config::mUseAutoHighlight;
 int Config::mHighlightInterval;
-
+int Config::mTextBack;
+int Config::mTextFore;
+int Config::mCaret;
+int Config::mLineBack;
+int Config::mSelection;
+int Config::mLinenumBack;
+int Config::mLinenumFore;
 std::vector<sConfigReference> Config::mConfTemplate;
 
 void Config::FetchData()
 {
-	Util::Timer tm( "Configuration Load", ADJUST, false );
+	TIMER_FUNCTION( timer, MS, false );
 
 	if ( !Filestream::Is_Exist( CONFIG_FILEPATH ) )
 	{
@@ -63,7 +69,7 @@ void Config::FetchData()
 		Config::SaveConfig();
 	}
 
-	LOG_CONSOLE( LEVEL_TRACE, tm.Toc_String() );
+	LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void Config::LoadDefaultConfig()
@@ -79,6 +85,13 @@ void Config::LoadDefaultConfig()
 	mZoomMin = -3;
 	mZoomMax = 15;
 	mZoomDefault = 2;
+	mTextBack = 2302755;
+	mTextFore = 16777215;
+	mCaret = 13405661;
+	mLineBack = 4605510;
+	mSelection = 13203258;
+	mLinenumBack = 3945010;
+	mLinenumFore = 13408221;
 	LOG_ALL( LEVEL_INFO, "Loading default configuration file!" );
 }
 
@@ -102,7 +115,7 @@ void Config::SaveConfig()
 	}
 }
 
-std::string Config::LoadSupportedFormat()
+std::string Config::GetSupportedFormat()
 {
 	std::string supp;
 	supp = "All types (*.*)|*.*";
@@ -126,4 +139,11 @@ void Config::MakeTemplate()
 	mConfTemplate.push_back( sConfigReference( "mZoomMin",           &mZoomMin ) );
 	mConfTemplate.push_back( sConfigReference( "mZoomMax",           &mZoomMax ) );
 	mConfTemplate.push_back( sConfigReference( "mZoomDefault",       &mZoomDefault ) );
+	mConfTemplate.push_back( sConfigReference( "mTextBack",          &mTextBack ) );
+	mConfTemplate.push_back( sConfigReference( "mTextFore",          &mTextFore ) );
+	mConfTemplate.push_back( sConfigReference( "mCaret",             &mCaret ) );
+	mConfTemplate.push_back( sConfigReference( "mLineBack",          &mLineBack ) );
+	mConfTemplate.push_back( sConfigReference( "mSelection",         &mSelection ) );
+	mConfTemplate.push_back( sConfigReference( "mLinenumBack",       &mLinenumBack ) );
+	mConfTemplate.push_back( sConfigReference( "mLinenumFore",       &mLinenumFore ) );
 }

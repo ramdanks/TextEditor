@@ -3,7 +3,8 @@
 #include <vector>
 
 #define MAJOR_VERSION     "0"
-#define CHILD_VERSION     "8"
+#define CHILD_VERSION     "9"
+#define DATE_UPDATED      "26-November-2020"
 #define APP_NAME          "Mémoriser"
 #define DEBUG_NAME        "Mémoriser - Debug Console"
 #define DICT_NAME         "Mémoriser - Dictionary"
@@ -22,7 +23,7 @@ public:
 	static void FetchData();
 	static void LoadDefaultConfig();
 	static void SaveConfig();
-	static std::string LoadSupportedFormat();
+	static std::string GetSupportedFormat();
 
 	static int mUseSplash;
 	static int mFontSize;
@@ -35,6 +36,16 @@ public:
 	static int mUseAutoSave;
 	static int mUseAutoHighlight;
 	static int mHighlightInterval;
+	static const int mCheckConnectionInterval = 100;
+
+	// decimal value of BGR colour (NOT RGB)
+	static int mTextBack;
+	static int mTextFore;
+	static int mCaret;
+	static int mLineBack;
+	static int mSelection;
+	static int mLinenumBack;
+	static int mLinenumFore;
 
 private:
 	static void MakeTemplate();

@@ -3,6 +3,7 @@
 #include <wx/aui/auibook.h>
 #include <wx/stc/stc.h>
 #include "Frame/DictionaryFrame.h"
+#include "Frame/StyleFrame.h"
 
 struct sPageData
 {
@@ -113,4 +114,5 @@ private:
 
 	friend class DictionaryFrame;
 	friend class AutoThread;
+	friend class StyleFrame;
 };

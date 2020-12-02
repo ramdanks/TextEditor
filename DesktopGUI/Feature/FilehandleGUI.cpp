@@ -20,7 +20,7 @@ wxString FilehandleGUI::mSupportedFormat;
 
 void FilehandleGUI::LoadSupportedFormat()
 {
-    mSupportedFormat = Config::LoadSupportedFormat();
+    mSupportedFormat = Config::GetSupportedFormat();
 }
 
 std::string FilehandleGUI::OpenDialog( wxWindow* parent, const wxString& defaultFilename )
@@ -59,7 +59,7 @@ std::vector<uint8_t> FilehandleGUI::OpenFileFormat( const std::string& filepath 
         
         wxWindowDisabler disabler;
         wxBusyCursor busyCursor;
-        wxBusyInfo busyInfo( "Decompressing files, wait please..." );
+        wxBusyInfo busyInfo( "Decompressing files, please wait..." );
         while ( wxProcess::Exists( proc->GetPid() ) );
         vRead = Filestream::Read_Bin( "temp/in" );
         Filestream::Delete_File( "temp/in" );
@@ -86,7 +86,7 @@ void FilehandleGUI::SaveFileFormat( const std::string& filepath, const char* pd,
 
         wxWindowDisabler disabler;
         wxBusyCursor busyCursor;
-        wxBusyInfo busyInfo( "Compressing files, wait please..." );
+        wxBusyInfo busyInfo( "Compressing files, please wait..." );
         while ( wxProcess::Exists( proc->GetPid() ) );
         Filestream::Delete_File( "temp/out" );
     }

@@ -216,12 +216,12 @@ void DictionaryFrame::OnDropFiles( wxDropFilesEvent& event )
 		{
 			if ( AlreadyLoaded( textPath, files[i] ) )
 			{
-				LOG_CONSOLE( LEVEL_INFO, "Dictionary already loaded: " + CV_STR( files[i] ) );
+				LOG_DEBUG( LEVEL_INFO, "Dictionary already loaded: " + CV_STR( files[i] ) );
 			}
 			else
 			{
 				if ( !LoadFromFile( textPath, files[i] ) )
-					LOG_CONSOLE( LEVEL_WARN, "Rejecting Dictionary File: " + CV_STR( files[i] ) );
+					LOG_DEBUG( LEVEL_WARN, "Rejecting Dictionary File: " + CV_STR( files[i] ) );
 			}
 		}
 	}
@@ -306,7 +306,7 @@ void DictionaryFrame::OnOpenFile( wxCommandEvent& event )
 	auto textPath = mComboBox->GetStringSelection();
 	if ( AlreadyLoaded( textPath, opened ) )
 	{
-		LOG_CONSOLE( LEVEL_INFO, "Dictionary already loaded: " + opened );
+		LOG_DEBUG( LEVEL_INFO, "Dictionary already loaded: " + opened );
 		return;
 	}
 	LoadFromFile( textPath, opened );

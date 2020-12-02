@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -21,6 +17,9 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{7be46362-1eb0-4a82-8884-f569a1fbb245}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -51,9 +50,6 @@
     <ClCompile Include="Frame\StyleFrame.cpp">
       <Filter>Frame</Filter>
     </ClCompile>
-    <ClCompile Include="Feature\Config.cpp">
-      <Filter>Feature</Filter>
-    </ClCompile>
     <ClCompile Include="Feature\Image.cpp">
       <Filter>Feature</Filter>
     </ClCompile>
@@ -81,6 +77,18 @@
     <ClCompile Include="Feature\AutoThread.cpp">
       <Filter>Feature</Filter>
     </ClCompile>
+    <ClCompile Include="Feature\Config.cpp">
+      <Filter>Feature</Filter>
+    </ClCompile>
+    <ClCompile Include="Socket\MemoPacket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Socket\MemoSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame\ShareFrame.cpp">
+      <Filter>Frame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Utilities\Err.h">
@@ -94,9 +102,6 @@
     </ClInclude>
     <ClInclude Include="..\Utilities\Timer.h">
       <Filter>Utilities</Filter>
-    </ClInclude>
-    <ClInclude Include="TextField.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Utilities\FindReplace.h">
       <Filter>Utilities</Filter>
@@ -116,9 +121,6 @@
     <ClInclude Include="Frame\StyleFrame.h">
       <Filter>Frame</Filter>
     </ClInclude>
-    <ClInclude Include="Feature\Config.h">
-      <Filter>Feature</Filter>
-    </ClInclude>
     <ClInclude Include="Feature\Image.h">
       <Filter>Feature</Filter>
     </ClInclude>
@@ -131,14 +133,8 @@
     <ClInclude Include="Frame\EventID.h">
       <Filter>Frame</Filter>
     </ClInclude>
-    <ClInclude Include="GridField.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Feature\Dictionary.h">
       <Filter>Feature</Filter>
-    </ClInclude>
-    <ClInclude Include="FontEncoding.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Utilities\Random.h">
       <Filter>Utilities</Filter>
@@ -151,6 +147,27 @@
     </ClInclude>
     <ClInclude Include="Feature\AutoThread.h">
       <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="Feature\Config.h">
+      <Filter>Feature</Filter>
+    </ClInclude>
+    <ClInclude Include="Socket\MemoPacket.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="Socket\MemoSocket.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="FontEncoding.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GridField.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextField.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Frame\ShareFrame.h">
+      <Filter>Frame</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,32 +2,27 @@
 #include "LogGUI.h"
 #include "../../Utilities/Timer.h"
 #include "../Frame/DictionaryFrame.h"
+#include "../Frame/ShareFrame.h"
 #include "../TextField.h"
 #include <functional>
 
-ThreadAction AutoThread::mActionAS;
-ThreadAction AutoThread::mActionAH;
+std::thread* AutoThread::mThreadAC;
 std::thread* AutoThread::mThreadAS;
 std::thread* AutoThread::mThreadAH;
 
 bool AutoThread::DeployAutoSave( uint32_t interval )
 {
-	if ( mThreadAS != nullptr ) return false;
-	if ( interval == 0 ) interval = 3600;
-	mActionAS.Interval = interval;
-
-	mThreadAS = new std::thread( &ReleaseThread, &RoutineAutoSave, &mActionAS );
-	return mThreadAS != nullptr;
+	return DeployThread( AUTOSAVE, interval );
 }
 
 bool AutoThread::DeployAutoHighlight( uint32_t interval )
 {
-	if ( mThreadAH != nullptr ) return false;
-	if ( interval == 0 ) interval = 3600;
-	mActionAH.Interval = interval;
+	return DeployThread( AUTOHIGHLIGHT, interval );
+}
 
-	mThreadAS = new std::thread( &ReleaseThread, &RoutineAutoHighlight, &mActionAH );
-	return mThreadAS != nullptr;
+bool AutoThread::DeployAutoConnect( uint32_t interval )
+{
+	return DeployThread( AUTOCONNECT, interval );
 }
 
 void AutoThread::Destroy( int thread )
@@ -38,34 +33,10 @@ void AutoThread::Destroy( int thread )
 		if ( mThreadAH != nullptr ) delete mThreadAH;
 }
 
-void AutoThread::Halt( int thread )
-{
-	if ( thread == AUTOSAVE ) mActionAS.IsHalted = true;
-	if ( thread == AUTOHIGHLIGHT ) mActionAH.IsHalted = true;
-}
-
-void AutoThread::Continue( int thread )
-{
-	if ( thread == AUTOSAVE ) mActionAS.IsHalted = false;
-	if ( thread == AUTOHIGHLIGHT ) mActionAH.IsHalted = false;
-}
-
-void AutoThread::SetInterval( int thread, uint32_t interval )
-{
-	if ( thread == AUTOSAVE ) mActionAS.Interval = false;
-	if ( thread == AUTOHIGHLIGHT ) mActionAH.IsHalted = false;
-}
-
-uint32_t AutoThread::GetTotalAction( int thread )
-{
-	if ( thread == AUTOSAVE ) return mActionAS.TotalAction;
-	if ( thread == AUTOHIGHLIGHT ) return mActionAH.TotalAction;
-}
-
 void AutoThread::RoutineAutoSave()
 {
 	TextField::SaveTempAll();
-	LOG_CONSOLE_FORMAT( LEVEL_TRACE, "AutoThread Saver actions(%u)", mActionAS.TotalAction );
+	LOG_THREAD( LEVEL_TRACE, "AutoThread Saving all temporary files" );
 }
 
 void AutoThread::RoutineAutoHighlight()
@@ -84,20 +55,80 @@ void AutoThread::RoutineAutoHighlight()
 	{
 		hashBefore = hash( text );
 		if ( !DictionaryFrame::StartStyling( textPath ) ) return;
-		LOG_CONSOLE_FORMAT( LEVEL_TRACE, "AutoThread Highlighting at page(%d), actions(%u)", page, mActionAH.TotalAction );
+		LOG_THREAD_FORMAT( LEVEL_TRACE, "AutoThread Highlighting at page: %d", page );
 	}
 }
 
-void AutoThread::ReleaseThread( void (*func)(void), ThreadAction* action )
+void AutoThread::RoutineAutoConnect()
+{
+	static bool before = false;
+	bool serverlisten = !ShareFrame::isListenOver;
+	bool status = ShareFrame::mSock->IsConnected();
+
+	if ( status != ShareFrame::mSock->IsOK() )
+		LOG_DEBUG( LEVEL_WARN, "Connected but Not OK!" );
+
+	if ( status != before )
+	{
+		before = status;
+		ShareFrame::UpdateInterface( status );
+		auto peerinfo = ShareFrame::mSock->GetSocketPeerInfo();
+		if ( status )
+		{
+			LOG_DEBUG( LEVEL_INFO, "Connected to Host: " + std::string( peerinfo.Address ) );
+		}
+		else if ( !status )
+		{	
+			LOG_DEBUG( LEVEL_INFO, "Disconnected from Host: " + std::string( peerinfo.Address ) );
+		}
+	}
+	// if not connected and listening session is over, listen again.
+	if ( !serverlisten && !status )
+	{
+		ShareFrame::mListenThread->join();
+		delete ShareFrame::mListenThread;
+		ShareFrame::mListenThread = new std::thread( &ShareFrame::ListenDetach );
+	}
+}
+
+bool AutoThread::DeployThread( int thread, uint32_t interval )
+{
+	try
+	{
+		if ( interval == 0 ) interval = 3600;
+		if ( thread == AUTOSAVE )
+		{
+			if ( mThreadAS != nullptr ) throw;
+			mThreadAS = new std::thread( &ReleaseThread, &RoutineAutoSave, interval );
+		}
+		else if ( thread == AUTOHIGHLIGHT )
+		{
+			if ( mThreadAH != nullptr ) throw;
+			mThreadAH = new std::thread( &ReleaseThread, &RoutineAutoHighlight, interval );
+		}
+		else if ( thread == AUTOCONNECT )
+		{
+			if ( mThreadAC != nullptr ) throw;
+			mThreadAC = new std::thread( &ReleaseThread, &RoutineAutoConnect, interval );
+		}
+		else
+		{
+			LOG_ALL( LEVEL_WARN, "Unrecognized thread deploy" );
+		}
+	}
+	catch ( ... )
+	{
+		LOG_ALL( LEVEL_ERROR, "Cannot create a thread" );
+	}
+	return mThreadAS != nullptr;
+}
+
+void AutoThread::ReleaseThread( void (*func)(void), uint32_t interval )
 {
 	//never ending loop
 	while ( true )
 	{
-		std::this_thread::sleep_for( std::chrono::milliseconds( action->Interval ) );
-		if ( !action->IsHalted )
-		{
-			action->TotalAction++;
-			func();
-		}
+		std::this_thread::sleep_for( std::chrono::milliseconds( interval ) );
+		func();	
 	}
 }
