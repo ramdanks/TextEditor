@@ -1,8 +1,6 @@
 #pragma once
 #include "../Socket/MemoSocket.h"
 #include "../Feature/AutoThread.h"
-#include <wx/wxprec.h>
-#include <thread>
 
 struct sFileInfo
 {

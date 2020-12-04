@@ -1,10 +1,6 @@
 #include "ShareFrame.h"
 #include "../Feature/LogGUI.h"
-#include "../../Utilities/Timer.h"
-#include "../../Utilities/Err.h"
-#include "../../Utilities/Filestream.h"
 #include "../Feature/FilehandleGUI.h"
-#include <wx/busyinfo.h>
 
 sFileMenu ShareFrame::mFileMenu;
 MemoSocket* ShareFrame::mSock;
@@ -71,21 +67,17 @@ void ShareFrame::OnDropFiles( wxDropFilesEvent& event )
 		for ( int i = 0; i < files.size(); i++ )
 		{
 			if ( isFileAlreadyListed( files[i] ) )
-			{
-				LOG_DEBUG( LEVEL_INFO, "File already in shared list: " + CV_STR( files[i] ) );
-			}
-			else
-			{
+				LOG_DEBUG( LV_INFO, "File already in shared list: " + CV_STR( files[i] ) );
+			else		
 				InsertList( files[i] );
-			}
 		}
 	}
 	catch ( Util::Err& e )
 	{
-		LOG_ALL( LEVEL_ERROR, e.Seek() );
+		LOG_ALL( LV_ERROR, e.Seek() );
 		return;
 	}
-	LOG_ALL_FORMAT( LEVEL_TRACE, "Drag n Drop Shared Files: %d, Time: %f (ms)", event.GetNumberOfFiles(), tm.Toc() );
+	LOG_ALL_FORMAT( LV_TRACE, "Drag n Drop Shared Files: %d, Time: %f (ms)", event.GetNumberOfFiles(), tm.Toc() );
 }
 
 void ShareFrame::OnOpenFiles( wxCommandEvent& event )
@@ -94,7 +86,7 @@ void ShareFrame::OnOpenFiles( wxCommandEvent& event )
 	if ( isFileAlreadyListed(opened) )
 	{
 		mFrame->SetStatusText( "File already in share list" );
-		LOG_DEBUG( LEVEL_INFO, "File already in share list: " + opened );
+		LOG_DEBUG( LV_INFO, "File already in share list: " + opened );
 		return;
 	}
 	InsertList( opened );
@@ -190,7 +182,7 @@ void ShareFrame::ConnectDetach()
 	}
 	catch ( ... )
 	{
-		LOG_DEBUG( LEVEL_WARN, "Cannot connect to Host:" + CV_STR( mInputctrl->GetValue() ) );
+		LOG_DEBUG( LV_WARN, "Cannot connect to Host:" + CV_STR( mInputctrl->GetValue() ) );
 		mIndText->SetLabel( "Disconnected" );
 		mInputctrl->Enable();
 	}

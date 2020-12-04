@@ -1,8 +1,5 @@
 #pragma once
-#include <wx/wxprec.h>
 #include "../Feature/Dictionary.h"
-#include <wx/stc/stc.h>
-#include <unordered_map>
 
 struct DictionaryData
 {
@@ -13,6 +10,8 @@ struct DictionaryData
 };
 
 typedef std::unordered_map<wxString, std::vector<DictionaryData>> PagesDictionaryList;
+// first = filepath of textfield (key)
+// second = list of dictionary
 
 class DictionaryFrame
 {
@@ -26,7 +25,7 @@ public:
 
 	static void ClearList( const wxString& textPath );
 	static void EraseList( const wxString& textPath );
-	static void EraseDict( const wxString& textPath, const wxString& dictPath );
+	static void EraseDict( const wxString& textPath, int index );
 
 	static void OnRefreshDict( wxCommandEvent& event );
 	static void ResetStyling( const wxString& textPath );
@@ -55,8 +54,9 @@ private:
 	static int GetFlags();
 	static wxStyledTextCtrl* RequestSTC( int page );
 	static wxStyledTextCtrl* RequestSTC( const wxString& textPath );
-	static DictionaryData* RequestDictionary( const wxString& textPath, const wxString& dictPath );
+	static DictionaryData* RequestDictionary( const wxString& textPath, int index );
 	static std::vector<DictionaryData>* RequestDictionaryList( const wxString& textPath );
+	static wxString* RequestSuggestion( const wxString& textPath );
 
 	static wxWindow* mParent;
 	static wxFrame* mFrame;

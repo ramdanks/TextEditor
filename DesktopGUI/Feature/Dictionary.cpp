@@ -1,12 +1,5 @@
 #include "Dictionary.h"
-#include "../../Utilities/Filestream.h"
-#include "../../Utilities/Timer.h"
 #include "../Feature/LogGUI.h"
-
-std::unordered_set<std::string> Dictionary::ParseWord( const std::string& str )
-{
-	return std::unordered_set<std::string>();
-}
 
 Dictionary::Dictionary()
 {
@@ -24,8 +17,6 @@ std::unordered_map<std::string, std::string> Dictionary::GetContent() const
 
 bool Dictionary::Load( const std::string& filepath )
 {
-	Util::Timer Tm( "Load CSV", MS, false );
-
 	if ( Filestream::FileExtension( filepath ) != "csv" ) return false;
 
 	auto vRead = Filestream::Read_Bin( filepath );
@@ -51,8 +42,6 @@ bool Dictionary::Load( const std::string& filepath )
 		if ( vContent.empty() ) break;
 		mContent.insert( { vContent[0], vContent[1] } );
 	}
-	
-	LOG_ALL_FORMAT( LEVEL_TRACE, "Dictionary Loaded, size(%u), path(%s), time(%f)(ms)", readsize, filepath, Tm.Toc() );
 	return true;
 }
 

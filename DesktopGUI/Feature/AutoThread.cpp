@@ -1,42 +1,46 @@
 #include "AutoThread.h"
-#include "LogGUI.h"
-#include "../../Utilities/Timer.h"
 #include "../Frame/DictionaryFrame.h"
 #include "../Frame/ShareFrame.h"
 #include "../TextField.h"
-#include <functional>
+#include "LogGUI.h"
 
-std::thread* AutoThread::mThreadAC;
-std::thread* AutoThread::mThreadAS;
-std::thread* AutoThread::mThreadAH;
+AutoThread::sThread AutoThread::mHighlighter;
+AutoThread::sThread AutoThread::mSaver;
+AutoThread::sThread AutoThread::mSocket;
 
 bool AutoThread::DeployAutoSave( uint32_t interval )
 {
-	return DeployThread( AUTOSAVE, interval );
+	return DeployThread( THREAD_SAVER, interval );
 }
 
 bool AutoThread::DeployAutoHighlight( uint32_t interval )
 {
-	return DeployThread( AUTOHIGHLIGHT, interval );
+	return DeployThread( THREAD_HIGHLIGHTER, interval );
 }
 
 bool AutoThread::DeployAutoConnect( uint32_t interval )
 {
-	return DeployThread( AUTOCONNECT, interval );
+	return DeployThread( THREAD_SOCKET, interval );
 }
 
 void AutoThread::Destroy( int thread )
 {
-	if ( thread == AUTOSAVE )
-		if ( mThreadAS != nullptr ) delete mThreadAS;
-	if ( thread == AUTOHIGHLIGHT )
-		if ( mThreadAH != nullptr ) delete mThreadAH;
+	switch ( thread )
+	{
+	case THREAD_SAVER:       mSaver.isJoin       = true;   break;
+	case THREAD_HIGHLIGHTER: mHighlighter.isJoin = true;   break;
+	case THREAD_SOCKET:      mSocket.isJoin      = true;   break;
+	case THREAD_ALL:         mSaver.isJoin       = true;		  
+		                     mHighlighter.isJoin = true;  
+		                     mSocket.isJoin      = true;   break;                     
+	default: break;
+	}
 }
 
 void AutoThread::RoutineAutoSave()
 {
 	TextField::SaveTempAll();
-	LOG_THREAD( LEVEL_TRACE, "AutoThread Saving all temporary files" );
+	LOG_THREAD( LV_TRACE, "AutoThread Saving all temporary files" );
 }
 
 void AutoThread::RoutineAutoHighlight()
@@ -55,7 +59,7 @@ void AutoThread::RoutineAutoHighlight()
 	{
 		hashBefore = hash( text );
 		if ( !DictionaryFrame::StartStyling( textPath ) ) return;
-		LOG_THREAD_FORMAT( LEVEL_TRACE, "AutoThread Highlighting at page: %d", page );
+		LOG_THREAD_FORMAT( LV_TRACE, "AutoThread Highlighting at page: %d", page );
 	}
 }
 
@@ -66,7 +70,7 @@ void AutoThread::RoutineAutoConnect()
 	bool status = ShareFrame::mSock->IsConnected();
 
 	if ( status != ShareFrame::mSock->IsOK() )
-		LOG_DEBUG( LEVEL_WARN, "Connected but Not OK!" );
+		LOG_DEBUG( LV_WARN, "Connected but Not OK!" );
 
 	if ( status != before )
 	{
@@ -74,13 +78,9 @@ void AutoThread::RoutineAutoConnect()
 		ShareFrame::UpdateInterface( status );
 		auto peerinfo = ShareFrame::mSock->GetSocketPeerInfo();
 		if ( status )
-		{
-			LOG_DEBUG( LEVEL_INFO, "Connected to Host: " + std::string( peerinfo.Address ) );
-		}
+			LOG_DEBUG( LV_INFO, "Connected to Host: " + std::string( peerinfo.Address ) );		
 		else if ( !status )
-		{	
-			LOG_DEBUG( LEVEL_INFO, "Disconnected from Host: " + std::string( peerinfo.Address ) );
-		}
+			LOG_DEBUG( LV_INFO, "Disconnected from Host: " + std::string( peerinfo.Address ) );		
 	}
 	// if not connected and listening session is over, listen again.
 	if ( !serverlisten && !status )
@@ -93,42 +93,39 @@ void AutoThread::RoutineAutoConnect()
 
 bool AutoThread::DeployThread( int thread, uint32_t interval )
 {
+	if ( interval == 0 ) interval = 3600;
 	try
 	{
-		if ( interval == 0 ) interval = 3600;
-		if ( thread == AUTOSAVE )
+		if ( thread == THREAD_SAVER )
 		{
-			if ( mThreadAS != nullptr ) throw;
-			mThreadAS = new std::thread( &ReleaseThread, &RoutineAutoSave, interval );
+			if ( mSaver.pThread != nullptr ) throw;
+			mSaver.pThread = new std::thread( &ReleaseThread, &RoutineAutoSave, &mSaver.isJoin, interval );
 		}
-		else if ( thread == AUTOHIGHLIGHT )
+		else if ( thread == THREAD_HIGHLIGHTER )
 		{
-			if ( mThreadAH != nullptr ) throw;
-			mThreadAH = new std::thread( &ReleaseThread, &RoutineAutoHighlight, interval );
+			if ( mHighlighter.pThread != nullptr ) throw;
+			mHighlighter.pThread = new std::thread( &ReleaseThread, &RoutineAutoHighlight, &mHighlighter.isJoin, interval );
 		}
-		else if ( thread == AUTOCONNECT )
+		else if ( thread == THREAD_SOCKET )
 		{
-			if ( mThreadAC != nullptr ) throw;
-			mThreadAC = new std::thread( &ReleaseThread, &RoutineAutoConnect, interval );
-		}
-		else
-		{
-			LOG_ALL( LEVEL_WARN, "Unrecognized thread deploy" );
+			if ( mSocket.pThread != nullptr ) throw;
+			mSocket.pThread = new std::thread( &ReleaseThread, &RoutineAutoConnect, &mSocket.isJoin, interval );
 		}
 	}
 	catch ( ... )
 	{
-		LOG_ALL( LEVEL_ERROR, "Cannot create a thread" );
+		LOG_ALL( LV_WARN, "Cannot deploy a thread" );
+		return false;
 	}
-	return mThreadAS != nullptr;
 }
 
-void AutoThread::ReleaseThread( void (*func)(void), uint32_t interval )
+void AutoThread::ReleaseThread( void (*func)(void), const bool* join, uint32_t interval )
 {
 	//never ending loop
 	while ( true )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds( interval ) );
+		if ( *join ) break;
 		func();	
 	}
 }

@@ -1,10 +1,8 @@
 #pragma once
-#include <string>
-#include <vector>
 
-#define MAJOR_VERSION     "0"
-#define CHILD_VERSION     "9"
-#define DATE_UPDATED      "26-November-2020"
+#define MAJOR_VERSION     "1"
+#define CHILD_VERSION     "0"
+#define DATE_UPDATED      "02-December-2020"
 #define APP_NAME          "Mémoriser"
 #define DEBUG_NAME        "Mémoriser - Debug Console"
 #define DICT_NAME         "Mémoriser - Dictionary"
@@ -24,13 +22,17 @@ public:
 	static void LoadDefaultConfig();
 	static void SaveConfig();
 	static std::string GetSupportedFormat();
+	static void SetFont( wxFont font );
+
+
+	static wxFont mFont;
+	static int mFontSize;
+	static int mFontWeight;
+	static int mFontFamily;
+	static int mFontStyle;
 
 	static int mUseSplash;
-	static int mFontSize;
-	static int mFontID;
 	static int mLanguageID;
-	static int mZoomMin;
-	static int mZoomMax;
 	static int mZoomDefault;
 	static int mSaveInterval;
 	static int mUseAutoSave;

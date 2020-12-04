@@ -1,21 +1,19 @@
 #include "Config.h"
-#include "../../Utilities/Filestream.h"
-#include "../../Utilities/Timer.h"
-#include "../../Utilities/Err.h"
 #include "LogGUI.h"
 
 //translation unit for static member
+wxFont Config::mFont;
+int Config::mFontSize;
+int Config::mFontWeight;
+int Config::mFontFamily;
+int Config::mFontStyle;
 int Config::mUseSplash;
 int Config::mSaveInterval;
 int Config::mUseAutoSave;
-int Config::mFontSize;
-int Config::mFontID;
 int Config::mLanguageID;
-int Config::mZoomMin;
-int Config::mZoomMax;
-int Config::mZoomDefault;
 int Config::mUseAutoHighlight;
 int Config::mHighlightInterval;
+int Config::mZoomDefault;
 int Config::mTextBack;
 int Config::mTextFore;
 int Config::mCaret;
@@ -27,7 +25,7 @@ std::vector<sConfigReference> Config::mConfTemplate;
 
 void Config::FetchData()
 {
-	TIMER_FUNCTION( timer, MS, false );
+	PROFILE_FUNC();
 
 	if ( !Filestream::Is_Exist( CONFIG_FILEPATH ) )
 	{
@@ -36,7 +34,7 @@ void Config::FetchData()
 		return;
 	}
 	if ( mConfTemplate.empty() ) MakeTemplate();
-	
+
 	try
 	{
 		auto vRead = Filestream::Read_Bin( CONFIG_FILEPATH );
@@ -53,38 +51,39 @@ void Config::FetchData()
 			THROW_ERR_IF( vConfig[0] != mConfTemplate[i].Tag, "Config file is compromised!" );
 			*mConfTemplate[i].RefData = std::stoi( vConfig[1] );
 		}
-		
-		LOG_ALL( LEVEL_INFO, "Loading configuration file success!" );
+
+		mFont = wxFont( mFontSize, (wxFontFamily)mFontFamily, (wxFontStyle)mFontStyle, (wxFontWeight)mFontWeight );
+		LOG_ALL( LV_INFO, "Loading configuration file success!" );
 	}
 	catch ( Util::Err& e )
 	{
-		LOG_ALL( LEVEL_WARN, e.Seek().c_str() );
+		LOG_ALL( LV_WARN, e.Seek().c_str() );
 		LoadDefaultConfig();
 		Config::SaveConfig();
 	}
 	catch ( ... )
 	{
-		LOG_ALL( LEVEL_WARN, "Unknown Exception found in FethConfiguration()!" );
+		LOG_ALL( LV_WARN, "Unknown Exception found in FethConfiguration()!" );
 		LoadDefaultConfig();
 		Config::SaveConfig();
 	}
-
-	LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void Config::LoadDefaultConfig()
 {
+	mFontFamily = wxFONTFAMILY_MODERN;
+	mFontStyle = wxFONTSTYLE_NORMAL;
+	mFontWeight = wxFONTWEIGHT_NORMAL;
+	mFont = wxFont( mFontSize, (wxFontFamily) mFontFamily, (wxFontStyle) mFontStyle, (wxFontWeight) mFontWeight );
+
 	mUseSplash = true;
 	mLanguageID = 0;
 	mSaveInterval = 3600;
 	mUseAutoSave = true;
 	mHighlightInterval = 100;
 	mUseAutoHighlight = true;
-	mFontID = 0;
 	mFontSize = 10;
-	mZoomMin = -3;
-	mZoomMax = 15;
-	mZoomDefault = 2;
+	mZoomDefault = 5;
 	mTextBack = 2302755;
 	mTextFore = 16777215;
 	mCaret = 13405661;
@@ -92,7 +91,7 @@ void Config::LoadDefaultConfig()
 	mSelection = 13203258;
 	mLinenumBack = 3945010;
 	mLinenumFore = 13408221;
-	LOG_ALL( LEVEL_INFO, "Loading default configuration file!" );
+	LOG_ALL( LV_INFO, "Loading default configuration file!" );
 }
 
 void Config::SaveConfig()
@@ -111,7 +110,7 @@ void Config::SaveConfig()
 	}
 	catch ( Util::Err& e )
 	{
-		LOG_ALL( LEVEL_WARN, e.Seek() );
+		LOG_ALL( LV_WARN, e.Seek() );
 	}
 }
 
@@ -126,6 +125,15 @@ std::string Config::GetSupportedFormat()
 	return supp;
 }
 
+void Config::SetFont( wxFont font )
+{
+	mFont = font;
+	mFontSize = font.GetPointSize();
+	mFontStyle = font.GetStyle();
+	mFontFamily = font.GetFamily();
+	mFontWeight = font.GetWeight();
+}
+
 void Config::MakeTemplate()
 {
 	mConfTemplate.push_back( sConfigReference( "mSplashScreen",      &mUseSplash ) );
@@ -134,10 +142,6 @@ void Config::MakeTemplate()
 	mConfTemplate.push_back( sConfigReference( "mSaveInterval",      &mSaveInterval ) );
 	mConfTemplate.push_back( sConfigReference( "mUseAutoHighlight",  &mUseAutoHighlight ) );
 	mConfTemplate.push_back( sConfigReference( "mHighlightInterval", &mHighlightInterval ) );
-	mConfTemplate.push_back( sConfigReference( "mFontID",            &mFontID ) );
-	mConfTemplate.push_back( sConfigReference( "mFontSize",          &mFontSize ) );
-	mConfTemplate.push_back( sConfigReference( "mZoomMin",           &mZoomMin ) );
-	mConfTemplate.push_back( sConfigReference( "mZoomMax",           &mZoomMax ) );
 	mConfTemplate.push_back( sConfigReference( "mZoomDefault",       &mZoomDefault ) );
 	mConfTemplate.push_back( sConfigReference( "mTextBack",          &mTextBack ) );
 	mConfTemplate.push_back( sConfigReference( "mTextFore",          &mTextFore ) );
@@ -146,4 +150,8 @@ void Config::MakeTemplate()
 	mConfTemplate.push_back( sConfigReference( "mSelection",         &mSelection ) );
 	mConfTemplate.push_back( sConfigReference( "mLinenumBack",       &mLinenumBack ) );
 	mConfTemplate.push_back( sConfigReference( "mLinenumFore",       &mLinenumFore ) );
+	mConfTemplate.push_back( sConfigReference( "mFontSize",          &mFontSize ) );
+	mConfTemplate.push_back( sConfigReference( "mFontStyle",         &mFontStyle ) );
+	mConfTemplate.push_back( sConfigReference( "mFontFamily",        &mFontFamily ) );
+	mConfTemplate.push_back( sConfigReference( "mFontWeight",        &mFontWeight ) );
 }

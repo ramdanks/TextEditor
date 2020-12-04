@@ -6,13 +6,25 @@
 namespace Util
 {
 	Timer::Timer()
-		: mTitle(""), mTime(SEC), mPrintOnDestroy(false)
+		: mTime(SEC), mPrintOnDestroy(false)
 	{
 		Tic();
 	}
 
-	Timer::Timer( std::string Title, TimerPoint TP, bool PrintOnDestroy )
+	Timer::Timer( TimerPoint TP, bool PrintOnDestroy )
+		: mTime(TP), mPrintOnDestroy(PrintOnDestroy)
+	{
+		Tic();
+	}
+
+	Timer::Timer( const std::string& Title, TimerPoint TP, bool PrintOnDestroy )
 		: mTitle(Title), mTime(TP), mPrintOnDestroy(PrintOnDestroy)
+	{
+		Tic();
+	}
+
+	Timer::Timer( std::string&& Title, TimerPoint TP, bool PrintOnDestroy )
+		: mTitle( std::move( Title ) ), mTime( TP ), mPrintOnDestroy( PrintOnDestroy )
 	{
 		Tic();
 	}
@@ -21,6 +33,20 @@ namespace Util
 	{
 		if ( mPrintOnDestroy )
 			std::cout << Toc_String().c_str() << std::endl;	
+	}
+
+	void Timer::Setting( std::string&& Title, TimerPoint TP, bool PrintOnDestroy )
+	{
+		mTitle = std::move( Title );
+		mTime = TP;
+		mPrintOnDestroy = PrintOnDestroy;
+	}
+
+	void Timer::Setting( const std::string& Title, TimerPoint TP, bool PrintOnDestroy )
+	{
+		mTitle = Title;
+		mTime = TP;
+		mPrintOnDestroy = PrintOnDestroy;
 	}
 
 	void Timer::Tic()
@@ -58,13 +84,6 @@ namespace Util
 		else if ( tp == NS )  spec = " (ns)";
 
 		return mTitle + " Time: " + std::to_string( time ) + spec;
-	}
-
-	void Timer::Setting( std::string Title, TimerPoint TP, bool PrintOnDestroy )
-	{
-		this->mTitle = Title;
-		this->mTime = TP;
-		this->mPrintOnDestroy = PrintOnDestroy;
 	}
 
 	float Timer::Adjust_Time( TimerPoint TP, float Sec )

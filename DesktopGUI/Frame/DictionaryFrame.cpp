@@ -2,14 +2,7 @@
 #include "../Feature/FilehandleGUI.h"
 #include "../Feature/Language.h"
 #include "../Feature/LogGUI.h"
-#include "../../Utilities/Timer.h"
-#include "../../Utilities/Err.h"
-#include <wx/busyinfo.h>
-#include <wx/colordlg.h>
-#include <wx/clrpicker.h>
 #include "../TextField.h"
-#include <mutex>
-#include <algorithm>
 
 wxWindow* DictionaryFrame::mParent;
 wxFrame* DictionaryFrame::mFrame;
@@ -28,7 +21,7 @@ wxCheckBox* UniformClr;
 
 void DictionaryFrame::Init( wxWindow* parent )
 {
-	mFrame = new wxFrame( parent, wxID_ANY, "Dictionary", wxDefaultPosition, wxSize( 600, 400 ),
+	mFrame = new wxFrame( parent, wxID_ANY, "Dictionary", wxDefaultPosition, wxSize( 400, 400 ),
 						  wxFRAME_FLOAT_ON_PARENT | wxDEFAULT_FRAME_STYLE );
 	mFrame->SetIcon( wxICON( ICON_APP ) );
 	mFrame->Bind( wxEVT_CLOSE_WINDOW, &OnCloseWindow );
@@ -92,6 +85,9 @@ void DictionaryFrame::Init( wxWindow* parent )
 	hboxOption->Add( UniformClr, 0 );
 
 	mListBox = new wxListBox( mPanel, -1 );
+	auto font = mListBox->GetFont();
+	font.Scale( 1.2 );
+	mListBox->SetFont( font );
 	mListBox->DragAcceptFiles( true );
 	mListBox->Bind( wxEVT_DROP_FILES, OnDropFiles );
 	mListBox->Bind( wxEVT_LISTBOX, OnUpdateListbox );
@@ -158,13 +154,11 @@ void DictionaryFrame::EraseList( const wxString& textPath )
 	mData.erase( it );
 }
 
-void DictionaryFrame::EraseDict( const wxString& textPath, const wxString& dictPath )
+void DictionaryFrame::EraseDict( const wxString& textPath, int index )
 {
 	auto list = RequestDictionaryList( textPath );
-	if ( list == nullptr ) return;
-	for ( uint32_t i = 0; i < list->size(); i++ )
-		if ( ( *list )[i].Filepath == dictPath )
-			list->erase( list->begin() + i );
+	if ( list == nullptr || index >= list->size() ) return;
+	list->erase( list->begin() + index );
 }
 
 bool DictionaryFrame::AlreadyLoaded( const wxString& textPath, const wxString& dictPath )
@@ -189,7 +183,7 @@ bool DictionaryFrame::LoadFromFile( const wxString& textPath, const wxString& di
 		unsigned long colRGB = strtol( dict.GetColour().c_str() + 1, &p, 16 );
 		wxColour clr( colRGB );
 		mData[textPath].push_back( { dict, dictPath, clr } );
-		mListBox->AppendString( dictPath );
+		mListBox->AppendString( dict.GetTitle() );
 		return true;
 	}
 	return false;
@@ -197,40 +191,38 @@ bool DictionaryFrame::LoadFromFile( const wxString& textPath, const wxString& di
 
 void DictionaryFrame::OnDropFiles( wxDropFilesEvent& event )
 {
-	Util::Timer tm( "Drop Files", MS, false );
-	try
-	{
-		wxBusyCursor busyCursor;
-		wxWindowDisabler disabler;
-		wxBusyInfo busyInfo( "Adding files, wait please..." );
+	TIMER_ONLY( timer, ADJUST, false );
 
-		if ( event.GetNumberOfFiles() < 1 ) return;
+	uint32_t dropped = 0;
+	if ( event.GetNumberOfFiles() < 1 ) return;
+
+	wxBusyCursor busyCursor;
+	wxWindowDisabler disabler;
+	wxBusyInfo busyInfo( "Adding files, wait please..." );
+
+	try
+	{	
 		auto files = FilehandleGUI::GetDroppedFiles( event.GetFiles(), event.GetNumberOfFiles() );
 		THROW_ERR_IFEMPTY( files, "Dropped Files is Empty on Dictionary!" );
 
 		auto textPath = mComboBox->GetStringSelection();
 		THROW_ERR_IFEMPTY( textPath, "Invalid Selection on Dictionary!" );
 
-		uint64_t readSizes = 0;
-		for ( int i = 0; i < files.size(); i++ )
+		dropped = files.size();
+		for ( int i = 0; i < dropped; i++ )
 		{
 			if ( AlreadyLoaded( textPath, files[i] ) )
-			{
-				LOG_DEBUG( LEVEL_INFO, "Dictionary already loaded: " + CV_STR( files[i] ) );
-			}
-			else
-			{
-				if ( !LoadFromFile( textPath, files[i] ) )
-					LOG_DEBUG( LEVEL_WARN, "Rejecting Dictionary File: " + CV_STR( files[i] ) );
-			}
+				LOG_DEBUG( LV_INFO, "Dictionary already loaded" );
+			else if ( !LoadFromFile( textPath, files[i] ) )
+				LOG_DEBUG( LV_WARN, "Rejecting Dictionary File" );
 		}
 	}
 	catch ( Util::Err& e )
-	{
-		LOG_ALL( LEVEL_ERROR, e.Seek() );
+	{	
+		LOG_ALL( LV_ERROR, e.Seek() );
 		return;
 	}
-	LOG_ALL_FORMAT( LEVEL_TRACE, "Drag n Drop Dictionary: %d, Time: %f (ms)", event.GetNumberOfFiles(), tm.Toc() );
+	LOG_ALL_FORMAT( LV_TRACE, "Drag n Drop Dictionary: %d, Time: %.2f (ms)", dropped, timer.Toc() );
 }
 
 void DictionaryFrame::UpdatePreview( const wxString& textPath, const wxColour& clr )
@@ -281,8 +273,8 @@ void DictionaryFrame::OnUpdateCombo( wxCommandEvent& event )
 void DictionaryFrame::OnUpdateListbox( wxCommandEvent& event )
 {
 	auto textPath = mComboBox->GetStringSelection();
-	auto dictPath = mListBox->GetStringSelection();
-	auto dict = RequestDictionary( textPath, dictPath );
+	auto sel = mListBox->GetSelection();
+	auto dict = RequestDictionary( textPath, sel );
 	if ( dict == nullptr ) return;
 
 	UpdatePreview( textPath, dict->TextColour );
@@ -296,7 +288,7 @@ void DictionaryFrame::UpdateList( const wxString& textPath )
 
 	wxArrayString strList;
 	for ( const auto& dict : *list )
-		strList.Add( wxString( dict.Filepath ) );
+		strList.Add( dict.Dict.GetTitle() );
 	mListBox->Append( strList );
 }
 
@@ -306,7 +298,7 @@ void DictionaryFrame::OnOpenFile( wxCommandEvent& event )
 	auto textPath = mComboBox->GetStringSelection();
 	if ( AlreadyLoaded( textPath, opened ) )
 	{
-		LOG_DEBUG( LEVEL_INFO, "Dictionary already loaded: " + opened );
+		LOG_DEBUG( LV_INFO, "Dictionary already loaded: " + opened );
 		return;
 	}
 	LoadFromFile( textPath, opened );
@@ -315,10 +307,10 @@ void DictionaryFrame::OnOpenFile( wxCommandEvent& event )
 void DictionaryFrame::OnRemoveSelected( wxCommandEvent& event )
 {
 	auto textPath = mComboBox->GetStringSelection();
-	auto dicPath = mListBox->GetStringSelection();
+	auto sel = mListBox->GetSelection();
 
-	mListBox->Delete( mListBox->GetSelection() );
-	EraseDict( textPath, dicPath );
+	mListBox->Delete( sel );
+	EraseDict( textPath, sel );
 
 	ResetStyling( textPath );
 	StartStyling( textPath );
@@ -345,8 +337,8 @@ void DictionaryFrame::OnRemoveAll( wxCommandEvent& event )
 void DictionaryFrame::OnSetColour( wxCommandEvent& event )
 {
 	auto textPath = mComboBox->GetStringSelection();
-	auto dictPath = mListBox->GetStringSelection();
-	auto dict = RequestDictionary( textPath, dictPath );
+	auto sel = mListBox->GetSelection();
+	auto dict = RequestDictionary( textPath, sel );
 	if ( dict == nullptr ) return;
 
 	auto dlg = wxColourDialog( mFrame );
@@ -360,11 +352,9 @@ void DictionaryFrame::OnSetColour( wxCommandEvent& event )
 
 void DictionaryFrame::OnSummary( wxCommandEvent& event )
 {
-	Util::Timer tm( "Dictionary Summary", ADJUST, false );
-
 	auto textPath = mComboBox->GetStringSelection();
-	auto dictPath = mListBox->GetStringSelection();
-	auto dict = RequestDictionary( textPath, dictPath );
+	auto sel = mListBox->GetSelection();
+	auto dict = RequestDictionary( textPath, sel );
 	if ( dict == nullptr ) return;
 
 	wxString message;
@@ -375,7 +365,6 @@ void DictionaryFrame::OnSummary( wxCommandEvent& event )
 	message += "\nFilepath: "        + dict->Filepath;
 
 	auto SumDialog = wxMessageDialog( mParent, message, "Dictionary Summary", wxOK | wxSTAY_ON_TOP );
-	LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 	SumDialog.ShowModal();
 }
 
@@ -391,11 +380,44 @@ void DictionaryFrame::OnClose( wxCommandEvent& event )
 
 void DictionaryFrame::OnOK( wxCommandEvent& event )
 {
-	for ( const auto& pages : mData )
+	PROFILE_FUNC();
+
+	for ( auto& pages : mData )
 	{
+		auto autocomplist = RequestSuggestion( pages.first );
+		autocomplist->clear();
+
+		std::vector<std::string> list;
+		for ( auto& dict : pages.second )
+		{
+			list.reserve( dict.Dict.Size() );
+			auto content = dict.Dict.GetContent();
+			for ( auto& word : content )
+				list.emplace_back( word.first );
+		}		
+
+		// sort for auto completion
+		int iterate = list.size() - 1;
+		for ( int i = 0; i < iterate; ++i )
+		{
+			for ( int j = 0; j < iterate - i; ++j )
+			{
+				if ( list[j] > list[j + 1] )
+				{
+					std::string temp = list[j];
+					list[j] = list[j + 1];
+					list[j + 1] = temp;
+				}
+			}
+		}
+
+		// insert autocompletion with seperator and already sorted
+		for ( auto& word : list ) autocomplist->Append( word + "|" );
+
 		ResetStyling( pages.first );
 		StartStyling( pages.first );
 	}
+
 	mFrame->Show( false );
 }
 
@@ -409,7 +431,7 @@ void DictionaryFrame::OnRefreshDict( wxCommandEvent& event )
 
 void DictionaryFrame::ResetStyling( const wxString& textPath )
 {
-	Util::Timer tm( "Reset Styling", ADJUST, false );
+	PROFILE_FUNC();
 
 	auto stc = RequestSTC( textPath );
 	auto list = RequestDictionaryList( textPath );
@@ -425,13 +447,11 @@ void DictionaryFrame::ResetStyling( const wxString& textPath )
 	
 	stc->StartStyling( 0 );
 	stc->SetStyling( stc->GetTextLength(), wxSTC_STYLE_DEFAULT );
-
-	LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 }
 
 bool DictionaryFrame::StartStyling( const wxString& textPath )
 {
-	Util::Timer tm( "Apply Styling", ADJUST, false );
+	PROFILE_FUNC();
 
 	auto stc = RequestSTC( textPath );
 	auto list = RequestDictionaryList( textPath );
@@ -451,7 +471,6 @@ bool DictionaryFrame::StartStyling( const wxString& textPath )
 			}
 		}
 	}
-	LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 	return true;
 }
 
@@ -476,13 +495,11 @@ wxStyledTextCtrl* DictionaryFrame::RequestSTC( const wxString& textPath )
 	return nullptr;
 }
 
-DictionaryData* DictionaryFrame::RequestDictionary( const wxString& textPath, const wxString& dictPath )
+DictionaryData* DictionaryFrame::RequestDictionary( const wxString& textPath, int index )
 {
 	auto list = RequestDictionaryList( textPath );
-	if ( list == nullptr ) return nullptr;
-	for ( auto& dict : *list )	
-		if ( dict.Filepath == dictPath ) return &dict;
-	return nullptr;
+	if ( list == nullptr || index >= list->size() ) return nullptr;
+	return &(*list )[index];
 }
 
 std::vector<DictionaryData>* DictionaryFrame::RequestDictionaryList( const wxString& textPath )
@@ -490,4 +507,11 @@ std::vector<DictionaryData>* DictionaryFrame::RequestDictionaryList( const wxStr
 	auto it = mData.find( textPath );
 	if ( it == mData.end() ) return nullptr;
 	return &it->second;
+}
+
+wxString* DictionaryFrame::RequestSuggestion( const wxString& textPath )
+{
+	for ( auto& page : TextField::mPageData )
+		if ( page.FilePath == textPath ) return &page.Suggestion;
+	return nullptr;
 }

@@ -1,7 +1,7 @@
 Bahasa Indonesia
 Selamat Datang di Mémoriser
 Mémoriser - Konsol Debug
-File
+Berkas
 Buat Baru
 Simpan
 Simpan Sebagai
@@ -21,13 +21,13 @@ Salin
 Tempel
 Hapus
 Pilih Semua
-Search
+Cari
 Cari
 Pilih dan Cari Selanjutnya
 Pilih dan Cari Sebelumnya
 Ganti
 Pergi ke
-View
+Tampilan
 Selalu di Atas
 Perbesar
 Perkecil
@@ -35,10 +35,10 @@ Kembalikan Perbesaran
 Ringkasan Teks
 Ringkasan Kompresi
 Konsol Debug
-Settings
+Pengaturan
 Preferensi
 Konfigurasi Gaya
-Help
+Bantuan
 Laporkan Kesalahan
 Buka Directory Log
 Lihat Dokumentasi

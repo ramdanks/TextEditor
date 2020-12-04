@@ -2,16 +2,11 @@
 #include <vector>
 #include <string>
 
+enum severity
+{ LV_NONE, LV_INFO, LV_TRACE, LV_WARN, LV_ERROR, LV_FATAL };
+
 namespace Util
 {
-	typedef const char* severity;
-
-	// log severity
-	#define LEVEL_INFO  "INFO"
-	#define LEVEL_TRACE "TRACE"
-	#define LEVEL_WARN  "WARN"
-	#define LEVEL_ERROR "ERROR"
-	#define LEVEL_FATAL "FATAL"
 
 	#define FORMAT_SPACE 0
 	#define FORMAT_LEVEL 1
@@ -26,8 +21,8 @@ namespace Util
 		Logging( const std::vector<uint8_t>& format ) : mFormat(format) {}
 		void Set_Format( const std::vector<uint8_t>& format ) { mFormat = format; }
 
-		void Log( severity level, const std::string& str );
 		void Log_File( severity level, const std::string& str, const std::string& path );
+		std::string Log_String( severity level, std::string&& str );
 		std::string Log_String( severity level, const std::string& str );
 	};
 }

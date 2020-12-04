@@ -1,27 +1,12 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/aui/auibook.h>
-#include <wx/panel.h>
-#include <wx/button.h>
-#include <wx/clrpicker.h>
-#include <wx/stc/stc.h>
 
 class StyleFrame : public wxFrame
 {
-	struct sFontPage
-	{
-		wxPanel* Panel;
-		wxListBox* NameLB;
-		wxListBox* StyleLB;
-		wxTextCtrl* NameTC;
-		wxTextCtrl* StyleTC;
-		wxComboBox* SizeCB;
-		wxStaticBox* SampleSB;
-	};
 
 	struct sStylePage
 	{
 		wxPanel* Panel;
+		wxFontPickerCtrl* FontPicker;
 		wxColourPickerCtrl* TextBack;
 		wxColourPickerCtrl* TextFore;
 		wxColourPickerCtrl* Caret;
@@ -48,7 +33,8 @@ private:
 	void OnCancel( wxCommandEvent& event );
 	void OnClose( wxCloseEvent& event );
 	void OnColourPickerChanged( wxColourPickerEvent& event );
-	
+	void OnFontPickerChanged( wxFontPickerEvent& event );
+
 	void UpdatePreview();
 	void AdjustColourPicker();
 	void CreateContent();
@@ -56,8 +42,6 @@ private:
 
 	wxWindow* mParent;
 	wxFrame* mFrame;
-	wxAuiNotebook* mNotebook;
-	sFontPage mFP;
 	sStylePage mSP;
 	sButton mButton;
 };

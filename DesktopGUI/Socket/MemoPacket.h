@@ -1,5 +1,4 @@
 #pragma once
-#include <wx/wxprec.h>
 
 #define MEMO_PROTOCOL_VER 0
 

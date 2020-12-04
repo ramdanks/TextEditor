@@ -1,8 +1,5 @@
 #pragma once
 #include "MemoPacket.h"
-#include <wx/wxprec.h>
-#include <wx/socket.h>
-#include <thread>
 
 #define MEMO_PORT 6000
 

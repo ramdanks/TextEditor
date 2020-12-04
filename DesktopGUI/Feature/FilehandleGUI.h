@@ -1,4 +1,4 @@
-#include <wx/wxprec.h>
+#pragma once
 
 class FilehandleGUI
 {
@@ -19,3 +19,11 @@ private:
 
 	static wxString mSupportedFormat;
 };
+
+#if defined( __WIN32__ )
+#define CMD_COMPRESS(file)     "Compressor -c temp/out " + file + " -mt"
+#define CMD_DECOMPRESS(file)   "Compressor -d " + file + " temp/in -mt"
+#elif defined ( __linux__ )
+#define CMD_COMPRESS(file)     "./Compressor -c temp/out " + file + " -mt"
+#define CMD_DECOMPRESS(file)   "./Compressor -d " + file + " temp/in -mt"
+#endif

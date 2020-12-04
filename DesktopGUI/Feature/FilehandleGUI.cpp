@@ -1,20 +1,6 @@
-#include <wx/process.h>
-#include <wx/filedlg.h>
-#include <wx/busyinfo.h>
-#include <wx/dir.h>
-#include "../../Utilities/Filestream.h"
-#include "../../Utilities/Err.h"
 #include "FilehandleGUI.h"
 #include "Config.h"
 #include "LogGUI.h"
-
-#if defined( __WIN32__ )
-    #define CMD_COMPRESS(file)     "Compressor -c temp/out " + file + " -mt"
-    #define CMD_DECOMPRESS(file)   "Compressor -d " + file + " temp/in -mt"
-#elif defined ( __linux__ )
-    #define CMD_COMPRESS(file)     "./Compressor -c temp/out " + file + " -mt"
-    #define CMD_DECOMPRESS(file)   "./Compressor -d " + file + " temp/in -mt"
-#endif
 
 wxString FilehandleGUI::mSupportedFormat;
 

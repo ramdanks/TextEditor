@@ -1,5 +1,4 @@
 #include "MemoSocket.h"
-#include <thread>
 
 #define SOCK_CONNECTED mServerSock.IsConnected() || mClientSock.IsConnected()
 

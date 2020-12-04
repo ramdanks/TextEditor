@@ -1,9 +1,10 @@
 Resource/*
 Vendor/*
-DesktopGUI/x64/*
-DesktopGUI/temp/*
 DesktopGUI/*.exe
-DesktopGUI/Log/*
+DesktopGUI/x64/*
+DesktopGUI/log/*
+DesktopGUI/resource/*
+DesktopGUI/temp/*
 DesktopGUI/wxWidgets/*
 DesktopGUI/wxWidgets.zip
 Text Editor with Compression/x64/*

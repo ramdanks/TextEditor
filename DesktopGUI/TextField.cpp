@@ -1,8 +1,4 @@
 #include "TextField.h"
-#include "TextField.h"
-#include "../Utilities/Err.h"
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Timer.h"
 #include "Feature/FilehandleGUI.h"
 #include "Feature/LogGUI.h"
 #include "Feature/Config.h"
@@ -12,8 +8,6 @@
 #include "Frame/FindFrame.h"
 #include "Frame/EventID.h"
 #include "FontEncoding.h"
-#include <wx/busyinfo.h>
-#include <mutex>
 
 //translation unit for static member
 wxFrame* TextField::mParent;
@@ -24,6 +18,7 @@ std::vector<wxMenuItem*> TextField::mWindowItem;
 bool TextField::isGotoInit = false;
 bool TextField::isFindInit = false;
 bool TextField::isDictInit = false;
+std::future<void> TextField::mFuture;
 
 wxCommandEvent NullCmdEvent = wxCommandEvent( wxEVT_NULL );
 //contain only one tab or textfield, already temporary, and no content
@@ -56,12 +51,14 @@ void TextField::Destroy()
 
 void TextField::MarginAutoAdjust()
 {
+    PROFILE_FUNC();
+    if ( mNotebook == nullptr ) return;
+
     auto currentPage = mNotebook->GetSelection();
     auto tf = mPageData[currentPage].TextField;
-    auto line = tf->GetLineCount();
-    auto zoom = tf->GetZoom();
-    double increment = std::floor( log( line ) / log( 10 ) );
-    tf->SetMarginWidth( 0, 27 + 7 * increment + zoom * increment );
+    wxString lines = wxString::Format( wxT( "%i" ), tf->GetLineCount() );
+    auto width = tf->TextWidth( wxSTC_STYLE_LINENUMBER, lines + ' ' );
+    tf->SetMarginWidth( 0, width );
 }
 
 void TextField::FetchTempFile()
@@ -82,7 +79,7 @@ void TextField::FetchTempFile()
             UpdateSaveIndicator( false );
         }
     }
-    LOG_ALL_FORMAT( LEVEL_TRACE, "Temporary file amount: %llu", vTempFile.size() );
+    LOG_ALL_FORMAT( LV_TRACE, "Temporary file amount: %llu", vTempFile.size() );
 }
 
 void TextField::CreateTempFile( const std::string& name )
@@ -96,7 +93,7 @@ bool TextField::AlreadyOpened( const std::string& filepath, bool focus )
     for ( uint32_t i = 0; i < mNotebook->GetPageCount(); i++ )
         if ( filepath == mPageData[i].FilePath )
         {   
-            LOG_DEBUG( LEVEL_INFO, "File is already opened: " + filepath );
+            LOG_DEBUG( LV_INFO, "File is already opened: " + filepath );
             if ( focus ) mNotebook->ChangeSelection( i );
             return true;
         }
@@ -105,7 +102,6 @@ bool TextField::AlreadyOpened( const std::string& filepath, bool focus )
 
 void TextField::SaveTempAll()
 {
-    if ( mNotebook == nullptr ) return;
     auto mutex = std::mutex();
     mutex.lock();
     for ( uint32_t i = 0; i < mPageData.size(); i++ )
@@ -176,12 +172,12 @@ void TextField::OnDropFiles( wxDropFilesEvent& event )
         UpdateSaveIndicator( true );
     }
 
-    LOG_ALL_FORMAT( LEVEL_TRACE, "Drag n Drop Items: %d, Size: %d, Time: %f (ms)", files.size(), readSizes, tm.Toc() );
+    LOG_ALL_FORMAT( LV_TRACE, "Drag n Drop Items: %d, Size: %d, Time: %f (ms)", files.size(), readSizes, tm.Toc() );
 }
 
 void TextField::UpdateMenuWindow()
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
 
     auto menubar = mParent->GetMenuBar();
     int pos = menubar->FindMenu( "&Window" );
@@ -199,29 +195,44 @@ void TextField::UpdateMenuWindow()
     }
     menubar->Append( mMenuWnd, "&Window" );
     mMenuWnd->Bind( wxEVT_MENU_OPEN, OnOpenMenuWindow );
-
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnSelectMenuWindow( wxCommandEvent& event )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     auto sel = event.GetId() - ID_WINDOWSELECT;
     mNotebook->ChangeSelection( sel );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnOpenMenuWindow( wxMenuEvent& event )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     for ( const auto& menu : mWindowItem ) menu->Check( false );
     mWindowItem[mNotebook->GetSelection()]->Check();
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
+}
+
+void TextField::ShowAutoComp()
+{
+    // Find the word start
+    auto page = GetActivePage();
+    auto stc = mPageData[page].TextField;
+
+    int currentPos = stc->GetCurrentPos();
+    int wordStartPos = stc->WordStartPosition( currentPos, true );
+    int lenEntered = currentPos - wordStartPos;
+    if ( !stc->AutoCompActive() && lenEntered > 0 )
+        stc->AutoCompShow( lenEntered, mPageData[page].Suggestion );
+}
+
+void TextField::OnAutoCompCompleted( wxStyledTextEvent& event )
+{
+    auto stc = (wxStyledTextCtrl*) event.GetEventObject();
+    stc->AutoCompCancel();
 }
 
 bool TextField::UpdateEOLString( wxStyledTextCtrl* stc, int mode )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     auto str = stc->GetValue();
     if ( FontEncoding::ConvertEOLString( str, mode ) )
     {
@@ -232,39 +243,36 @@ bool TextField::UpdateEOLString( wxStyledTextCtrl* stc, int mode )
         return true;
     }
     return false;
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::UpdateStatusEOL( wxStyledTextCtrl* stc )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     mParent->SetStatusText( FontEncoding::EOLModeString( stc->GetEOLMode() ), 2 );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::UpdateStatusEncoding( wxStyledTextCtrl* stc )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     wxString status;
     status = FontEncoding::GetEncodingString( stc->GetFont().GetEncoding() );
     mParent->SetStatusText( status, 3 );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::UpdateStatusPos( wxStyledTextCtrl* stc )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     wxString status;
     auto line = stc->GetCurrentLine();
     auto pos = stc->GetCurrentPos();
     status = wxString::Format( "Line: %d, Pos: %d", line+1, pos );
     mParent->SetStatusText( status, 1 );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::FindText( wxStyledTextCtrl* stc, bool next )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
+
     int flags = wxSTC_FIND_WHOLEWORD | wxSTC_FIND_MATCHCASE;
     auto text = stc->GetSelectedText();
     int selection = stc->GetSelectionStart();
@@ -279,34 +287,32 @@ void TextField::FindText( wxStyledTextCtrl* stc, bool next )
     }
     stc->SetSelection( atPos, atPos + text.size() );
     stc->ScrollToLine( stc->GetCurrentLine() );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnUpdateUI( wxStyledTextEvent& event )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
+
+    auto stc = (wxStyledTextCtrl*) event.GetEventObject();
     static int beforePos = 0;
-    auto currentPage = mNotebook->GetSelection();
-    int curPos = mPageData[currentPage].TextField->GetCurrentPos();
-    if ( beforePos != curPos ) UpdateStatusPos( mPageData[currentPage].TextField );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
+    int curPos = stc->GetCurrentPos();
+    if ( beforePos != curPos )
+    {
+        beforePos = curPos;
+        UpdateStatusPos( stc );
+    }
 }
 
 void TextField::OnTextChanged( wxStyledTextEvent& event )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
+    ShowAutoComp();
     UpdateSaveIndicator( false );
     MarginAutoAdjust();
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnSTCZoom( wxStyledTextEvent& event )
 {
-    auto currentPage = mNotebook->GetSelection();
-    if ( currentPage == -1 ) return;
-    auto zoom = mPageData[currentPage].TextField->GetZoom();
-    if ( zoom > Config::mZoomMax ) OnZoomOut( NullCmdEvent );
-    else if ( zoom < Config::mZoomMin ) OnZoomIn( NullCmdEvent );
     MarginAutoAdjust();
 }
 
@@ -318,7 +324,7 @@ void TextField::OnPageCloseButton( wxAuiNotebookEvent& evt )
 
 void TextField::OnPageChanged( wxAuiNotebookEvent& evt )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
     auto currentPage = mNotebook->GetSelection();
     // remove page data first before doing notebook deletion
     if ( !mPageData.empty() )
@@ -328,11 +334,12 @@ void TextField::OnPageChanged( wxAuiNotebookEvent& evt )
         UpdateStatusEOL( mPageData[currentPage].TextField );
         UpdateStatusPos( mPageData[currentPage].TextField );
     }
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::OnPageDrag( wxAuiNotebookEvent& evt )
 {
+    PROFILE_FUNC();
+
     auto currentPage = evt.GetSelection();
     auto currentWindow = mNotebook->GetPage( currentPage );
 
@@ -354,8 +361,6 @@ void TextField::OnPageDrag( wxAuiNotebookEvent& evt )
 
 void TextField::OnTextSummary( wxCommandEvent& event )
 {
-    TIMER_FUNCTION( timer, MS, false );
-
     auto currentPage = mNotebook->GetSelection();
     auto pd = mPageData[currentPage];
 
@@ -378,14 +383,11 @@ void TextField::OnTextSummary( wxCommandEvent& event )
     message += pd.FilePath;
 
     auto SumDialog = wxMessageDialog( mParent, message, "Text Summary", wxOK | wxSTAY_ON_TOP );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
     SumDialog.ShowModal();
 }
 
 void TextField::OnCompSummary( wxCommandEvent& event )
 {
-    TIMER_FUNCTION( timer, MS, false );
-
     auto currentPage = mNotebook->GetSelection();
     auto pd = mPageData[currentPage];
 
@@ -414,7 +416,6 @@ void TextField::OnCompSummary( wxCommandEvent& event )
     }
 
     auto SumDialog = wxMessageDialog( mParent, message, "Compression Summary", wxOK | wxSTAY_ON_TOP );
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
     SumDialog.ShowModal();
 }
 
@@ -438,38 +439,36 @@ void TextField::OnEOL_CRLF( wxCommandEvent& event )
 
 void TextField::OnUpperCase( wxCommandEvent& event )
 {
-    Util::Timer tm( "Upper Case", MS, false );
+    PROFILE_FUNC();
     auto currentPage = mNotebook->GetSelection();
     FontEncoding::CaseConversion( mPageData[currentPage].TextField, CASE_UPPER );
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 }
 
 void TextField::OnLowerCase( wxCommandEvent& event )
 {
-    Util::Timer tm( "Lower Case", MS, false );
+    PROFILE_FUNC();
     auto currentPage = mNotebook->GetSelection();
     FontEncoding::CaseConversion( mPageData[currentPage].TextField, CASE_LOWER );
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 }
 
 void TextField::OnInverseCase( wxCommandEvent& event )
 {
-    Util::Timer tm( "Inverse Case", MS, false );
+    PROFILE_FUNC();
     auto currentPage = mNotebook->GetSelection();
     FontEncoding::CaseConversion( mPageData[currentPage].TextField, CASE_INVERSE );
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 }
 
 void TextField::OnRandomCase( wxCommandEvent& event )
 {
-    Util::Timer tm( "Random Case", MS, false );
+    PROFILE_FUNC();
     auto currentPage = mNotebook->GetSelection();
     FontEncoding::CaseConversion( mPageData[currentPage].TextField, CASE_RANDOM );
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 }
 
 void TextField::OnNewFile( wxCommandEvent& event )
 {
+    PROFILE_FUNC();
+
     std::string tempName;
     for ( uint32_t counter = 1; ; counter++ )
     {
@@ -514,7 +513,7 @@ void TextField::OnRenameFile( wxCommandEvent& event )
 
         mNotebook->SetPageText( currentPage, RenameDlg.GetValue() );
         UpdateParentName();
-        LOG_ALL( LEVEL_TRACE, "Rename file to: " + newName );
+        LOG_ALL( LV_TRACE, "Rename file to: " + newName );
     }
 }
 
@@ -532,7 +531,7 @@ void TextField::OnOpenFile( wxCommandEvent& event )
 
         auto vRead = FilehandleGUI::OpenFileFormat( filepath );
         THROW_ERR_IFEMPTY( vRead, "Cannot open file " + filepath );
-        LOG_ALL( LEVEL_TRACE, "Opened Filepath: " + filepath );
+        LOG_ALL( LV_TRACE, "Opened Filepath: " + filepath );
         
         wxString text = wxString::FromUTF8( (char*) &vRead[0], vRead.size() );
         THROW_ERR_IFEMPTY( text, "Problem converting string to wxString OnOpenFile()!" );
@@ -562,12 +561,12 @@ void TextField::OnOpenFile( wxCommandEvent& event )
         UpdateSaveIndicator( true );
         UpdateMenuWindow();
 
-        LOG_ALL_FORMAT( LEVEL_TRACE, "Document size: %llu (chars)", vRead.size() );
-        LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
+        LOG_ALL_FORMAT( LV_TRACE, "Document size: %llu (chars)", vRead.size() );
+        LOG_ALL( LV_TRACE, tm.Toc_String() );
     }
     catch ( Util::Err& e )
     {
-        LOG_ALL( LEVEL_ERROR, e.Seek() );
+        LOG_ALL( LV_ERROR, e.Seek() );
     }
 }
 
@@ -611,7 +610,7 @@ void TextField::OnPageClose( wxCommandEvent& evt )
     }
     catch ( Util::Err& e )
     {
-        LOG_ALL( LEVEL_ERROR, e.Seek() );
+        LOG_ALL( LV_ERROR, e.Seek() );
     }
 }
 
@@ -641,7 +640,7 @@ void TextField::OnPageCloseAll( wxCommandEvent& event )
     }
     catch ( Util::Err& e )
     {
-        LOG_ALL( LEVEL_ERROR, e.Seek() );
+        LOG_ALL( LV_ERROR, e.Seek() );
     }
 }
 
@@ -663,11 +662,11 @@ void TextField::OnSaveFile( wxCommandEvent& event )
 
         FilehandleGUI::SaveFileFormat( mPageData[currentPage].FilePath, pData.c_str(), pData.size() );
         UpdateSaveIndicator( true );
-        LOG_ALL( LEVEL_INFO, "File saved: " + mPageData[currentPage].FilePath );
+        LOG_ALL( LV_INFO, "File saved: " + mPageData[currentPage].FilePath );
     }
     catch ( Util::Err& e )
     {
-        LOG_ALL( LEVEL_ERROR, e.Seek() );
+        LOG_ALL( LV_ERROR, e.Seek() );
     }
 }
 
@@ -691,8 +690,6 @@ void TextField::OnSaveFileAs( wxCommandEvent& event )
 
     try
     {       
-        Util::Timer tm( "Save File", ADJUST, false );
-
         //if file is a temporary delete temp
         if ( mPageData[currentPage].isTemporary )
             Filestream::Delete_File( mPageData[currentPage].FilePath );
@@ -708,19 +705,18 @@ void TextField::OnSaveFileAs( wxCommandEvent& event )
         UpdateSaveIndicator( true );
         UpdateParentName();
 
-        LOG_ALL_FORMAT( LEVEL_TRACE, "Document size: %llu (chars)", pData.size() );
-        LOG_ALL( LEVEL_INFO, "File saved as: " + filepath );
-        LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
+        LOG_ALL_FORMAT( LV_TRACE, "Document size: %llu (chars)", pData.size() );
+        LOG_ALL( LV_INFO, "File saved as: " + filepath );
     }
     catch ( Util::Err& e )
     {
-        LOG_ALL( LEVEL_ERROR, e.Seek() );
+        LOG_ALL( LV_ERROR, e.Seek() );
     }
 }
 
 void TextField::OnEmbedDict( wxCommandEvent& event )
 {
-    Util::Timer tm( "Dictionary Frame", MS, false );
+    PROFILE_FUNC();
 
     if ( !isDictInit )
     {
@@ -735,8 +731,6 @@ void TextField::OnEmbedDict( wxCommandEvent& event )
     auto currentPage = mNotebook->GetSelection();
     DictionaryFrame::UpdateComboBox( list, mPageData[currentPage].FilePath );
     DictionaryFrame::ShowAndFocus();
-
-    LOG_ALL( LEVEL_TRACE, tm.Toc_String() );
 }
 
 void TextField::OnUndo( wxCommandEvent& event )
@@ -784,14 +778,12 @@ void TextField::OnSelectAll( wxCommandEvent& event )
 void TextField::OnZoomIn( wxCommandEvent& event )
 {
     auto currentPage = mNotebook->GetSelection();
-    if ( mPageData[currentPage].TextField->GetZoom() >= Config::mZoomMax ) return;
     mPageData[currentPage].TextField->ZoomIn();
 }
 
 void TextField::OnZoomOut( wxCommandEvent& event )
 {
     auto currentPage = mNotebook->GetSelection();
-    if ( mPageData[currentPage].TextField->GetZoom() <= Config::mZoomMin ) return;
     mPageData[currentPage].TextField->ZoomOut();
 }
 
@@ -851,7 +843,7 @@ void TextField::OnFindPrev( wxCommandEvent& event )
 
 void TextField::AddNewTab( sPageData& pd )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
 
     pd.TextField = new wxStyledTextCtrl( mNotebook, -1, wxDefaultPosition, wxSize( 0, 0 ) );
     mNotebook->AddPage( pd.TextField, Filestream::GetFileName( pd.FilePath ), true );
@@ -865,16 +857,21 @@ void TextField::AddNewTab( sPageData& pd )
     UpdateStatusEncoding( pd.TextField );
 
     pd.TextField->DragAcceptFiles( true );
+    pd.TextField->AutoCompSetAutoHide( true );
+    pd.TextField->AutoCompSetIgnoreCase( true );
+    pd.TextField->AutoCompSetMaxWidth( 32 );
+    pd.TextField->AutoCompSetSeparator( '|' );
     pd.TextField->Bind( wxEVT_DROP_FILES, TextField::OnDropFiles );
+    pd.TextField->Bind( wxEVT_STC_AUTOCOMP_COMPLETED, OnAutoCompCompleted );
 
     UpdateMenuWindow();
     MarginAutoAdjust();
-
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
 }
 
 void TextField::LoadStyle( wxStyledTextCtrl* stc )
 {
+    PROFILE_FUNC();
+    stc->StyleSetFont( wxSTC_STYLE_DEFAULT, Config::mFont );
     stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, wxColour( Config::mTextFore ) ); //foreground such as text
     stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( Config::mTextBack ) ); //background for field
     stc->StyleClearAll();
@@ -890,6 +887,8 @@ void TextField::LoadStyle( wxStyledTextCtrl* stc )
 
 void TextField::UpdateParentName()
 {
+    PROFILE_FUNC();
+
     auto currentPage = mNotebook->GetSelection();
     wxString title = APP_NAME;
     if ( !mPageData[currentPage].isTemporary )
@@ -902,6 +901,9 @@ void TextField::UpdateParentName()
 
 void TextField::UpdateSaveIndicator( bool save, int index )
 {
+    PROFILE_FUNC();
+
+    if ( mNotebook == nullptr ) return;
     auto currentPage = index;
     if ( index == -1 ) currentPage = mNotebook->GetSelection();
 

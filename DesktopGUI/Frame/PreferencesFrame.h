@@ -1,18 +1,53 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/combobox.h>
+#include "AppFrame.h"
 
-class PreferencesFrame : public wxFrame
+class PreferencesFrame
 {
+	struct GeneralPage
+	{
+		wxPanel* Panel;
+		wxComboBox* LocalizationCB;
+	};
+
+	struct DictionaryPage
+	{
+		wxPanel* Panel;
+	};
+
+	struct Autosave
+	{
+		wxPanel* Panel;
+	};
+
+	struct MainFrame
+	{
+		wxStatusBar* Statbar;
+		wxMenu* File;
+		wxMenu* Edit;
+		wxMenu* View;
+		wxMenu* Case;
+		wxMenu* EOL;
+		wxMenu* Search;
+		wxMenu* Setting;
+		wxMenu* Help;
+		wxMenuBar* MenuBar;
+	};
+
 public:
-	PreferencesFrame( wxWindow* parent );
-	void ShowAndFocus( bool show, bool focus );
+	static void Init( wxWindow* parent );
+	static void ShowAndFocus( bool show, bool focus );
 
 private:
-	void OnClose( wxCloseEvent& event );
-	wxDECLARE_EVENT_TABLE();
+	static void CreateContent();
+	static void RefreshMessage();
+	static void OnLocalization( wxCommandEvent& event );
+	static void OnClose( wxCloseEvent& event );
 
-	wxComboBox* mBoxLanguage;
-	wxWindow* mParent;
-	wxFrame* mFrame;
+	static wxFrame* mFrame;
+	static DictionaryPage mDP;
+	static GeneralPage mGP;
+	static wxAuiNotebook* mNotebook;
+	static MainFrame mMFmenu;
+
+	friend class AppFrame;
 };

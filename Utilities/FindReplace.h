@@ -13,12 +13,12 @@ namespace Util
 
 	void ToLowerCase( std::string& buffer )
 	{
-		std::transform( buffer.begin(), buffer.end(), buffer.begin(), std::tolower );
+		std::transform( buffer.begin(), buffer.end(), buffer.begin(), ::tolower );
 	}
 
 	void ToUpperCase( std::string& buffer )
 	{
-		std::transform( buffer.begin(), buffer.end(), buffer.begin(), std::toupper );
+		std::transform( buffer.begin(), buffer.end(), buffer.begin(), ::toupper );
 	}
 
 	size_t ReplaceAll( std::string& buffer, const std::string& replace, sFindAttrib& attr )

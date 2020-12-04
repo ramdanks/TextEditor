@@ -1,15 +1,4 @@
 #pragma once
-#include <vector>
-#include <wx/string.h>
-
-#define LANG_ENGLISH_FILEPATH      "resource/lang/english.txt"
-#define LANG_BAHASA_FILEPATH       "resource/lang/bahasa.txt"
-#define LANG_SPANISH_FILEPATH      "resource/lang/spanish.txt"
-#define LANG_PORTUGUESE_FILEPATH   "resource/lang/portuguese.txt"
-#define LANG_GERMAN_FILEPATH       "resource/lang/german.txt"
-#define LANG_ITALIAN_FILEPATH      "resource/lang/italian.txt"
-#define LANG_FRENCH_FILEPATH       "resource/lang/french.txt"
-#define LANG_DUTCH_FILEPATH        "resource/lang/dutch.txt"
 
 enum LanguageID
 {
@@ -39,6 +28,15 @@ private:
 
 	static std::vector<wxString> mMessage;
 };
+
+#define LANG_ENGLISH_FILEPATH      "resource/lang/english.txt"
+#define LANG_BAHASA_FILEPATH       "resource/lang/bahasa.txt"
+#define LANG_SPANISH_FILEPATH      "resource/lang/spanish.txt"
+#define LANG_PORTUGUESE_FILEPATH   "resource/lang/portuguese.txt"
+#define LANG_GERMAN_FILEPATH       "resource/lang/german.txt"
+#define LANG_ITALIAN_FILEPATH      "resource/lang/italian.txt"
+#define LANG_FRENCH_FILEPATH       "resource/lang/french.txt"
+#define LANG_DUTCH_FILEPATH        "resource/lang/dutch.txt"
 
 #define EMPTY_IDENTIFIER        "<NULL>"
 #define MSG_LANG                Language::GetMessage(0)
@@ -86,3 +84,15 @@ private:
 #define MSG_OPENLOGDIR          Language::GetMessage(42)
 #define MSG_SEEDOC              Language::GetMessage(43)
 #define MSG_ABOUT               Language::GetMessage(44)
+#define MSG_HIGHLIGHTING        "Text Highlighting"
+#define MSG_REFRESH             "Refresh"
+#define MSG_SHARE               "Share"
+#define MSG_UPPCASE             "Uppercase"
+#define MSG_LOWCASE             "Lowercase"
+#define MSG_INVCASE             "Inverse-case"
+#define MSG_RANCASE             "Random-case"
+#define MSG_EOLUNX              "Unix (LF)"
+#define MSG_EOLMAC              "Macintosh (CR)"
+#define MSG_EOLWIN              "Windows (CR-LF)"
+#define MSG_CASECONV            "Case Conversion"
+#define MSG_EOLCONV             "EOL Conversion"

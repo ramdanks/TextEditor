@@ -1,10 +1,4 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/stc/stc.h>
-#include "wx/textctrl.h"
-#include <wx/button.h>
-#include <wx/checkbox.h>
-#include <wx/notebook.h>
 
 struct sPageAttrib
 {
@@ -17,6 +11,7 @@ struct sPageAttrib
 
 class FindFrame
 {
+	static char buf[256];
 public:
 	static void Init( wxWindow* parent );
 	static void UpdateInfo( wxStyledTextCtrl* tf, wxString filepath = "" );

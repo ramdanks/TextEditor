@@ -1,19 +1,17 @@
 #include "LogGUI.h"
-#include "../../Utilities/Filestream.h"
-#include "../../Utilities/Timer.h"
 #include "Config.h"
 
-wxBEGIN_EVENT_TABLE( LogGUI, wxFrame )
-EVT_CLOSE( LogGUI::OnClose )
-EVT_BUTTON( 1, LogGUI::OnClear )
-EVT_BUTTON( 2, LogGUI::OnSaveLog )
-wxEND_EVENT_TABLE()
+char              LogGUI::sCharBuf[256];
+wxFrame*          LogGUI::mFrame;
+std::string       LogGUI::mErrFile;
+std::string       LogGUI::mLogFile;
+Util::Logging*    LogGUI::mLog;
+wxAuiNotebook*    LogGUI::mNotebook;
+wxStyledTextCtrl* LogGUI::mDebugTC;
+wxStyledTextCtrl* LogGUI::mFunctionTC;
+wxStyledTextCtrl* LogGUI::mThreadTC;
 
-LogGUI* LogGUI::sLogGUI;
-char LogGUI::sCharBuf[256];
-
-LogGUI::LogGUI( wxWindow* parent, bool GUI )
-	: wxFrame( parent, wxID_ANY, DEBUG_NAME, wxDefaultPosition, wxSize( 800, 400 ) )
+void LogGUI::Init( wxWindow* parent, bool GUI )
 {
 	Filestream::Create_Directories( "log" );
 
@@ -25,10 +23,13 @@ LogGUI::LogGUI( wxWindow* parent, bool GUI )
 
 	if ( GUI )
 	{
-		this->CreateStatusBar();
-		this->SetStatusText( "Debugger will Catch any Event" );
+		mFrame = new wxFrame( parent, wxID_ANY, DEBUG_NAME, wxDefaultPosition, wxSize( 700, 400 ) );
+		mFrame->SetIcon( wxICON( ICON_BUG ) );
 
-		auto panel = new wxPanel( this );
+		mFrame->CreateStatusBar();
+		mFrame->SetStatusText( "Debugger will Catch any Event" );
+
+		auto panel = new wxPanel( mFrame );
 		auto panelsizer = new wxBoxSizer( wxVERTICAL );
 		auto btnsizer = new wxBoxSizer( wxHORIZONTAL );
 
@@ -70,8 +71,16 @@ LogGUI::LogGUI( wxWindow* parent, bool GUI )
 		panelsizer->Add( -1, 5 );
 		panelsizer->Add( mNotebook, 1, wxEXPAND );
 		panel->SetSizer( panelsizer );
+
+		mFrame->Bind( wxEVT_CLOSE_WINDOW, OnClose );
+		btnSave->Bind( wxEVT_BUTTON, OnSaveLog );
+		btnClear->Bind( wxEVT_BUTTON, OnClear );
 	}
-	this->SetIcon( wxICON( ICON_BUG ) );
+}
+
+void LogGUI::SetParent( wxWindow* parent )
+{
+	mFrame->SetParent( parent );
 }
 
 void LogGUI::SetLogFile( const std::string& filepath )
@@ -89,25 +98,55 @@ void LogGUI::SetLogFormat( const std::vector<uint8_t>& format )
 	mLog->Set_Format( format );
 }
 
-void LogGUI::LogConsoleDebug( Util::severity l, const std::string& msg )
+void LogGUI::LogFile( severity l, std::string&& msg )
+{
+	if ( !mLogFile.empty() )
+		mLog->Log_File( l, std::move( msg ), mLogFile );
+}
+
+void LogGUI::LogFile( severity l, const std::string& msg )
+{
+	if ( !mLogFile.empty() )
+		mLog->Log_File( l, msg, mLogFile );
+}
+
+void LogGUI::LogConsoleDebug( severity l, std::string&& msg )
+{
+	AppendTC( mDebugTC, mLog->Log_String( l, std::move( msg ) ) );
+}
+
+void LogGUI::LogConsoleDebug( severity l, const std::string& msg )
 {
 	AppendTC( mDebugTC, mLog->Log_String( l, msg ) );
 }
 
-void LogGUI::LogConsoleFunction( Util::severity l, const std::string& msg )
+void LogGUI::LogConsoleFunction( severity l, std::string&& msg )
+{
+	AppendTC( mFunctionTC, mLog->Log_String( l, std::move( msg ) ) );
+}
+
+void LogGUI::LogConsoleFunction( severity l, const std::string& msg )
 {
 	AppendTC( mFunctionTC, mLog->Log_String( l, msg ) );
 }
 
-void LogGUI::LogConsoleThread( Util::severity l, const std::string& msg )
+void LogGUI::LogConsoleThread( severity l, std::string&& msg )
+{
+	AppendTC( mThreadTC, mLog->Log_String( l, std::move( msg ) ) );
+}
+
+void LogGUI::LogConsoleThread( severity l, const std::string& msg )
 {
 	AppendTC( mThreadTC, mLog->Log_String( l, msg ) );
 }
 
-void LogGUI::LogFile( Util::severity l, const std::string& msg )
+void LogGUI::AppendTC( wxStyledTextCtrl* stc, std::string&& msg )
 {
-	if ( !mLogFile.empty() )
-		mLog->Log_File( l, msg, mLogFile );
+	if ( stc == nullptr ) return;
+	stc->SetEditable( true );
+	stc->AppendText( std::move( msg ) );
+	stc->SetEditable( false );
+	stc->ScrollToEnd();
 }
 
 void LogGUI::AppendTC( wxStyledTextCtrl* stc, const std::string& msg )
@@ -150,5 +189,38 @@ void LogGUI::OnSaveLog( wxCommandEvent& event )
 
 void LogGUI::OnClose( wxCloseEvent& event )
 {
-	this->Show( false );
+	mFrame->Show( false );
+}
+
+ProfileFunc::ProfileFunc( std::string&& func )
+	: mSeverity(LV_NONE)
+{
+	mTimer.Setting( std::move( func ), ADJUST, false );
+	mTimer.Tic();
+}
+
+ProfileFunc::ProfileFunc( const std::string& func )
+	: mSeverity(LV_NONE)
+{
+	mTimer.Setting( func, ADJUST, false );
+	mTimer.Tic();
+}
+
+ProfileFunc::ProfileFunc( const std::string& func, severity s )
+	: mSeverity(s)
+{
+	mTimer.Setting( func, ADJUST, false );
+	mTimer.Tic();
+}
+
+ProfileFunc::ProfileFunc( const std::string& func, severity s, TimerPoint tp )
+	: mSeverity(s)
+{
+	mTimer.Setting( func, tp, false );
+	mTimer.Tic();
+}
+
+ProfileFunc::~ProfileFunc()
+{
+	LogGUI::LogConsoleFunction( mSeverity, mTimer.Toc_String() );
 }

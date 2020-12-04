@@ -1,7 +1,4 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/stattext.h>
-#include <wx/stc/stc.h>
 
 struct sGotoInfo
 {

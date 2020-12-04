@@ -1,9 +1,7 @@
 #include "FindFrame.h"
-#include <wx/panel.h>
-#include "../../Utilities/Timer.h"
-#include "../../Utilities/FindReplace.h"
 #include "../Feature/Language.h"
 #include "../Feature/LogGUI.h"
+#include "../../Utilities/FindReplace.h"
 
 wxFrame* FindFrame::mFrame;
 wxTextCtrl* FindFrame::mEntryReplace;
@@ -11,6 +9,7 @@ wxNotebook* FindFrame::mNotebook;
 wxStyledTextCtrl* FindFrame::mTextField;
 sPageAttrib* FindFrame::mFindAttrib;
 sPageAttrib* FindFrame::mReplaceAttrib;
+char FindFrame::buf[256];
 
 #define FIND_PAGE 0
 #define REPLACE_PAGE 1
@@ -21,8 +20,7 @@ sPageAttrib* FindFrame::mReplaceAttrib;
 #define BOXMW(x)  x->BoxMatchWhole
 #define BOXWA(x)  x->BoxWrapAround
 
-char CharBuf[128];
-#define SETBUF( msg, ... ) snprintf( CharBuf, sizeof CharBuf, msg, __VA_ARGS__ )
+#define SETBUF( msg, ... ) snprintf( buf, sizeof buf, msg, __VA_ARGS__ )
 
 void FindFrame::Init( wxWindow* parent )
 {
@@ -97,9 +95,9 @@ void FindFrame::OnCount( wxCommandEvent& event )
 	} while ( get != -1 );
 
 	SETBUF( "Total words count: %u", count );
-	mFrame->SetStatusText( CharBuf );
+	mFrame->SetStatusText( buf );
 
-	LOG_ALL_FORMAT( LEVEL_TRACE, "Counting (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
+	LOG_ALL_FORMAT( LV_TRACE, "Counting (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
 }
 
 void FindFrame::OnReplace( wxCommandEvent& event )
@@ -160,9 +158,9 @@ void FindFrame::OnReplaceAll( wxCommandEvent& event )
 	mTextField->SetText( buffer );
 
 	SETBUF( "Total replaced words: %u", count );
-	mFrame->SetStatusText( CharBuf );
+	mFrame->SetStatusText( buf );
 
-	LOG_ALL_FORMAT( LEVEL_TRACE, "Replace (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
+	LOG_ALL_FORMAT( LV_TRACE, "Replace (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.Toc() );
 }
 
 void FindFrame::IFind( bool reverse )
@@ -217,9 +215,9 @@ void FindFrame::IFind( bool reverse )
 	mTextField->ScrollToLine( mTextField->GetCurrentLine() );
 	
 	SETBUF( "Word found at pos: %d, line: %d", atPos, mTextField->GetCurrentLine() + 1 );
-	mFrame->SetStatusText( CharBuf );
+	mFrame->SetStatusText( buf );
 
-	LOG_DEBUG_FORMAT( LEVEL_TRACE, "Find single word: %f (ms)", tm.Toc() );
+	LOG_DEBUG_FORMAT( LV_TRACE, "Find single word: %f (ms)", tm.Toc() );
 }
 
 void FindFrame::CreateFindPage()

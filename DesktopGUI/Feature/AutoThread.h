@@ -1,12 +1,18 @@
 #pragma once
-#include <thread>
 
-#define AUTOSAVE      1
-#define AUTOHIGHLIGHT 2
-#define AUTOCONNECT   3
+#define THREAD_ALL         0
+#define THREAD_SAVER       1
+#define THREAD_HIGHLIGHTER 2
+#define THREAD_SOCKET      3
 
 class AutoThread
 {
+	struct sThread
+	{
+		std::thread* pThread = nullptr;
+		bool isJoin = false;
+	};
+
 public:
 	static bool DeployAutoSave( uint32_t interval = 0 );
 	static bool DeployAutoHighlight( uint32_t interval = 0 );
@@ -20,9 +26,9 @@ public:
 
 private:
 	static bool DeployThread( int thread, uint32_t interval );
-	static void ReleaseThread( void (*func)(void), uint32_t interval );
+	static void ReleaseThread( void (*func)(void), const bool* join, uint32_t interval );
 
-	static std::thread* mThreadAC;
-	static std::thread* mThreadAS;
-	static std::thread* mThreadAH;
+	static sThread mHighlighter;
+	static sThread mSaver;
+	static sThread mSocket;
 };

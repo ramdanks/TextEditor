@@ -1,14 +1,9 @@
-#include <wx/icon.h>
-#include <wx/splash.h>
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Timer.h"
-#include "../Utilities/Err.h"
+//#include "stdafx.h"
 #include "Feature/Config.h"
 #include "Feature/LogGUI.h"
 #include "Feature/Language.h"
 #include "Feature/Image.h"
 #include "Frame/AppFrame.h"
-#include "TextField.h"
 
 class MyApp : public wxApp
 {
@@ -17,12 +12,14 @@ public:
     int OnExit() override;
 
 private:
+    bool InstanceExist();
     void ShowSplashScreen();
     void HideSplashScreen();
     void DestroySplashScreen();
 
     AppFrame* mMainFrame;
     wxSplashScreen* mSplash;
+    wxSingleInstanceChecker* mInstance;
 };
 
 wxIMPLEMENT_APP( MyApp ); //entry point program
@@ -30,10 +27,12 @@ wxIMPLEMENT_APP( MyApp ); //entry point program
 bool MyApp::OnInit()
 {
     Util::Timer tm( "Application Init", ADJUST, false );
+
+    if ( InstanceExist() ) return false;
 #ifndef _DIST 
-    LogGUI::sLogGUI = new LogGUI( NULL, true ); 
+    LogGUI::Init( NULL, true ); 
 #else
-    LogGUI::sLogGUI = new LogGUI( NULL, false );
+    LogGUI::Init( NULL, false );
 #endif
     try
     {
@@ -41,17 +40,11 @@ bool MyApp::OnInit()
         Config::FetchData();
         Image::FetchData();
 
-        if ( Config::mUseSplash )
-            ShowSplashScreen();
+        if ( Config::mUseSplash ) ShowSplashScreen();
 
         //load language from configuration
-        if ( Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) ) )
-        {
-            LOG_ALL( LEVEL_INFO, "Imported language from config: " + CV_STR( MSG_LANG ) );
-        }
-        else
-        {  
-            LOG_ALL_FORMAT( LEVEL_INFO, "Problem importing language with ID: %d", Config::mLanguageID ); 
+        if ( !Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) ) ) {
+            LOG_ALL_FORMAT( LV_INFO, "Problem importing language with ID: %d", Config::mLanguageID ); 
         }
 
         //create main frame
@@ -60,29 +53,35 @@ bool MyApp::OnInit()
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
 
         //finally
-        if ( mSplash != nullptr )
-            DestroySplashScreen();
+        if ( Config::mUseSplash ) DestroySplashScreen();
         mMainFrame->Show();
         mMainFrame->Raise();
     }
     catch ( Util::Err& e )
     {
-        LOG_FILE( LEVEL_FATAL, e.Seek() );
+        LOG_FILE( LV_FATAL, e.Seek() );
         return false;
     }
     catch ( ... )
     {
-        LOG_FILE( LEVEL_FATAL, "Unhandled Exception at OnInit wxApp!" );
+        LOG_FILE( LV_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
-    LOG_ALL( LEVEL_INFO, tm.Toc_String() );
+    LOG_ALL( LV_INFO, tm.Toc_String() );
     return true;
 }
 
 int MyApp::OnExit()
 {
     Config::SaveConfig();
+    delete mInstance;
     return 0;
+}
+
+bool MyApp::InstanceExist()
+{
+    mInstance = new wxSingleInstanceChecker;
+    return mInstance->IsAnotherRunning();
 }
 
 void MyApp::ShowSplashScreen()
@@ -95,7 +94,7 @@ void MyApp::ShowSplashScreen()
     }
     catch ( ... )
     {
-        LOG_ALL( LEVEL_WARN, "Splash screen can not created!" );
+        LOG_ALL( LV_WARN, "Splash screen can not created!" );
     }
 }
 

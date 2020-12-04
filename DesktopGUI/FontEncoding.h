@@ -1,6 +1,4 @@
 #pragma once
-#include <wx/string.h>
-#include <wx/stc/stc.h>
 
 #define CR_CHAR   '\r'
 #define LF_CHAR   '\n'

@@ -17,7 +17,7 @@ namespace Util
 	};
 
 	static void Log( const Err& e, const std::string& filepath )
-	{ log.Log_File( LEVEL_ERROR, e.Seek(), filepath ); }
+	{ log.Log_File( LV_ERROR, e.Seek(), filepath ); }
 
 	#define THROW_ERR(MSG)                        throw Util::Err(MSG)
 	#define THROW_ERR_IF(X, MSG)                  if (X) throw Util::Err(MSG)

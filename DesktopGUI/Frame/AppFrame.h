@@ -1,9 +1,6 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/stc/stc.h>
-#include <wx/aui/auibook.h>
-#include "PreferencesFrame.h"
 #include "../GridField.h"
+#include "PreferencesFrame.h"
 #include "StyleFrame.h"
 #include "ShareFrame.h"
 
@@ -38,8 +35,6 @@ private:
     GridField* mGridField;
     wxStatusBar* mStatusBar;
     StyleFrame* mStyleFrame;
-    PreferencesFrame* mPreferencesFrame;
+    bool isPrefInit;
     bool isShareInit;
-
-    float AutosaveTime;
 };

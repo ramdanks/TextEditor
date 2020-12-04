@@ -16,24 +16,26 @@ namespace Util
 {
 	class Timer
 	{
-		std::string mTitle;
-		TimerPoint mTime;
-		bool mPrintOnDestroy;
-
 	public:
 		Timer();
-		Timer( std::string Title, TimerPoint TP, bool PrintOnDestroy );
+		Timer( TimerPoint TP, bool PrintOnDestroy );
+		Timer( const std::string& Title, TimerPoint TP, bool PrintOnDestroy );
+		Timer( std::string&& Title, TimerPoint TP, bool PrintOnDestroy );
 		~Timer();
 
+		void Setting( std::string&& Title, TimerPoint TP, bool PrintOnDestroy );
+		void Setting( const std::string& Title, TimerPoint TP, bool PrintOnDestroy );
 
 		void Tic();
 		float Toc();
 		std::string Toc_String();
-		void Setting( std::string Title, TimerPoint TP, bool PrintOnDestroy );
 		static float Adjust_Time( TimerPoint TP, float Sec );
 		static std::string Get_Current_Time();
 
 	private:
+		std::string mTitle;
+		TimerPoint mTime;
+		bool mPrintOnDestroy;
 		std::chrono::time_point<std::chrono::steady_clock> TimeLog;
 		std::chrono::duration<float> Duration;
 	};
@@ -58,21 +60,15 @@ namespace Util
 
 #define TIMER_MACROS 1
 #if TIMER_MACROS
-	#define TIMER_SCOPE( OBJ,STR,TP,POD )  Util::Timer OBJ( STR,TP,POD )
-	#define TIMER_FUNCTION( OBJ,TP,POD )   TIMER_SCOPE( OBJ,__FUNCSIG__,TP,POD )
-	#define TIMER_SEC_FUNCTION( OBJ,POD )  TIMER_SCOPE( OBJ,__FUNCSIG__,SEC,POD )
-	#define TIMER_MS_FUNCTION( OBJ,POD )   TIMER_SCOPE( OBJ,__FUNCSIG__,MS,POD )
-	#define TIMER_US_FUNCTION( OBJ,POD )   TIMER_SCOPE( OBJ,__FUNCSIG__,US,POD )
-	#define TIMER_NS_FUNCTION( OBJ,POD )   TIMER_SCOPE( OBJ,__FUNCSIG__,NS,POD )
+	#define TIMER_ONLY( OBJ,TP,POD )       Util::Timer OBJ(TP,POD)
+	#define TIMER_SCOPE( OBJ,STR,TP,POD )  Util::Timer OBJ(STR,TP,POD)
+	#define TIMER_FUNCTION( OBJ,TP,POD )   TIMER_SCOPE(OBJ,__FUNCSIG__,TP,POD)
 	#define TIMER_GET( OBJ )               OBJ.Toc()
 	#define TIMER_GETSTR( OBJ )            OBJ.Toc_String()
 #else
+	#define TIMER_ONLY( OBJ,TP,POD )
 	#define TIMER_SCOPE( OBJ,STR,TP,POD )
-	#define TIMER_FUNCTION( OBJ,TP,POD ) 
-	#define TIMER_SEC_FUNCTION( OBJ,POD )
-	#define TIMER_MS_FUNCTION( OBJ,POD ) 
-	#define TIMER_US_FUNCTION( OBJ,POD ) 
-	#define TIMER_NS_FUNCTION( OBJ,POD ) 
-	#define TIMER_GET( OBJ )             
-	#define TIMER_GETSTR( OBJ )          
+	#define TIMER_FUNCTION( OBJ,TP,POD )
+	#define TIMER_GET( OBJ )       
+	#define TIMER_GETSTR( OBJ )
 #endif

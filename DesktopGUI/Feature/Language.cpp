@@ -1,7 +1,4 @@
 #include "Language.h"
-#include "../../Utilities/Filestream.h"
-#include "../../Utilities/Timer.h"
-#include "../../Utilities/Err.h"
 #include "LogGUI.h"
 
 //translation unit for static member
@@ -82,7 +79,7 @@ wxString Language::IdentifyID( LanguageID id )
 
 bool Language::LoadMessage( LanguageID id )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    PROFILE_FUNC();
 
     try
     {
@@ -104,21 +101,20 @@ bool Language::LoadMessage( LanguageID id )
         THROW_ERR_IFEMPTY( vMsg, "Problem parsing a language string from LoadMessage()!" );
 
         // save and convert from utf-8
+        mMessage.clear();
         for ( const auto& i : vMsg ) mMessage.push_back( wxString::FromUTF8( i ) );
     }
     catch ( Util::Err& e )
     {
-        LOG_ALL( LEVEL_WARN, e.Seek() );
+        LOG_ALL( LV_WARN, e.Seek() );
         LoadMessageDefault();
         return false;
     }
     catch ( ... )
     {
-        LOG_ALL( LEVEL_WARN, "Unknown Exception when processing language file from LoadMessage()!" );
+        LOG_ALL( LV_WARN, "Unknown Exception when processing language file from LoadMessage()!" );
         LoadMessageDefault();
         return false;
     }
-
-    LOG_FUNCTION( LEVEL_INFO, TIMER_GETSTR( timer ) );
     return true;
 }

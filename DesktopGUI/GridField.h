@@ -1,8 +1,4 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/grid.h>
-#include <wx/notebook.h>
-#include <vector>
 #include "Feature/Dictionary.h"
 
 struct sGridData

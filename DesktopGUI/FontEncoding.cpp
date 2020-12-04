@@ -1,9 +1,5 @@
 #include "FontEncoding.h"
-#include "../Utilities/Filestream.h"
-#include "../Utilities/Timer.h"
-#include "../Utilities/Random.h"
 #include "Feature/LogGUI.h"
-#include <wx/stc/stc.h> 
 
 wxString FontEncoding::GetEncodingString( const wxFontEncoding& enc )
 {
@@ -139,7 +135,7 @@ bool FontEncoding::ConvertEOLString( wxString& str, int mode )
     }
     str += vLines.back();
 
-    LOG_ALL_FORMAT( LEVEL_TRACE, "Adjust EOL time: %f (ms)", Tm.Toc() );
+    LOG_ALL_FORMAT( LV_TRACE, "Adjust EOL time: %f (ms)", Tm.Toc() );
     return true;
 }
 

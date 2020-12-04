@@ -1,7 +1,4 @@
 #pragma once
-#include <wx/wxprec.h>
-#include <wx/aui/auibook.h>
-#include <wx/stc/stc.h>
 #include "Frame/DictionaryFrame.h"
 #include "Frame/StyleFrame.h"
 
@@ -11,6 +8,7 @@ struct sPageData
 	bool isTemporary;
 	std::string FilePath;
 	wxStyledTextCtrl* TextField;
+	wxString Suggestion;
 };
 
 //can manipulate MainFrame automatically
@@ -86,6 +84,9 @@ private:
 	static void OnSelectMenuWindow( wxCommandEvent& event );
 	static void OnOpenMenuWindow( wxMenuEvent& event );
 
+	static void ShowAutoComp();
+	static void OnAutoCompCompleted( wxStyledTextEvent& event );
+
 	static bool UpdateEOLString( wxStyledTextCtrl* stc, int mode );
 
 	static void UpdateStatusEOL( wxStyledTextCtrl* stc );
@@ -106,6 +107,7 @@ private:
 	static bool isFindInit;
 	static bool isDictInit;
 	
+	static std::future<void> mFuture;
 	static wxMenu* mMenuWnd;
 	static wxFrame* mParent;
 	static wxAuiNotebook* mNotebook;

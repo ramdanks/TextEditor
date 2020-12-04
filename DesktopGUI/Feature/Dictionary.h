@@ -1,7 +1,4 @@
 #pragma once
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 struct sContent
 {
@@ -12,8 +9,6 @@ struct sContent
 class Dictionary
 {
 public:
-	static std::unordered_set<std::string> ParseWord( const std::string& str );
-
 	Dictionary();
 	Dictionary( const std::string& filepath );
 
