@@ -1,6 +1,7 @@
 #pragma once
 #include "Frame/DictionaryFrame.h"
 #include "Frame/StyleFrame.h"
+#include "Frame/PreferencesFrame.h"
 
 struct sPageData
 {
@@ -106,6 +107,7 @@ private:
 	static bool isGotoInit;
 	static bool isFindInit;
 	static bool isDictInit;
+	static bool isAutocomp;
 	
 	static std::future<void> mFuture;
 	static wxMenu* mMenuWnd;
@@ -114,6 +116,7 @@ private:
 	static std::vector<sPageData> mPageData;
 	static std::vector<wxMenuItem*> mWindowItem;
 
+	friend class PreferencesFrame;
 	friend class DictionaryFrame;
 	friend class AutoThread;
 	friend class StyleFrame;

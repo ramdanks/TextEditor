@@ -11,6 +11,7 @@
 #include <wx/font.h>
 #include <wx/fontpicker.h>
 #include <wx/filedlg.h>
+#include <wx/filepicker.h>
 #include <wx/grid.h>
 #include <wx/icon.h>
 #include <wx/listbox.h>
@@ -25,6 +26,8 @@
 #include <wx/statbox.h>
 #include <wx/stattext.h>
 #include <wx/socket.h>
+#include <wx/slider.h>
+#include <wx/spinctrl.h>
 #include <wx/textctrl.h>
 #include <wx/textdlg.h>
 #include <wx/aui/auibook.h>

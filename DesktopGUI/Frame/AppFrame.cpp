@@ -26,8 +26,9 @@ AppFrame::AppFrame( const wxPoint& pos, const wxSize& size )
 {
     PROFILE_FUNC();
 
-    this->mStatusBar = CreateStatusBar();
-    this->mStatusBar->SetStatusText( MSG_STATUSBAR );
+    mStatusBar = CreateStatusBar();
+    mStatusBar->SetStatusText( MSG_STATUSBAR );
+    if ( !Config::mGeneral.UseStatbar ) mStatusBar->Show( false );
 
     CreateMenu();
     BindMenu();
@@ -35,17 +36,18 @@ AppFrame::AppFrame( const wxPoint& pos, const wxSize& size )
     TextField::Init( this );
     TextField::FetchTempFile();
     ShareFrame::Init( this );
+    PreferencesFrame::mMF.Frame = this;
 
-    AutoThread::DeployAutoConnect( Config::mCheckConnectionInterval );
-    if ( Config::mUseAutoSave ) AutoThread::DeployAutoSave( Config::mSaveInterval );
-    if ( Config::mUseAutoHighlight ) AutoThread::DeployAutoHighlight( Config::mHighlightInterval );
+    AutoThread::DeployAutoConnect( Config::mGeneral.CheckConnectionInterval );
+    if ( Config::mAutosave.Use ) AutoThread::DeployAutoSave();
+    if ( Config::mAutohigh.Use ) AutoThread::DeployAutoHighlight();
 }
 
 void AppFrame::CreateMenu()
 {
     wxMenu* menuFile = new wxMenu;
     {
-        PreferencesFrame::mMFmenu.File = menuFile;
+        PreferencesFrame::mMF.File = menuFile;
         menuFile->Append( ID_NEWFILE, MSG_NEW + "\tCtrl-N" );
         menuFile->Append( ID_SAVEFILE, MSG_SAVE + "\tCtrl-S" );
         menuFile->Append( ID_SAVEFILEAS, MSG_SAVEAS + "\tCtrl-Alt-S" );
@@ -65,7 +67,7 @@ void AppFrame::CreateMenu()
                                                                                 
     wxMenu* menuEdit = new wxMenu;
     {
-        PreferencesFrame::mMFmenu.Edit = menuEdit;
+        PreferencesFrame::mMF.Edit = menuEdit;
         menuEdit->Append( ID_UNDO,            MSG_UNDO         + "\tCtrl-Z"         );
         menuEdit->Append( ID_REDO,            MSG_REDO         + "\tCtrl-Y"         );
         menuEdit->AppendSeparator();                                                
@@ -78,7 +80,7 @@ void AppFrame::CreateMenu()
                                                                                 
         wxMenu* subCase = new wxMenu;
         {
-            PreferencesFrame::mMFmenu.Case = subCase;
+            PreferencesFrame::mMF.Case = subCase;
             subCase->Append( ID_UPPERCASE, MSG_UPPCASE );
             subCase->Append( ID_LOWERCASE, MSG_LOWCASE );
             subCase->Append( ID_INVERSECASE, MSG_INVCASE );
@@ -87,7 +89,7 @@ void AppFrame::CreateMenu()
 
         wxMenu* subEOL = new wxMenu;
         {
-            PreferencesFrame::mMFmenu.EOL = subEOL;
+            PreferencesFrame::mMF.EOL = subEOL;
             subEOL->Append( ID_EOL_LF, MSG_EOLUNX );
             subEOL->Append( ID_EOL_CR, MSG_EOLMAC );
             subEOL->Append( ID_EOL_CRLF, MSG_EOLWIN );
@@ -99,7 +101,7 @@ void AppFrame::CreateMenu()
                                                                                    
     wxMenu* menuSearch = new wxMenu;
     {
-        PreferencesFrame::mMFmenu.Search = menuSearch;
+        PreferencesFrame::mMF.Search = menuSearch;
         menuSearch->Append( ID_FIND,          MSG_FIND           + "\tCtrl-F"          );
         menuSearch->Append( ID_SELECTFNEXT,   MSG_SELECTFNEXT    + "\tCtrl-F3"         );
         menuSearch->Append( ID_SELECTFPREV,   MSG_SELECTFPREV    + "\tCtrl-Shift-F3"   );
@@ -109,7 +111,7 @@ void AppFrame::CreateMenu()
                                                              
     wxMenu* menuView = new wxMenu;
     {
-        PreferencesFrame::mMFmenu.View = menuView;
+        PreferencesFrame::mMF.View = menuView;
         menuView->Append( ID_STAYONTOP, MSG_AOT, wxEmptyString, wxITEM_CHECK );
         menuView->Append( ID_ZOOMIN,          MSG_ZOOMIN         + "\tCtrl-Num +"      );
         menuView->Append( ID_ZOOMOUT,         MSG_ZOOMOUT        + "\tCtrl-Num -"      );
@@ -125,14 +127,14 @@ void AppFrame::CreateMenu()
                                                                                   
     wxMenu* menuSettings = new wxMenu;
     {
-        PreferencesFrame::mMFmenu.Setting = menuSettings;
+        PreferencesFrame::mMF.Setting = menuSettings;
         menuSettings->Append( ID_PREFERENCES, MSG_PREFERENCES                          );
         menuSettings->Append( ID_STYLECONFIG, MSG_STYLECONFIG                          );
     }
 
     wxMenu* menuHelp = new wxMenu;
     {
-        PreferencesFrame::mMFmenu.Help = menuHelp;
+        PreferencesFrame::mMF.Help = menuHelp;
         menuHelp->Append( ID_REPORTBUG,       MSG_REPORTBUG                            );
         menuHelp->Append( ID_LOGDIR,          MSG_OPENLOGDIR                           );
         menuHelp->AppendSeparator();                                                   
@@ -142,7 +144,7 @@ void AppFrame::CreateMenu()
 
     wxMenuBar* menuBar = new wxMenuBar;
     {
-        PreferencesFrame::mMFmenu.MenuBar = menuBar;
+        PreferencesFrame::mMF.MenuBar = menuBar;
         menuBar->Append( menuFile, MSG_FILE );
         menuBar->Append( menuEdit, MSG_EDIT );
         menuBar->Append( menuSearch, MSG_SEARCH );
@@ -289,7 +291,7 @@ void AppFrame::OnPreferences( wxCommandEvent& event )
     {
         isPrefInit = true;
         PreferencesFrame::Init( this );
-        PreferencesFrame::mMFmenu.Statbar = this->mStatusBar;
+        PreferencesFrame::mMF.Statbar = this->mStatusBar;
     }
     PreferencesFrame::ShowAndFocus( true, true );
 }

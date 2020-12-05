@@ -2,25 +2,13 @@
 #include "LogGUI.h"
 
 //translation unit for static member
-wxFont Config::mFont;
-int Config::mFontSize;
-int Config::mFontWeight;
-int Config::mFontFamily;
-int Config::mFontStyle;
-int Config::mUseSplash;
-int Config::mSaveInterval;
-int Config::mUseAutoSave;
-int Config::mLanguageID;
-int Config::mUseAutoHighlight;
-int Config::mHighlightInterval;
-int Config::mZoomDefault;
-int Config::mTextBack;
-int Config::mTextFore;
-int Config::mCaret;
-int Config::mLineBack;
-int Config::mSelection;
-int Config::mLinenumBack;
-int Config::mLinenumFore;
+Config::Font Config::mFont;
+Config::Style Config::mStyle;
+Config::General Config::mGeneral;
+Config::AutoThread Config::mAutosave;
+Config::AutoThread Config::mAutohigh;
+Config::AutoThread Config::mAutocomp;
+Config::Notebook Config::mNotebook;
 std::vector<sConfigReference> Config::mConfTemplate;
 
 void Config::FetchData()
@@ -51,8 +39,6 @@ void Config::FetchData()
 			THROW_ERR_IF( vConfig[0] != mConfTemplate[i].Tag, "Config file is compromised!" );
 			*mConfTemplate[i].RefData = std::stoi( vConfig[1] );
 		}
-
-		mFont = wxFont( mFontSize, (wxFontFamily)mFontFamily, (wxFontStyle)mFontStyle, (wxFontWeight)mFontWeight );
 		LOG_ALL( LV_INFO, "Loading configuration file success!" );
 	}
 	catch ( Util::Err& e )
@@ -71,26 +57,35 @@ void Config::FetchData()
 
 void Config::LoadDefaultConfig()
 {
-	mFontFamily = wxFONTFAMILY_MODERN;
-	mFontStyle = wxFONTSTYLE_NORMAL;
-	mFontWeight = wxFONTWEIGHT_NORMAL;
-	mFont = wxFont( mFontSize, (wxFontFamily) mFontFamily, (wxFontStyle) mFontStyle, (wxFontWeight) mFontWeight );
+	// system default
+	mGeneral.UseSplash     = true;
+	mGeneral.LanguageID    = 0;
+	mGeneral.ZoomDefault   = 5;
+	mGeneral.UseStatbar    = true;
+	mGeneral.UseDragDrop   = true;
+	// autosave default
+	mAutosave.Use          = true;
+	mAutosave.Param        = 5000;
+	// autohighlight default
+	mAutohigh.Use          = true;
+	mAutohigh.Param        = 5000;
+	// autocompletion default
+	mAutocomp.Use          = true;
+	mAutocomp.Param        = 5000;
+	// font default	       
+	mFont.Size             = 10;
+	mFont.Family           = wxFONTFAMILY_MODERN;
+	mFont.Style            = wxFONTSTYLE_NORMAL;
+	mFont.Weight           = wxFONTWEIGHT_NORMAL;
+	// style default       
+	mStyle.TextBack        = 2302755;
+	mStyle.TextFore        = 16777215;
+	mStyle.Caret           = 13405661;
+	mStyle.LineBack        = 4605510;
+	mStyle.Selection       = 13203258;
+	mStyle.LinenumBack     = 3945010;
+	mStyle.LinenumFore     = 13408221;
 
-	mUseSplash = true;
-	mLanguageID = 0;
-	mSaveInterval = 3600;
-	mUseAutoSave = true;
-	mHighlightInterval = 100;
-	mUseAutoHighlight = true;
-	mFontSize = 10;
-	mZoomDefault = 5;
-	mTextBack = 2302755;
-	mTextFore = 16777215;
-	mCaret = 13405661;
-	mLineBack = 4605510;
-	mSelection = 13203258;
-	mLinenumBack = 3945010;
-	mLinenumFore = 13408221;
 	LOG_ALL( LV_INFO, "Loading default configuration file!" );
 }
 
@@ -125,33 +120,77 @@ std::string Config::GetSupportedFormat()
 	return supp;
 }
 
+int Config::GetNotebookStyle()
+{
+	int style = 0;
+	if ( Config::mNotebook.Orientation )   style |= wxAUI_NB_TOP;
+	else                                   style |= wxAUI_NB_BOTTOM;
+	if ( Config::mNotebook.FixedWidth )    style |= wxAUI_NB_TAB_FIXED_WIDTH;
+	if ( !Config::mNotebook.LockMove )     style |= wxAUI_NB_TAB_MOVE;
+	if ( Config::mNotebook.MiddleClose )   style |= wxAUI_NB_MIDDLE_CLICK_CLOSE;
+	if ( Config::mNotebook.ShowCloseBtn )
+	{
+		if ( Config::mNotebook.CloseBtnOn )    style |= wxAUI_NB_CLOSE_ON_ALL_TABS;
+		else                                   style |= wxAUI_NB_CLOSE_ON_ACTIVE_TAB;
+	}
+	return style;
+}
+
+void Config::SetNotebookStyle( int style )
+{
+	Config::mNotebook.Orientation  = style & wxAUI_NB_TOP;
+	Config::mNotebook.FixedWidth   = style & wxAUI_NB_BOTTOM;
+	Config::mNotebook.LockMove     = style & wxAUI_NB_TAB_FIXED_WIDTH;
+	Config::mNotebook.MiddleClose  = style & wxAUI_NB_TAB_MOVE;
+	Config::mNotebook.ShowCloseBtn = style & wxAUI_NB_MIDDLE_CLICK_CLOSE;
+	Config::mNotebook.CloseBtnOn   = style & wxAUI_NB_CLOSE_ON_ALL_TABS;
+}
+
+wxFont Config::BuildFont()
+{
+	return wxFont( mFont.Size, (wxFontFamily) mFont.Family, (wxFontStyle) mFont.Style,
+				   (wxFontWeight) mFont.Weight, false, mFont.Face );
+}
+
 void Config::SetFont( wxFont font )
 {
-	mFont = font;
-	mFontSize = font.GetPointSize();
-	mFontStyle = font.GetStyle();
-	mFontFamily = font.GetFamily();
-	mFontWeight = font.GetWeight();
+	mFont.Face   = font.GetFaceName();
+	mFont.Size   = font.GetPointSize();
+	mFont.Style  = font.GetStyle();
+	mFont.Family = font.GetFamily();
+	mFont.Weight = font.GetWeight();
 }
 
 void Config::MakeTemplate()
 {
-	mConfTemplate.push_back( sConfigReference( "mSplashScreen",      &mUseSplash ) );
-	mConfTemplate.push_back( sConfigReference( "mSystemLanguage",    &mLanguageID ) );
-	mConfTemplate.push_back( sConfigReference( "mUseAutoSave",       &mUseAutoSave ) );
-	mConfTemplate.push_back( sConfigReference( "mSaveInterval",      &mSaveInterval ) );
-	mConfTemplate.push_back( sConfigReference( "mUseAutoHighlight",  &mUseAutoHighlight ) );
-	mConfTemplate.push_back( sConfigReference( "mHighlightInterval", &mHighlightInterval ) );
-	mConfTemplate.push_back( sConfigReference( "mZoomDefault",       &mZoomDefault ) );
-	mConfTemplate.push_back( sConfigReference( "mTextBack",          &mTextBack ) );
-	mConfTemplate.push_back( sConfigReference( "mTextFore",          &mTextFore ) );
-	mConfTemplate.push_back( sConfigReference( "mCaret",             &mCaret ) );
-	mConfTemplate.push_back( sConfigReference( "mLineBack",          &mLineBack ) );
-	mConfTemplate.push_back( sConfigReference( "mSelection",         &mSelection ) );
-	mConfTemplate.push_back( sConfigReference( "mLinenumBack",       &mLinenumBack ) );
-	mConfTemplate.push_back( sConfigReference( "mLinenumFore",       &mLinenumFore ) );
-	mConfTemplate.push_back( sConfigReference( "mFontSize",          &mFontSize ) );
-	mConfTemplate.push_back( sConfigReference( "mFontStyle",         &mFontStyle ) );
-	mConfTemplate.push_back( sConfigReference( "mFontFamily",        &mFontFamily ) );
-	mConfTemplate.push_back( sConfigReference( "mFontWeight",        &mFontWeight ) );
+	mConfTemplate.reserve( 30 );
+	mConfTemplate.emplace_back( "Hide",              &mNotebook.Hide );
+	mConfTemplate.emplace_back( "Orientation",       &mNotebook.Orientation );
+	mConfTemplate.emplace_back( "LockMove",          &mNotebook.LockMove );
+	mConfTemplate.emplace_back( "FixedWidth",        &mNotebook.FixedWidth );
+	mConfTemplate.emplace_back( "MiddleMouseClose",  &mNotebook.MiddleClose );
+	mConfTemplate.emplace_back( "ShowCloseBtn",      &mNotebook.ShowCloseBtn );
+	mConfTemplate.emplace_back( "CloseBtnOn",        &mNotebook.CloseBtnOn );
+	mConfTemplate.emplace_back( "SplashScreen",      &mGeneral.UseSplash );
+	mConfTemplate.emplace_back( "UseStatusbar",      &mGeneral.UseStatbar );
+	mConfTemplate.emplace_back( "UseDragDrop",       &mGeneral.UseDragDrop );
+	mConfTemplate.emplace_back( "SystemLanguage",    &mGeneral.LanguageID );
+	mConfTemplate.emplace_back( "ZoomDefault",       &mGeneral.ZoomDefault );
+	mConfTemplate.emplace_back( "UseAutosave",       &mAutosave.Use );
+	mConfTemplate.emplace_back( "AutosaveInterval",  &mAutosave.Param );
+	mConfTemplate.emplace_back( "UseAutohigh",       &mAutohigh.Use );
+	mConfTemplate.emplace_back( "AutohighInterval",  &mAutohigh.Param );
+	mConfTemplate.emplace_back( "UseAutocomp",       &mAutocomp.Use );
+	mConfTemplate.emplace_back( "AutocompWords",     &mAutocomp.Param );
+	mConfTemplate.emplace_back( "TextBack",          &mStyle.TextBack );
+	mConfTemplate.emplace_back( "TextFore",          &mStyle.TextFore );
+	mConfTemplate.emplace_back( "Caret",             &mStyle.Caret );
+	mConfTemplate.emplace_back( "LineBack",          &mStyle.LineBack );
+	mConfTemplate.emplace_back( "Selection",         &mStyle.Selection );
+	mConfTemplate.emplace_back( "LinenumBack",       &mStyle.LinenumBack );
+	mConfTemplate.emplace_back( "LinenumFore",       &mStyle.LinenumFore );
+	mConfTemplate.emplace_back( "FontSize",          &mFont.Size );
+	mConfTemplate.emplace_back( "FontStyle",         &mFont.Style );
+	mConfTemplate.emplace_back( "FontFamily",        &mFont.Family );
+	mConfTemplate.emplace_back( "FontWeight",        &mFont.Weight );
 }

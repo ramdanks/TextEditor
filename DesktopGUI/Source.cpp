@@ -40,11 +40,11 @@ bool MyApp::OnInit()
         Config::FetchData();
         Image::FetchData();
 
-        if ( Config::mUseSplash ) ShowSplashScreen();
+        if ( Config::mGeneral.UseSplash ) ShowSplashScreen();
 
         //load language from configuration
-        if ( !Language::LoadMessage( static_cast<LanguageID>( Config::mLanguageID ) ) ) {
-            LOG_ALL_FORMAT( LV_INFO, "Problem importing language with ID: %d", Config::mLanguageID ); 
+        if ( !Language::LoadMessage( static_cast<LanguageID>( Config::mGeneral.LanguageID ) ) ) {
+            LOG_ALL_FORMAT( LV_INFO, "Problem importing language with ID: %d", Config::mGeneral.LanguageID ); 
         }
 
         //create main frame
@@ -53,7 +53,7 @@ bool MyApp::OnInit()
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
 
         //finally
-        if ( Config::mUseSplash ) DestroySplashScreen();
+        if ( Config::mGeneral.UseSplash ) DestroySplashScreen();
         mMainFrame->Show();
         mMainFrame->Raise();
     }

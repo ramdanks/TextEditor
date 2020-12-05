@@ -18,6 +18,7 @@ std::vector<wxMenuItem*> TextField::mWindowItem;
 bool TextField::isGotoInit = false;
 bool TextField::isFindInit = false;
 bool TextField::isDictInit = false;
+bool TextField::isAutocomp = false;
 std::future<void> TextField::mFuture;
 
 wxCommandEvent NullCmdEvent = wxCommandEvent( wxEVT_NULL );
@@ -27,7 +28,7 @@ wxCommandEvent NullCmdEvent = wxCommandEvent( wxEVT_NULL );
 void TextField::Init( wxFrame * parent )
 {
     mParent = parent;
-    int style = wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE | wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_CLOSE_ON_ACTIVE_TAB | wxAUI_NB_MIDDLE_CLICK_CLOSE;
+    int style = Config::GetNotebookStyle();
     mNotebook = new wxAuiNotebook( parent, -1, wxDefaultPosition, wxDefaultSize, style );
 
     const int statusWidth[] = { -3, -1, 120, -1 };
@@ -306,7 +307,7 @@ void TextField::OnUpdateUI( wxStyledTextEvent& event )
 void TextField::OnTextChanged( wxStyledTextEvent& event )
 {
     PROFILE_FUNC();
-    ShowAutoComp();
+    if ( isAutocomp ) ShowAutoComp();
     UpdateSaveIndicator( false );
     MarginAutoAdjust();
 }
@@ -545,7 +546,7 @@ void TextField::OnOpenFile( wxCommandEvent& event )
         }
         else
         {
-            mPageData.push_back( { false, false, filepath, nullptr } );           
+            mPageData.push_back( { false, false, filepath, nullptr } );
             AddNewTab( mPageData.back() );
         }
 
@@ -790,7 +791,7 @@ void TextField::OnZoomOut( wxCommandEvent& event )
 void TextField::OnZoomRestore( wxCommandEvent& event )
 {
     auto currentPage = mNotebook->GetSelection();
-    mPageData[currentPage].TextField->SetZoom( Config::mZoomDefault );
+    mPageData[currentPage].TextField->SetZoom( Config::mGeneral.ZoomDefault );
 }
 
 void TextField::OnFind( wxCommandEvent& event )
@@ -848,7 +849,7 @@ void TextField::AddNewTab( sPageData& pd )
     pd.TextField = new wxStyledTextCtrl( mNotebook, -1, wxDefaultPosition, wxSize( 0, 0 ) );
     mNotebook->AddPage( pd.TextField, Filestream::GetFileName( pd.FilePath ), true );
 
-    pd.TextField->SetZoom( Config::mZoomDefault );
+    pd.TextField->SetZoom( Config::mGeneral.ZoomDefault );
     pd.TextField->SetScrollWidth( 1 ); //avoid large horizontal scroll width by default
 
     LoadStyle( pd.TextField );
@@ -871,17 +872,17 @@ void TextField::AddNewTab( sPageData& pd )
 void TextField::LoadStyle( wxStyledTextCtrl* stc )
 {
     PROFILE_FUNC();
-    stc->StyleSetFont( wxSTC_STYLE_DEFAULT, Config::mFont );
-    stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, wxColour( Config::mTextFore ) ); //foreground such as text
-    stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( Config::mTextBack ) ); //background for field
+    stc->StyleSetFont( wxSTC_STYLE_DEFAULT, Config::BuildFont() );
+    stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, wxColour( Config::mStyle.TextFore ) ); //foreground such as text
+    stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( Config::mStyle.TextBack ) ); //background for field
     stc->StyleClearAll();
     stc->SetCaretLineVisible( true ); //set caret line background visible
-    stc->SetCaretLineBackground( wxColour( Config::mLineBack ) ); //caret line background
-    stc->SetCaretForeground( wxColour( Config::mCaret ) ); //caret colour
-    stc->SetSelBackground( true, wxColour( Config::mSelection ) ); //background of selected text
+    stc->SetCaretLineBackground( wxColour( Config::mStyle.LineBack ) ); //caret line background
+    stc->SetCaretForeground( wxColour( Config::mStyle.Caret ) ); //caret colour
+    stc->SetSelBackground( true, wxColour( Config::mStyle.Selection ) ); //background of selected text
     stc->SetMarginType( 0, wxSTC_MARGIN_NUMBER );
-    stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mLinenumBack ) ); //linenumber back color
-    stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mLinenumFore ) ); //linenumber fore color
+    stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mStyle.LinenumBack ) ); //linenumber back color
+    stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mStyle.LinenumFore ) ); //linenumber fore color
     //stc->StyleSetSpec( wxSTC_STYLE_LINENUMBER, "fore:#dd96cc,back:#3c3c3c" ); //linenumber color with one func
 }
 

@@ -1,6 +1,7 @@
 Resource/*
 Vendor/*
 DesktopGUI/*.exe
+DesktopGUI/*.cfg
 DesktopGUI/x64/*
 DesktopGUI/log/*
 DesktopGUI/resource/*

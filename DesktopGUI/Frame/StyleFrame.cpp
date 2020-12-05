@@ -34,14 +34,14 @@ void StyleFrame::OnOK( wxCommandEvent& event )
 	wxWindowDisabler disabler;
 	wxBusyInfo busyInfo( "Applying new Style" );
 
-	Config::mTextBack    = mSP.TextBack->GetColour().GetRGB();
-	Config::mTextFore    = mSP.TextFore->GetColour().GetRGB();
-	Config::mCaret       = mSP.Caret->GetColour().GetRGB();
-	Config::mLineBack    = mSP.LineBack->GetColour().GetRGB();
-	Config::mSelection   = mSP.Selection->GetColour().GetRGB();
-	Config::mLinenumBack = mSP.LinenumBack->GetColour().GetRGB();
-	Config::mLinenumFore = mSP.LinenumFore->GetColour().GetRGB();
 	Config::SetFont( mSP.FontPicker->GetSelectedFont() );
+	Config::mStyle.TextBack    = mSP.TextBack->GetColour().GetRGB();
+	Config::mStyle.TextFore    = mSP.TextFore->GetColour().GetRGB();
+	Config::mStyle.Caret       = mSP.Caret->GetColour().GetRGB();
+	Config::mStyle.LineBack    = mSP.LineBack->GetColour().GetRGB();
+	Config::mStyle.Selection   = mSP.Selection->GetColour().GetRGB();
+	Config::mStyle.LinenumBack = mSP.LinenumBack->GetColour().GetRGB();
+	Config::mStyle.LinenumFore = mSP.LinenumFore->GetColour().GetRGB();
 
 	for ( auto& page : TextField::mPageData )
 		TextField::LoadStyle( page.TextField );
@@ -93,13 +93,13 @@ void StyleFrame::UpdatePreview()
 
 void StyleFrame::AdjustColourPicker()
 {
-	mSP.TextBack->SetColour( wxColour( Config::mTextBack ) );
-	mSP.TextFore->SetColour( wxColour( Config::mTextFore ) );
-	mSP.Caret->SetColour( wxColour( Config::mCaret ) );
-	mSP.LineBack->SetColour( wxColour( Config::mLineBack ) );
-	mSP.Selection->SetColour( wxColour( Config::mSelection ) );
-	mSP.LinenumBack->SetColour( wxColour( Config::mLinenumBack ) );
-	mSP.LinenumFore->SetColour( wxColour( Config::mLinenumFore ) );
+	mSP.TextBack->SetColour(    wxColour( Config::mStyle.TextBack ) );
+	mSP.TextFore->SetColour(    wxColour( Config::mStyle.TextFore ) );
+	mSP.Caret->SetColour(       wxColour( Config::mStyle.Caret ) );
+	mSP.LineBack->SetColour(    wxColour( Config::mStyle.LineBack ) );
+	mSP.Selection->SetColour(   wxColour( Config::mStyle.Selection ) );
+	mSP.LinenumBack->SetColour( wxColour( Config::mStyle.LinenumBack ) );
+	mSP.LinenumFore->SetColour( wxColour( Config::mStyle.LinenumFore ) );
 }
 
 void StyleFrame::CreateContent()
@@ -112,31 +112,31 @@ void StyleFrame::CreateContent()
 
 	new wxStaticText( mSP.Panel, -1, "Select Font:", wxPoint( 10, 10 ) );
 	mSP.FontPicker = new wxFontPickerCtrl( mSP.Panel, -1, wxNullFont, wxPoint( 10, 30 ), wxSize( 150, 25 ) );
-	mSP.FontPicker->SetSelectedFont( Config::mFont );
+	mSP.FontPicker->SetSelectedFont( Config::BuildFont() );
 
 	new wxStaticText( mSP.Panel, 01, "Select Theme:", wxPoint( 180, 10 ) );
 	mSP.Theme = new wxComboBox( mSP.Panel, -1, wxEmptyString, wxPoint( 180, 30 ), wxSize( 150, 25 ) );
 
-	auto PickerSB = new wxStaticBox( mSP.Panel, -1, "Colour Picker", wxPoint( 10, 65 ), wxSize( 285, 245 ) );
+	auto PickerSB = new wxStaticBox( mSP.Panel, -1, "Colour Picker", wxPoint( 10, 65 ), wxSize( 240, 245 ) );
 
-	mSP.TextBack    = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 25 ) );
-	mSP.TextFore    = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 55 ) );
-	mSP.LinenumBack = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 85 ) );
-	mSP.LinenumFore = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 115 ) );
-	mSP.Selection   = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 145 ) );
-	mSP.Caret       = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 175 ) );
-	mSP.LineBack    = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 170, 205 ) );
+	mSP.TextBack    = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 25 ) );
+	mSP.TextFore    = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 55 ) );
+	mSP.LinenumBack = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 85 ) );
+	mSP.LinenumFore = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 115 ) );
+	mSP.Selection   = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 145 ) );
+	mSP.Caret       = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 175 ) );
+	mSP.LineBack    = new wxColourPickerCtrl( PickerSB, -1, wxColour( 0, 0, 0 ), wxPoint( 130, 205 ) );
 
-	new wxStaticText( PickerSB, -1, "Background",             wxPoint( 10, 25  ) );
-	new wxStaticText( PickerSB, -1, "Foreground",             wxPoint( 10, 55  ) );
-	new wxStaticText( PickerSB, -1, "Line Number Background", wxPoint( 10, 85  ) );
-	new wxStaticText( PickerSB, -1, "Line Number Foreground", wxPoint( 10, 115 ) );
-	new wxStaticText( PickerSB, -1, "Selection",              wxPoint( 10, 145 ) );
-	new wxStaticText( PickerSB, -1, "Caret",                  wxPoint( 10, 175 ) );
-	new wxStaticText( PickerSB, -1, "Caret Line Background",  wxPoint( 10, 205 ) );
+	new wxStaticText( PickerSB, -1, "Background",        wxPoint( 10, 25  ) );
+	new wxStaticText( PickerSB, -1, "Foreground",        wxPoint( 10, 55  ) );
+	new wxStaticText( PickerSB, -1, "Margin Background", wxPoint( 10, 85  ) );
+	new wxStaticText( PickerSB, -1, "Margin Foreground", wxPoint( 10, 115 ) );
+	new wxStaticText( PickerSB, -1, "Selection",         wxPoint( 10, 145 ) );
+	new wxStaticText( PickerSB, -1, "Caret",             wxPoint( 10, 175 ) );
+	new wxStaticText( PickerSB, -1, "Caret Background",  wxPoint( 10, 205 ) );
 
-	auto PreviewSB = new wxStaticBox( mSP.Panel, -1, "Preview", wxPoint( 310, 65 ), wxSize( 180, 245 ) );
-	mSP.Preview = new wxStyledTextCtrl( PreviewSB, -1, wxPoint( 15, 22 ), wxSize( 150, 205 ) );
+	auto PreviewSB = new wxStaticBox( mSP.Panel, -1, "Preview", wxPoint( 265, 65 ), wxSize( 225, 245 ) );
+	mSP.Preview = new wxStyledTextCtrl( PreviewSB, -1, wxPoint( 15, 22 ), wxSize( 195, 205 ) );
 	mSP.Preview->AppendText( "Lorem ipsum dolor\r\n" );
 	mSP.Preview->AppendText( "sit amet, consectetur\r\n" );
 	mSP.Preview->AppendText( "adipiscing elit, sed\r\n" );
