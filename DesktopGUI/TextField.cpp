@@ -203,6 +203,7 @@ void TextField::OnSelectMenuWindow( wxCommandEvent& event )
     PROFILE_FUNC();
     auto sel = event.GetId() - ID_WINDOWSELECT;
     mNotebook->ChangeSelection( sel );
+    UpdateParentName();
 }
 
 void TextField::OnOpenMenuWindow( wxMenuEvent& event )

@@ -246,8 +246,6 @@ void AppFrame::OnDocumentation( wxCommandEvent& event )
 {
 #if defined( _WIN32 )       
     system( "start https://github.com/ramdanks/TextEditor" );
-#elif defined( unix )       
-    system( "wget https://github.com/ramdanks/TextEditor" );
 #elif defined( __APPLE__ )  
     system( "open https://github.com/ramdanks/TextEditor" );
 #elif defined ( __linux__ ) 
@@ -268,6 +266,13 @@ void AppFrame::OnLogDir( wxCommandEvent& event )
 
 void AppFrame::OnReportBug( wxCommandEvent& event )
 {
+#if defined( _WIN32 )       
+    system( "start https://forms.gle/2Cu4BBEr3V5YGwpZA" );
+#elif defined( __APPLE__ )  
+    system( "open https://forms.gle/2Cu4BBEr3V5YGwpZA" );
+#elif defined ( __linux__ ) 
+    system( "xdg-open https://forms.gle/2Cu4BBEr3V5YGwpZA" );
+#endif
 }
 
 void AppFrame::OnStayOnTop( wxCommandEvent& event )

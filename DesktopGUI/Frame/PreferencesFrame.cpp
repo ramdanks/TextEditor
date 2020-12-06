@@ -32,30 +32,84 @@ void PreferencesFrame::ShowAndFocus( bool show, bool focus )
 
 void PreferencesFrame::Update()
 {
+	PROFILE_FUNC();
+
 	mGP.CB_SB->SetValue( Config::mGeneral.UseStatbar );
 	mGP.CB_DD->SetValue( Config::mGeneral.UseDragDrop );
 	mGP.CB_SS->SetValue( Config::mGeneral.UseSplash );
 	mGP.LocalizationCB->SetSelection( Config::mGeneral.LanguageID );
 
-	mGP.CB_NB_Hide->SetValue( Config::mNotebook.Hide );
-	mGP.RB_NB_Top->SetValue( Config::mNotebook.Orientation );
-	mGP.RB_NB_Bot->SetValue( !Config::mNotebook.Orientation );
-	mGP.CB_NB_Fixed->SetValue( Config::mNotebook.FixedWidth );
-	mGP.CB_NB_Lock->SetValue( Config::mNotebook.LockMove );
-	mGP.CB_NB_Middle->SetValue( Config::mNotebook.MiddleClose );
-	mGP.CB_NB_ShowClose->SetValue( Config::mNotebook.ShowCloseBtn );
-	mGP.RB_NB_OnAll->SetValue( Config::mNotebook.CloseBtnOn );
-	mGP.RB_NB_OnAct->SetValue( !Config::mNotebook.CloseBtnOn );
+	mGP.CB_NB_Hide->SetValue  ( Config::mNotebook.Hide         );
+	mGP.RB_NB_Top->SetValue   ( Config::mNotebook.Orientation  );
+	mGP.RB_NB_Bot->SetValue   ( !Config::mNotebook.Orientation );
+	mGP.CB_NB_Fixed->SetValue ( Config::mNotebook.FixedWidth   );
+	mGP.CB_NB_Lock->SetValue  ( Config::mNotebook.LockMove     );
+	mGP.CB_NB_Middle->SetValue( Config::mNotebook.MiddleClose  );
+	mGP.CB_NB_Close->SetValue ( Config::mNotebook.ShowCloseBtn );
+	mGP.RB_NB_OnAll->SetValue ( Config::mNotebook.CloseBtnOn   );
+	mGP.RB_NB_OnAct->SetValue ( !Config::mNotebook.CloseBtnOn  );
 
 	if ( Config::mNotebook.Hide )
 	{
 		mGP.RB_NB_Top->Disable();
 		mGP.RB_NB_Bot->Disable();
 	}
-	if ( !Config::mNotebook.ShowCloseBtn )
+	else
+	{
+		mGP.RB_NB_Top->Enable();
+		mGP.RB_NB_Bot->Enable();
+	}
+	if ( Config::mNotebook.ShowCloseBtn )
+	{
+		mGP.RB_NB_OnAll->Enable();
+		mGP.RB_NB_OnAct->Enable();		
+	}
+	else
 	{
 		mGP.RB_NB_OnAll->Disable();
 		mGP.RB_NB_OnAct->Disable();
+	}
+
+	mDP.CB_AH->SetValue( !Config::mAutohigh.Use );
+	mDP.SL_AH->SetValue( Config::mAutohigh.Param );
+	mDP.SC_AH->SetValue( Config::mAutohigh.Param );
+	if ( Config::mAutohigh.Use )
+	{
+		mDP.SC_AH->Enable();
+		mDP.SL_AH->Enable();
+	}
+	else
+	{
+		mDP.SC_AH->Disable();
+		mDP.SL_AH->Disable();
+	}
+
+	mDP.CB_AC->SetValue( !Config::mAutocomp.Use );
+	mDP.SL_AC->SetValue( Config::mAutocomp.Param );
+	mDP.SC_AC->SetValue( Config::mAutocomp.Param );
+	if ( Config::mAutocomp.Use )
+	{
+		mDP.SC_AC->Enable();
+		mDP.SL_AC->Enable();		
+	}
+	else
+	{
+		mDP.SC_AC->Disable();
+		mDP.SL_AC->Disable();
+	}
+
+	mTP.CB_AS->SetValue( !Config::mAutosave.Use );
+	mTP.SL_AS->SetValue( Config::mAutosave.Param );
+	mTP.SC_AS->SetValue( Config::mAutosave.Param );
+	if ( Config::mAutosave.Use )
+	{
+		mDP.SC_AC->Enable();
+		mDP.SL_AC->Enable();		
+	}
+	else
+	{
+		mTP.SC_AS->Disable();
+		mTP.SL_AS->Disable();
 	}
 }
 
@@ -75,39 +129,32 @@ void PreferencesFrame::CreateContent()
 	auto vsizer = new wxBoxSizer( wxVERTICAL );
 
 	int sliderstyle = wxSL_HORIZONTAL | wxSL_MIN_MAX_LABELS;
-	int style = wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_SCROLL_BUTTONS;
-	mNotebook = new wxAuiNotebook( panel, -1, wxDefaultPosition, wxDefaultSize, style );
+	mNotebook = new wxAuiNotebook( panel, -1, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP );
 
 	mGP.Panel = new wxPanel( mNotebook );
-	auto local = new wxStaticBox( mGP.Panel, wxID_ANY, "Localization",
-								  wxPoint( 10, 10 ), wxSize( 200, 60 ) );
-	mGP.LocalizationCB = new wxComboBox( local, 0, "",wxPoint( 15, 23 ),
-										 wxSize( 170, 30 ), LanguageList, wxCB_READONLY );
+	auto local = new wxStaticBox( mGP.Panel, wxID_ANY, "Localization", wxPoint( 10, 10 ), wxSize( 200, 60 ) );
+	mGP.LocalizationCB = new wxComboBox( local, 0, "",wxPoint( 15, 23 ), wxSize( 170, 30 ), LanguageList, wxCB_READONLY );
 
-	auto notebook  = new wxStaticBox( mGP.Panel, wxID_ANY, "Tab Bar (Notebook)",
-									  wxPoint( 225, 10 ), wxSize( 185, 270 ) );
-	mGP.CB_NB_Hide = new wxCheckBox( notebook, wxID_ANY, "Hide Notebook", wxPoint( 15, 25 ) );
-	mGP.RB_NB_Top  = new wxRadioButton( notebook, 0, "On Top", wxPoint( 15, 50 ), wxDefaultSize, wxRB_GROUP );
-	mGP.RB_NB_Bot = new wxRadioButton( notebook, 0, "On Bottom", wxPoint( 15, 75 ) );
-	mGP.CB_NB_Lock = new wxCheckBox( notebook, wxID_ANY, "Lock Page Moving", wxPoint( 15, 100 ) );
-	mGP.CB_NB_Fixed = new wxCheckBox( notebook, wxID_ANY, "Fixed Width", wxPoint( 15, 125 ) );
-	mGP.CB_NB_Middle = new wxCheckBox( notebook, wxID_ANY, "Middle Mouse to Close", wxPoint( 15, 150 ) );
-	mGP.CB_NB_ShowClose = new wxCheckBox( notebook, wxID_ANY, "Show Close Button", wxPoint( 15, 175 ) );
-	mGP.RB_NB_OnAll = new wxRadioButton( notebook, 1, "On All Pages", wxPoint( 15, 200 ), wxDefaultSize, wxRB_GROUP );
-	mGP.RB_NB_OnAct = new wxRadioButton( notebook, 1, "On Active Pages", wxPoint( 15, 225 ) );
+	auto notebook    = new wxStaticBox  ( mGP.Panel, 0, "Tab Bar (Notebook)", wxPoint( 225, 10 ), wxSize( 185, 270 ) );
+	mGP.CB_NB_Hide   = new wxCheckBox   ( notebook,  0, "Hide Notebook",      wxPoint( 15, 25 ) );
+	mGP.RB_NB_Top    = new wxRadioButton( notebook,  1, "On Top",             wxPoint( 15, 50 ), wxDefaultSize, wxRB_GROUP );
+	mGP.RB_NB_Bot    = new wxRadioButton( notebook,  1, "On Bottom",          wxPoint( 15, 75 ) );
+	mGP.CB_NB_Lock   = new wxCheckBox   ( notebook,  0, "Lock Page Moving",   wxPoint( 15, 100 ) );
+	mGP.CB_NB_Fixed  = new wxCheckBox   ( notebook,  0, "Fixed Width",        wxPoint( 15, 125 ) );
+	mGP.CB_NB_Middle = new wxCheckBox   ( notebook,  0, "Middle Mouse Close", wxPoint( 15, 150 ) );
+	mGP.CB_NB_Close  = new wxCheckBox   ( notebook,  0, "Show Close Button",  wxPoint( 15, 175 ) );
+	mGP.RB_NB_OnAll  = new wxRadioButton( notebook,  1, "On All Pages",       wxPoint( 15, 200 ), wxDefaultSize, wxRB_GROUP );
+	mGP.RB_NB_OnAct  = new wxRadioButton( notebook,  1, "On Active Pages",    wxPoint( 15, 225 ) );
 
-	mGP.CB_NB_Hide->Bind( wxEVT_CHECKBOX, OnCheckHide );
-	mGP.CB_NB_ShowClose->Bind( wxEVT_CHECKBOX, OnCheckShowClose );
+	auto system = new wxStaticBox( mGP.Panel, 0, "System",                   wxPoint( 10, 75 ), wxSize( 200, 100 ) );
+	mGP.CB_SB   = new wxCheckBox ( system,    0, "Show Statusbar",           wxPoint( 15, 25 ) );
+	mGP.CB_DD   = new wxCheckBox ( system,    0, "Use Drag and Drop",        wxPoint( 15, 50 ) );
+	mGP.CB_SS   = new wxCheckBox ( system,    0, "Splash Screen on Startup", wxPoint( 15, 75 ) );
 
-	auto system = new wxStaticBox( mGP.Panel, wxID_ANY, "System",               wxPoint( 10, 75 ), wxSize( 200, 100 ) );
-	mGP.CB_SB   = new wxCheckBox( system, wxID_ANY, "Show Statusbar",           wxPoint( 15, 25 ) );
-	mGP.CB_DD   = new wxCheckBox( system, wxID_ANY, "Use Drag and Drop",        wxPoint( 15, 50 ) );
-	mGP.CB_SS   = new wxCheckBox( system, wxID_ANY, "Splash Screen on Startup", wxPoint( 15, 75 ) );
-
-	auto toolbar = new wxStaticBox( mGP.Panel, wxID_ANY, "Toolbar", wxPoint( 10, 180 ), wxSize( 200, 100 ) );
-	new wxCheckBox( toolbar, wxID_ANY, "Hide Toolbar", wxPoint( 15, 25 ) );
-	new wxRadioButton( toolbar, wxID_ANY, "Standard Icons", wxPoint( 15, 50 ) );
-	new wxRadioButton( toolbar, wxID_ANY, "Big Icons", wxPoint( 15, 75 ) );
+	auto toolbar   = new wxStaticBox  ( mGP.Panel, 0, "Toolbar",        wxPoint( 10, 180 ), wxSize( 200, 100 ) );
+	mGP.CB_TB_Hide = new wxCheckBox   ( toolbar,   0, "Hide Toolbar",   wxPoint( 15, 25 ) );
+	mGP.RB_TB_Std  = new wxRadioButton( toolbar,   0, "Standard Icons", wxPoint( 15, 50 ) );
+	mGP.RB_TB_Big  = new wxRadioButton( toolbar,   0, "Big Icons",      wxPoint( 15, 75 ) );
 
 	// Dictionary Setting
 	mDP.Panel = new wxPanel( mNotebook );
@@ -122,20 +169,16 @@ void PreferencesFrame::CreateContent()
 	new wxRadioButton( dpsb, wxID_ANY, "Only Opened", wxPoint( 235, 105 ) );
 
 	auto ahsb = new wxStaticBox( mDP.Panel, -1, "Auto-Highlighting", wxPoint( 10, 150 ), wxSize( 400, 80 ) );
-	mDP.CB_AH = new wxCheckBox( ahsb, wxID_ANY, "Disable", wxPoint( 15, 25 ) );
 	new wxStaticText( ahsb, -1, "Set Interval [ms]:", wxPoint( 15, 50 ) );
-	mDP.SpinAutohigh = new wxSpinCtrl( ahsb, -1, wxEmptyString, wxPoint( 340, 45 ),
-									   wxDefaultSize, 16384L, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL );
-	auto shigh = new wxSlider( ahsb, WND_ID_SAUTOHIGH, 0, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL,
-							   wxPoint( 120, 45 ), wxSize( 200, 400 ), sliderstyle );
+	mDP.CB_AH = new wxCheckBox( ahsb, WND_ID_SAUTOHIGH, "Disable", wxPoint( 15, 25 ) );
+	mDP.SC_AH = new wxSpinCtrl( ahsb, WND_ID_SAUTOHIGH, wxEmptyString, wxPoint( 340, 45 ), wxDefaultSize, 16384L, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL );
+	mDP.SL_AH = new wxSlider( ahsb, WND_ID_SAUTOHIGH, 0, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL, wxPoint( 120, 45 ), wxSize( 200, 400 ), sliderstyle );
 
 	auto acsb = new wxStaticBox( mDP.Panel, -1, "Auto-Completion", wxPoint( 10, 235 ), wxSize( 400, 80 ) );
-	mDP.CB_AC = new wxCheckBox( acsb, wxID_ANY, "Disable", wxPoint( 15, 25 ) );
 	new wxStaticText( acsb, -1, "Set Limit [words]:", wxPoint( 15, 50 ) );
-	mDP.SpinAutocomp = new wxSpinCtrl( acsb, -1, wxEmptyString, wxPoint( 330, 45 ),
-									   wxDefaultSize, 16384L, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS );
-	auto scomp = new wxSlider( acsb, WND_ID_SAUTOCOMP, 0, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS,
-							   wxPoint( 120, 45 ), wxSize( 190, 400 ), sliderstyle );
+	mDP.CB_AC = new wxCheckBox( acsb, WND_ID_SAUTOCOMP, "Disable", wxPoint( 15, 25 ) );
+	mDP.SC_AC = new wxSpinCtrl( acsb, WND_ID_SAUTOCOMP, wxEmptyString, wxPoint( 330, 45 ), wxDefaultSize, 16384L, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS );
+	mDP.SL_AC = new wxSlider( acsb, WND_ID_SAUTOCOMP, 0, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS, wxPoint( 120, 45 ), wxSize( 190, 400 ), sliderstyle );
 
 	// Autosave Setting
 	mTP.Panel = new wxPanel( mNotebook );
@@ -149,16 +192,25 @@ void PreferencesFrame::CreateContent()
 	new wxRadioButton( assb, wxID_ANY, "New Documents", wxPoint( 120, 105 ) );
 
 	auto autosave = new wxStaticBox( mTP.Panel, -1, "Auto-Save", wxPoint( 10, 150 ), wxSize( 400, 80 ) );
-	new wxCheckBox( autosave, wxID_ANY, "Disable", wxPoint( 15, 25 ) );
 	new wxStaticText( autosave, -1, "Set Interval [sec]:", wxPoint( 15, 50 ) );
-	mTP.SpinAutosave = new wxSpinCtrl( autosave, -1, wxEmptyString, wxPoint( 340, 45 ),
-									   wxDefaultSize, 16384L, MIN_AUTOSAVE_INTERVAL, MAX_AUTOSAVE_INTERVAL );
-	auto ssave = new wxSlider( autosave, WND_ID_SAUTOSAVE, 0, MIN_AUTOSAVE_INTERVAL, MAX_AUTOSAVE_INTERVAL,
-							   wxPoint( 120, 45 ), wxSize( 200, 25 ), sliderstyle );
+	mTP.CB_AS = new wxCheckBox( autosave, WND_ID_SAUTOSAVE, "Disable", wxPoint( 15, 25 ) );
+	mTP.SC_AS = new wxSpinCtrl( autosave, WND_ID_SAUTOSAVE, wxEmptyString, wxPoint( 340, 45 ), wxDefaultSize, 16384L, MIN_AUTOSAVE_INTERVAL, MAX_AUTOSAVE_INTERVAL );
+	mTP.SL_AS = new wxSlider( autosave, WND_ID_SAUTOSAVE, 0, MIN_AUTOSAVE_INTERVAL, MAX_AUTOSAVE_INTERVAL, wxPoint( 120, 45 ), wxSize( 200, 25 ), sliderstyle );
+	
+	mGP.CB_NB_Hide->Bind( wxEVT_CHECKBOX, OnCheckHide );
+	mGP.CB_NB_Close->Bind( wxEVT_CHECKBOX, OnCheckShowClose );
 
-	shigh->Bind( wxEVT_SCROLL_CHANGED, OnScroll );
-	scomp->Bind( wxEVT_SCROLL_CHANGED, OnScroll );
-	ssave->Bind( wxEVT_SCROLL_CHANGED, OnScroll );
+	mDP.CB_AH->Bind( wxEVT_CHECKBOX, OnCheckAuto );
+	mDP.CB_AC->Bind( wxEVT_CHECKBOX, OnCheckAuto );
+	mTP.CB_AS->Bind( wxEVT_CHECKBOX, OnCheckAuto );
+
+	mDP.SL_AC->Bind( wxEVT_SCROLL_CHANGED, OnScroll );
+	mDP.SL_AH->Bind( wxEVT_SCROLL_CHANGED, OnScroll );
+	mTP.SL_AS->Bind( wxEVT_SCROLL_CHANGED, OnScroll );
+
+	mDP.SC_AC->Bind( wxEVT_SPINCTRL, OnSpin );
+	mDP.SC_AH->Bind( wxEVT_SPINCTRL, OnSpin );
+	mTP.SC_AS->Bind( wxEVT_SPINCTRL, OnSpin );
 
 	mNotebook->AddPage( mGP.Panel, "General" );
 	mNotebook->AddPage( mDP.Panel, "Dictionary and Autocomp" );
@@ -270,7 +322,7 @@ void PreferencesFrame::UpdateNotebook()
 	Config::mNotebook.FixedWidth   = mGP.CB_NB_Fixed->GetValue();
 	Config::mNotebook.LockMove     = mGP.CB_NB_Lock->GetValue();
 	Config::mNotebook.MiddleClose  = mGP.CB_NB_Middle->GetValue();
-	Config::mNotebook.ShowCloseBtn = mGP.CB_NB_ShowClose->GetValue();
+	Config::mNotebook.ShowCloseBtn = mGP.CB_NB_Close->GetValue();
 	Config::mNotebook.CloseBtnOn   = mGP.RB_NB_OnAll->GetValue();
 	
 	if ( Config::mNotebook.Hide )  TextField::mNotebook->Show( false );
@@ -293,7 +345,7 @@ void PreferencesFrame::UpdateDragDrop()
 void PreferencesFrame::UpdateAutocomp()
 {
 	auto isAutocomp = !mDP.CB_AC->GetValue();
-	Config::mAutocomp.Param = mDP.SpinAutocomp->GetValue();
+	Config::mAutocomp.Param = mDP.SC_AC->GetValue();
 	if ( Config::mAutocomp.Use != isAutocomp )
 	{
 		Config::mAutocomp.Use = isAutocomp;
@@ -304,7 +356,7 @@ void PreferencesFrame::UpdateAutocomp()
 void PreferencesFrame::UpdateAutohigh()
 {
 	auto isAutohigh = !mDP.CB_AH->GetValue();
-	Config::mAutohigh.Param = mDP.SpinAutohigh->GetValue();
+	Config::mAutohigh.Param = mDP.SC_AH->GetValue();
 	if ( Config::mAutohigh.Use != isAutohigh )
 	{
 		Config::mAutohigh.Use = isAutohigh;
@@ -318,7 +370,7 @@ void PreferencesFrame::UpdateAutohigh()
 void PreferencesFrame::UpdateAutosave()
 {
 	auto isAutosave = !mTP.CB_AS->GetValue();
-	Config::mAutosave.Param = mTP.SpinAutosave->GetValue() * 1000;
+	Config::mAutosave.Param = mTP.SC_AS->GetValue() * 1000;
 	if ( Config::mAutosave.Use != isAutosave )
 	{
 		Config::mAutosave.Use = isAutosave;
@@ -347,6 +399,51 @@ void PreferencesFrame::UpdateStatbar()
 			size.y -= 20;
 		}
 		mMF.Frame->SetSize( size );
+	}
+}
+
+void PreferencesFrame::OnCheckAuto( wxCommandEvent& event )
+{
+	auto cb = (wxCheckBox*) event.GetEventObject();
+	auto id = cb->GetId();
+	if ( id == WND_ID_SAUTOHIGH )
+	{
+		if ( cb->GetValue() )
+		{
+			mDP.SL_AH->Disable();
+			mDP.SC_AH->Disable();
+		}
+		else
+		{
+			mDP.SL_AH->Enable();
+			mDP.SC_AH->Enable();
+		}
+	}
+	else if ( id == WND_ID_SAUTOCOMP )
+	{
+		if ( cb->GetValue() )
+		{
+			mDP.SL_AC->Disable();
+			mDP.SC_AC->Disable();
+		}
+		else
+		{
+			mDP.SL_AC->Enable();
+			mDP.SC_AC->Enable();			
+		}
+	}
+	else if ( id == WND_ID_SAUTOSAVE )
+	{
+		if ( cb->GetValue() )
+		{
+			mTP.SL_AS->Disable();
+			mTP.SC_AS->Disable();
+		}
+		else
+		{			
+			mTP.SL_AS->Enable();
+			mTP.SC_AS->Enable();
+		}
 	}
 }
 
@@ -396,6 +493,7 @@ void PreferencesFrame::OnOK( wxCommandEvent& event )
 
 void PreferencesFrame::OnCancel( wxCommandEvent& event )
 {
+	Update();
 	mFrame->Show( false );
 }
 
@@ -421,15 +519,17 @@ void PreferencesFrame::OnClose( wxCloseEvent& event )
 void PreferencesFrame::OnScroll( wxScrollEvent& event )
 {
 	auto slider = (wxSlider*) event.GetEventObject();
-	switch ( slider->GetId() )
-	{
-	case WND_ID_SAUTOHIGH:
-		mDP.SpinAutohigh->SetValue( slider->GetValue() );
-	case WND_ID_SAUTOCOMP:
-		mDP.SpinAutocomp->SetValue( slider->GetValue() );
-	case WND_ID_SAUTOSAVE:
-		mTP.SpinAutosave->SetValue( slider->GetValue() );
-	default:
-		break;
-	}
+	auto id = slider->GetId();
+	if      ( id == WND_ID_SAUTOHIGH ) mDP.SC_AH->SetValue( slider->GetValue() );
+	else if ( id == WND_ID_SAUTOCOMP ) mDP.SC_AC->SetValue( slider->GetValue() );
+	else if ( id == WND_ID_SAUTOSAVE ) mTP.SC_AS->SetValue( slider->GetValue() );
+}
+
+void PreferencesFrame::OnSpin( wxSpinEvent& event )
+{
+	auto spin = (wxSpinCtrl*) event.GetEventObject();
+	auto id = spin->GetId();
+	if      ( id == WND_ID_SAUTOHIGH ) mDP.SL_AH->SetValue( spin->GetValue() );
+	else if ( id == WND_ID_SAUTOCOMP ) mDP.SL_AC->SetValue( spin->GetValue() );
+	else if ( id == WND_ID_SAUTOSAVE ) mTP.SL_AS->SetValue( spin->GetValue() );
 }

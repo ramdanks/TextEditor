@@ -16,9 +16,12 @@ class PreferencesFrame
 		wxCheckBox* CB_NB_Lock;
 		wxCheckBox* CB_NB_Fixed;
 		wxCheckBox* CB_NB_Middle;
-		wxCheckBox* CB_NB_ShowClose;
+		wxCheckBox* CB_NB_Close;
 		wxRadioButton* RB_NB_OnAll;
 		wxRadioButton* RB_NB_OnAct;
+		wxCheckBox* CB_TB_Hide;
+		wxRadioButton* RB_TB_Std;
+		wxRadioButton* RB_TB_Big;
 	};
 
 	struct DictionaryPage
@@ -26,16 +29,18 @@ class PreferencesFrame
 		wxPanel* Panel;
 		wxCheckBox* CB_AC;
 		wxCheckBox* CB_AH;
-		wxSpinCtrl* SpinAutocomp;
-		wxSpinCtrl* SpinAutohigh;
-		
+		wxSpinCtrl* SC_AC;
+		wxSpinCtrl* SC_AH;
+		wxSlider* SL_AC;
+		wxSlider* SL_AH;
 	};
 
 	struct TempPage
 	{
 		wxPanel* Panel;
 		wxCheckBox* CB_AS;
-		wxSpinCtrl* SpinAutosave;
+		wxSlider* SL_AS;
+		wxSpinCtrl* SC_AS;
 	};
 
 	struct MainFrame
@@ -69,6 +74,7 @@ private:
 	static void UpdateAutosave();
 	static void UpdateStatbar();
 
+	static void OnCheckAuto( wxCommandEvent& event );
 	static void OnCheckHide( wxCommandEvent& event );
 	static void OnCheckShowClose( wxCommandEvent& event );
 
@@ -78,6 +84,7 @@ private:
 	static void OnLocalization( wxCommandEvent& event );
 	static void OnClose( wxCloseEvent& event );
 	static void OnScroll( wxScrollEvent& event );
+	static void OnSpin( wxSpinEvent& event );
 
 	static wxFrame* mFrame;
 	static DictionaryPage mDP;
