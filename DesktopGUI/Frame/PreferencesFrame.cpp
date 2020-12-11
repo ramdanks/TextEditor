@@ -34,11 +34,14 @@ void PreferencesFrame::Update()
 {
 	PROFILE_FUNC();
 
+	wxCommandEvent evt = wxEVT_NULL;
+
 	mGP.CB_SB->SetValue( Config::mGeneral.UseStatbar );
 	mGP.CB_DD->SetValue( Config::mGeneral.UseDragDrop );
 	mGP.CB_SS->SetValue( Config::mGeneral.UseSplash );
 	mGP.LocalizationCB->SetSelection( Config::mGeneral.LanguageID );
 
+	// notebook setting
 	mGP.CB_NB_Hide->SetValue  ( Config::mNotebook.Hide         );
 	mGP.RB_NB_Top->SetValue   ( Config::mNotebook.Orientation  );
 	mGP.RB_NB_Bot->SetValue   ( !Config::mNotebook.Orientation );
@@ -48,69 +51,41 @@ void PreferencesFrame::Update()
 	mGP.CB_NB_Close->SetValue ( Config::mNotebook.ShowCloseBtn );
 	mGP.RB_NB_OnAll->SetValue ( Config::mNotebook.CloseBtnOn   );
 	mGP.RB_NB_OnAct->SetValue ( !Config::mNotebook.CloseBtnOn  );
+	OnCheckHide( evt );
+	OnCheckShowClose( evt );
 
-	if ( Config::mNotebook.Hide )
-	{
-		mGP.RB_NB_Top->Disable();
-		mGP.RB_NB_Bot->Disable();
-	}
-	else
-	{
-		mGP.RB_NB_Top->Enable();
-		mGP.RB_NB_Bot->Enable();
-	}
-	if ( Config::mNotebook.ShowCloseBtn )
-	{
-		mGP.RB_NB_OnAll->Enable();
-		mGP.RB_NB_OnAct->Enable();		
-	}
-	else
-	{
-		mGP.RB_NB_OnAll->Disable();
-		mGP.RB_NB_OnAct->Disable();
-	}
+	// dictionary
+	mDP.Disable->SetValue( !Config::mDictionary.UseGlobal );
+	mDP.OnAll->SetValue( Config::mDictionary.ApplyOn == DICT_ALL_DOCS );
+	mDP.OnTemp->SetValue( Config::mDictionary.ApplyOn == DICT_TMP_DOCS );
+	mDP.OnOpen->SetValue( Config::mDictionary.ApplyOn == DICT_OPN_DOCS );
+	mDP.DirPick->SetPath( Config::mDictionary.Directory );
+	OnCheckDict( evt );
 
+	// autohighlight setting
 	mDP.CB_AH->SetValue( !Config::mAutohigh.Use );
 	mDP.SL_AH->SetValue( Config::mAutohigh.Param );
 	mDP.SC_AH->SetValue( Config::mAutohigh.Param );
-	if ( Config::mAutohigh.Use )
-	{
-		mDP.SC_AH->Enable();
-		mDP.SL_AH->Enable();
-	}
-	else
-	{
-		mDP.SC_AH->Disable();
-		mDP.SL_AH->Disable();
-	}
+	UpdatePanelAuto( WND_ID_SAUTOHIGH );
 
+	// autocompletion setting
 	mDP.CB_AC->SetValue( !Config::mAutocomp.Use );
 	mDP.SL_AC->SetValue( Config::mAutocomp.Param );
 	mDP.SC_AC->SetValue( Config::mAutocomp.Param );
-	if ( Config::mAutocomp.Use )
-	{
-		mDP.SC_AC->Enable();
-		mDP.SL_AC->Enable();		
-	}
-	else
-	{
-		mDP.SC_AC->Disable();
-		mDP.SL_AC->Disable();
-	}
+	UpdatePanelAuto( WND_ID_SAUTOCOMP );
 
+	// temporary
+	mTP.Disable->SetValue( !Config::mTemp.UseTemp );
+	mTP.DirPick->SetPath( Config::mTemp.Directory );
+	mTP.OnAll->SetValue( Config::mTemp.ApplyOn == TEMP_APPLY_ALL );
+	mTP.OnNew->SetValue( Config::mTemp.ApplyOn == TEMP_APPLY_NEW );
+	OnCheckTemp( evt );
+
+	// autosave setting
 	mTP.CB_AS->SetValue( !Config::mAutosave.Use );
-	mTP.SL_AS->SetValue( Config::mAutosave.Param );
-	mTP.SC_AS->SetValue( Config::mAutosave.Param );
-	if ( Config::mAutosave.Use )
-	{
-		mDP.SC_AC->Enable();
-		mDP.SL_AC->Enable();		
-	}
-	else
-	{
-		mTP.SC_AS->Disable();
-		mTP.SL_AS->Disable();
-	}
+	mTP.SL_AS->SetValue( Config::mAutosave.Param / 1000 );
+	mTP.SC_AS->SetValue( Config::mAutosave.Param / 1000 );
+	UpdatePanelAuto( WND_ID_SAUTOSAVE );
 }
 
 void PreferencesFrame::CreateContent()
@@ -160,36 +135,36 @@ void PreferencesFrame::CreateContent()
 	mDP.Panel = new wxPanel( mNotebook );
 
 	auto dpsb = new wxStaticBox( mDP.Panel, -1, "Global Dictionary", wxPoint( 10, 10 ), wxSize( 400, 135 ) );
-	new wxCheckBox( dpsb, wxID_ANY, "Disable", wxPoint( 15, 25 ) ); 
-	new wxStaticText( dpsb, -1, "Global Path:", wxPoint( 15, 50 ) );
-	new wxDirPickerCtrl( dpsb, -1, wxEmptyString, "Global Dictionary", wxPoint( 90, 39 ), wxSize( 295, 40 ) );
-	new wxStaticText( dpsb, wxID_ANY, "Automatically Apply to:", wxPoint( 15, 80 ) );
-	new wxRadioButton( dpsb, wxID_ANY, "All Documents", wxPoint( 15, 105 ) );
-	new wxRadioButton( dpsb, wxID_ANY, "Only Temporary", wxPoint( 120, 105 ) );
-	new wxRadioButton( dpsb, wxID_ANY, "Only Opened", wxPoint( 235, 105 ) );
+	new wxStaticText                 ( dpsb, -1, "Global Path:", wxPoint( 15, 50 ) );
+	new wxStaticText                 ( dpsb, wxID_ANY, "Automatically Apply to:", wxPoint( 15, 80 ) );
+	mDP.Disable = new wxCheckBox     ( dpsb, wxID_ANY, "Disable", wxPoint( 15, 25 ) ); 
+	mDP.DirPick = new wxDirPickerCtrl( dpsb, -1, wxEmptyString, "Global Dictionary", wxPoint( 90, 39 ), wxSize( 295, 40 ) );
+	mDP.OnAll   = new wxRadioButton  ( dpsb, wxID_ANY, "All Documents", wxPoint( 15, 105 ) );
+	mDP.OnTemp  = new wxRadioButton  ( dpsb, wxID_ANY, "Only New", wxPoint( 120, 105 ) );
+	mDP.OnOpen  = new wxRadioButton  ( dpsb, wxID_ANY, "Only Opened", wxPoint( 203, 105 ) );
 
 	auto ahsb = new wxStaticBox( mDP.Panel, -1, "Auto-Highlighting", wxPoint( 10, 150 ), wxSize( 400, 80 ) );
-	new wxStaticText( ahsb, -1, "Set Interval [ms]:", wxPoint( 15, 50 ) );
+	new wxStaticText          ( ahsb, -1, "Set Interval [ms]:", wxPoint( 15, 50 ) );
 	mDP.CB_AH = new wxCheckBox( ahsb, WND_ID_SAUTOHIGH, "Disable", wxPoint( 15, 25 ) );
 	mDP.SC_AH = new wxSpinCtrl( ahsb, WND_ID_SAUTOHIGH, wxEmptyString, wxPoint( 340, 45 ), wxDefaultSize, 16384L, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL );
-	mDP.SL_AH = new wxSlider( ahsb, WND_ID_SAUTOHIGH, 0, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL, wxPoint( 120, 45 ), wxSize( 200, 400 ), sliderstyle );
+	mDP.SL_AH = new wxSlider  ( ahsb, WND_ID_SAUTOHIGH, 0, MIN_AUTOHIGH_INTERVAL, MAX_AUTOHIGH_INTERVAL, wxPoint( 120, 45 ), wxSize( 200, 400 ), sliderstyle );
 
 	auto acsb = new wxStaticBox( mDP.Panel, -1, "Auto-Completion", wxPoint( 10, 235 ), wxSize( 400, 80 ) );
-	new wxStaticText( acsb, -1, "Set Limit [words]:", wxPoint( 15, 50 ) );
+	new wxStaticText          ( acsb, -1, "Set Limit [words]:", wxPoint( 15, 50 ) );
 	mDP.CB_AC = new wxCheckBox( acsb, WND_ID_SAUTOCOMP, "Disable", wxPoint( 15, 25 ) );
 	mDP.SC_AC = new wxSpinCtrl( acsb, WND_ID_SAUTOCOMP, wxEmptyString, wxPoint( 330, 45 ), wxDefaultSize, 16384L, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS );
-	mDP.SL_AC = new wxSlider( acsb, WND_ID_SAUTOCOMP, 0, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS, wxPoint( 120, 45 ), wxSize( 190, 400 ), sliderstyle );
+	mDP.SL_AC = new wxSlider  ( acsb, WND_ID_SAUTOCOMP, 0, MIN_AUTOCOMP_WORDS, MAX_AUTOCOMP_WORDS, wxPoint( 120, 45 ), wxSize( 190, 400 ), sliderstyle );
 
 	// Autosave Setting
 	mTP.Panel = new wxPanel( mNotebook );
 
 	auto assb = new wxStaticBox( mTP.Panel, -1, "Temporary Files", wxPoint( 10, 10 ), wxSize( 400, 135 ) );
-	mTP.CB_AS = new wxCheckBox( assb, wxID_ANY, "Disable", wxPoint( 15, 25 ) );
-	new wxStaticText( assb, -1, "Temporary Path:", wxPoint( 15, 50 ) );
-	new wxDirPickerCtrl( assb, -1, wxEmptyString, "Temporary", wxPoint( 110, 39 ), wxSize( 275, 40 ) );
-	new wxStaticText( assb, wxID_ANY, "Create Temporary for:", wxPoint( 15, 80 ) );
-	new wxRadioButton( assb, wxID_ANY, "All Documents", wxPoint( 15, 105 ) );
-	new wxRadioButton( assb, wxID_ANY, "New Documents", wxPoint( 120, 105 ) );
+	new wxStaticText                 ( assb, -1, "Create Temporary for:", wxPoint( 15, 80 ) );
+	new wxStaticText                 ( assb, -1, "Temporary Path:", wxPoint( 15, 50 ) );
+	mTP.Disable = new wxCheckBox     ( assb, -1, "Disable", wxPoint( 15, 25 ) );
+	mTP.DirPick = new wxDirPickerCtrl( assb, -1, wxEmptyString, "Temporary", wxPoint( 110, 39 ), wxSize( 275, 40 ) );
+	mTP.OnAll   = new wxRadioButton  ( assb, -1, "All Documents", wxPoint( 15, 105 ) );
+	mTP.OnNew   = new wxRadioButton  ( assb, -1, "New Documents", wxPoint( 120, 105 ) );
 
 	auto autosave = new wxStaticBox( mTP.Panel, -1, "Auto-Save", wxPoint( 10, 150 ), wxSize( 400, 80 ) );
 	new wxStaticText( autosave, -1, "Set Interval [sec]:", wxPoint( 15, 50 ) );
@@ -200,6 +175,8 @@ void PreferencesFrame::CreateContent()
 	mGP.CB_NB_Hide->Bind( wxEVT_CHECKBOX, OnCheckHide );
 	mGP.CB_NB_Close->Bind( wxEVT_CHECKBOX, OnCheckShowClose );
 
+	mTP.Disable->Bind( wxEVT_CHECKBOX, OnCheckTemp );
+	mDP.Disable->Bind( wxEVT_CHECKBOX, OnCheckDict );
 	mDP.CB_AH->Bind( wxEVT_CHECKBOX, OnCheckAuto );
 	mDP.CB_AC->Bind( wxEVT_CHECKBOX, OnCheckAuto );
 	mTP.CB_AS->Bind( wxEVT_CHECKBOX, OnCheckAuto );
@@ -315,6 +292,15 @@ void PreferencesFrame::RefreshMessage()
 	mMF.MenuBar->SetMenuLabel( 5, MSG_HELP );
 }
 
+void PreferencesFrame::UpdateDictionary()
+{
+	Config::mDictionary.UseGlobal = !mDP.Disable->GetValue();
+	Config::mDictionary.Directory = mDP.DirPick->GetPath();
+	if      ( mDP.OnAll->GetValue() ) Config::mDictionary.ApplyOn = DICT_ALL_DOCS;
+	else if ( mDP.OnTemp->GetValue() ) Config::mDictionary.ApplyOn = DICT_TMP_DOCS;
+	else if ( mDP.OnOpen->GetValue() ) Config::mDictionary.ApplyOn = DICT_OPN_DOCS;
+}
+
 void PreferencesFrame::UpdateNotebook()
 {
 	Config::mNotebook.Hide         = mGP.CB_NB_Hide->GetValue();
@@ -347,10 +333,7 @@ void PreferencesFrame::UpdateAutocomp()
 	auto isAutocomp = !mDP.CB_AC->GetValue();
 	Config::mAutocomp.Param = mDP.SC_AC->GetValue();
 	if ( Config::mAutocomp.Use != isAutocomp )
-	{
 		Config::mAutocomp.Use = isAutocomp;
-		TextField::isAutocomp = isAutocomp;
-	}
 }
 
 void PreferencesFrame::UpdateAutohigh()
@@ -402,13 +385,19 @@ void PreferencesFrame::UpdateStatbar()
 	}
 }
 
-void PreferencesFrame::OnCheckAuto( wxCommandEvent& event )
+void PreferencesFrame::UpdateTemp()
 {
-	auto cb = (wxCheckBox*) event.GetEventObject();
-	auto id = cb->GetId();
+	Config::mTemp.UseTemp = !mTP.Disable->GetValue();
+	Config::mTemp.Directory = mTP.DirPick->GetPath();
+	if      ( mTP.OnAll->GetValue() ) Config::mTemp.ApplyOn = TEMP_APPLY_ALL;
+	else if ( mTP.OnNew->GetValue() ) Config::mTemp.ApplyOn = TEMP_APPLY_NEW;
+}
+
+void PreferencesFrame::UpdatePanelAuto( int id )
+{
 	if ( id == WND_ID_SAUTOHIGH )
 	{
-		if ( cb->GetValue() )
+		if ( mDP.CB_AH->GetValue() )
 		{
 			mDP.SL_AH->Disable();
 			mDP.SC_AH->Disable();
@@ -421,7 +410,7 @@ void PreferencesFrame::OnCheckAuto( wxCommandEvent& event )
 	}
 	else if ( id == WND_ID_SAUTOCOMP )
 	{
-		if ( cb->GetValue() )
+		if ( mDP.CB_AC->GetValue() )
 		{
 			mDP.SL_AC->Disable();
 			mDP.SC_AC->Disable();
@@ -429,43 +418,87 @@ void PreferencesFrame::OnCheckAuto( wxCommandEvent& event )
 		else
 		{
 			mDP.SL_AC->Enable();
-			mDP.SC_AC->Enable();			
+			mDP.SC_AC->Enable();
 		}
 	}
 	else if ( id == WND_ID_SAUTOSAVE )
 	{
-		if ( cb->GetValue() )
+		if ( mTP.CB_AS->GetValue() )
 		{
 			mTP.SL_AS->Disable();
 			mTP.SC_AS->Disable();
 		}
 		else
-		{			
+		{
 			mTP.SL_AS->Enable();
 			mTP.SC_AS->Enable();
 		}
 	}
 }
 
-void PreferencesFrame::OnCheckHide( wxCommandEvent& event )
+void PreferencesFrame::OnCheckTemp( wxCommandEvent& event )
 {
-	auto btn = (wxCheckBox*) event.GetEventObject();
-	if ( !btn->GetValue() )
+	if ( mTP.Disable->GetValue() )
 	{
-		mGP.RB_NB_Top->Enable();
-		mGP.RB_NB_Bot->Enable();
+		mTP.OnAll->Disable();
+		mTP.OnNew->Disable();
+		mTP.DirPick->Disable();
+		mTP.CB_AS->Disable();
+		mTP.CB_AS->SetValue( true );
 	}
 	else
 	{
+		mTP.OnAll->Enable();
+		mTP.OnNew->Enable();
+		mTP.DirPick->Enable();
+		mTP.CB_AS->Enable();
+		mTP.CB_AS->SetValue( false );
+	}
+	UpdatePanelAuto( WND_ID_SAUTOSAVE );
+}
+
+void PreferencesFrame::OnCheckDict( wxCommandEvent& event )
+{
+	if ( mDP.Disable->GetValue() )
+	{
+		mDP.OnAll->Disable();
+		mDP.OnTemp->Disable();
+		mDP.OnOpen->Disable();
+		mDP.DirPick->Disable();
+	}
+	else
+	{
+		mDP.OnAll->Enable();
+		mDP.OnTemp->Enable();
+		mDP.OnOpen->Enable();
+		mDP.DirPick->Enable();
+	}
+}
+
+void PreferencesFrame::OnCheckAuto( wxCommandEvent& event )
+{
+	auto cb = (wxCheckBox*) event.GetEventObject();
+	auto id = cb->GetId();
+	UpdatePanelAuto( id );
+}
+
+void PreferencesFrame::OnCheckHide( wxCommandEvent& event )
+{
+	if ( mGP.CB_NB_Hide->GetValue() )
+	{
 		mGP.RB_NB_Top->Disable();
 		mGP.RB_NB_Bot->Disable();
+	}
+	else
+	{	
+		mGP.RB_NB_Top->Enable();
+		mGP.RB_NB_Bot->Enable();
 	}
 }
 
 void PreferencesFrame::OnCheckShowClose( wxCommandEvent& event )
 {
-	auto btn = (wxCheckBox*) event.GetEventObject();
-	if ( btn->GetValue() )
+	if ( mGP.CB_NB_Close->GetValue() )
 	{
 		mGP.RB_NB_OnAll->Enable();
 		mGP.RB_NB_OnAct->Enable();
@@ -486,6 +519,8 @@ void PreferencesFrame::OnOK( wxCommandEvent& event )
 	UpdateAutocomp();
 	UpdateDragDrop();
 	UpdateNotebook();
+	UpdateDictionary();
+	UpdateTemp();
 	Config::mGeneral.UseSplash = mGP.CB_SS->GetValue();
 
 	mFrame->Show( false );

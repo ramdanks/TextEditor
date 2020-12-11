@@ -17,25 +17,22 @@ namespace Util
 	class Timer
 	{
 	public:
-		Timer();
-		Timer( TimerPoint TP, bool PrintOnDestroy );
-		Timer( const std::string& Title, TimerPoint TP, bool PrintOnDestroy );
-		Timer( std::string&& Title, TimerPoint TP, bool PrintOnDestroy );
+		Timer() = default;
+		Timer( const char* msg, TimerPoint time, bool pod );
 		~Timer();
 
-		void Setting( std::string&& Title, TimerPoint TP, bool PrintOnDestroy );
-		void Setting( const std::string& Title, TimerPoint TP, bool PrintOnDestroy );
+		void set( const char* msg, TimerPoint time, bool pod );
 
-		void Tic();
-		float Toc();
+		void tic();
+		float toc();
 		std::string Toc_String();
 		static float Adjust_Time( TimerPoint TP, float Sec );
 		static std::string Get_Current_Time();
 
 	private:
-		std::string mTitle;
+		const char* mTitle;
 		TimerPoint mTime;
-		bool mPrintOnDestroy;
+		bool mPod;
 		std::chrono::time_point<std::chrono::steady_clock> TimeLog;
 		std::chrono::duration<float> Duration;
 	};
@@ -60,7 +57,7 @@ namespace Util
 
 #define TIMER_MACROS 1
 #if TIMER_MACROS
-	#define TIMER_ONLY( OBJ,TP,POD )       Util::Timer OBJ(TP,POD)
+	#define TIMER_ONLY( OBJ,TP,POD )       Util::Timer OBJ(nullptr,TP,POD)
 	#define TIMER_SCOPE( OBJ,STR,TP,POD )  Util::Timer OBJ(STR,TP,POD)
 	#define TIMER_FUNCTION( OBJ,TP,POD )   TIMER_SCOPE(OBJ,__FUNCSIG__,TP,POD)
 	#define TIMER_GET( OBJ )               OBJ.Toc()

@@ -107,6 +107,7 @@ void AppFrame::CreateMenu()
         menuSearch->Append( ID_SELECTFPREV,   MSG_SELECTFPREV    + "\tCtrl-Shift-F3"   );
         menuSearch->Append( ID_REPLACE,       MSG_REPLACE        + "\tCtrl-H"          );
         menuSearch->Append( ID_GOTO,          MSG_GOTO           + "\tCtrl-G"          );
+        menuSearch->Bind( wxEVT_MENU_OPEN, TextField::OnOpenMenuSearch );
     }
                                                              
     wxMenu* menuView = new wxMenu;
@@ -213,9 +214,8 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
     {
         if ( !TextField::SaveToExit() )
         {
-            auto prompt = wxMessageDialog( this, "There is non-temporary file which has been modified.\n"
-                                           "Please save your work before exiting, any changes will be ignored.\n"
-                                           "You sure want to Continue ?",
+            auto prompt = wxMessageDialog( this, "Any changes made to the documents will be ignored.\n"
+                                           "Please save your work before exiting, You sure want to Continue ?",
                                            "Close Window", wxYES_NO );
             if ( prompt.ShowModal() == wxID_NO )
             {

@@ -32,6 +32,12 @@ public:
 			std::filesystem::remove_all( entry.path() );
 	}
 
+	static bool Exist( const char* filepath )
+	{
+		struct stat buffer;
+		return stat( filepath, &buffer ) == 0;
+	}
+
 	static bool Is_Exist( const std::string& filepath )
 	{
 		struct stat buffer;
@@ -61,7 +67,7 @@ public:
 		auto myfile = std::fstream( filepath, std::ios::out | std::ios::binary );
 		if ( myfile )
 		{
-			if ( filesize > 0 ) myfile.write( fp, filesize );
+			myfile.write( fp, filesize );
 			myfile.close();
 		}
 	}

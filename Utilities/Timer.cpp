@@ -5,64 +5,42 @@
 
 namespace Util
 {
-	Timer::Timer()
-		: mTime(SEC), mPrintOnDestroy(false)
+	Timer::Timer( const char* msg, TimerPoint time, bool pod )
+		: mTitle(msg), mTime(time), mPod(pod)
 	{
-		Tic();
-	}
-
-	Timer::Timer( TimerPoint TP, bool PrintOnDestroy )
-		: mTime(TP), mPrintOnDestroy(PrintOnDestroy)
-	{
-		Tic();
-	}
-
-	Timer::Timer( const std::string& Title, TimerPoint TP, bool PrintOnDestroy )
-		: mTitle(Title), mTime(TP), mPrintOnDestroy(PrintOnDestroy)
-	{
-		Tic();
-	}
-
-	Timer::Timer( std::string&& Title, TimerPoint TP, bool PrintOnDestroy )
-		: mTitle( std::move( Title ) ), mTime( TP ), mPrintOnDestroy( PrintOnDestroy )
-	{
-		Tic();
+		tic();
 	}
 
 	Timer::~Timer()
 	{
-		if ( mPrintOnDestroy )
-			std::cout << Toc_String().c_str() << std::endl;	
+		if ( mPod )
+		{
+			if ( mTitle ) printf( "%s\n", Toc_String().c_str() );
+			else printf( "Time:%f\n", toc() );
+		}
 	}
 
-	void Timer::Setting( std::string&& Title, TimerPoint TP, bool PrintOnDestroy )
+	void Timer::set( const char* msg, TimerPoint time, bool pod )
 	{
-		mTitle = std::move( Title );
-		mTime = TP;
-		mPrintOnDestroy = PrintOnDestroy;
+		mTitle = msg;
+		mTime = time;
+		mPod = pod;
 	}
 
-	void Timer::Setting( const std::string& Title, TimerPoint TP, bool PrintOnDestroy )
-	{
-		mTitle = Title;
-		mTime = TP;
-		mPrintOnDestroy = PrintOnDestroy;
-	}
-
-	void Timer::Tic()
+	void Timer::tic()
 	{
 		TimeLog = std::chrono::high_resolution_clock::now();
 	}
 
-	float Timer::Toc()
+	float Timer::toc()
 	{
 		Duration = std::chrono::high_resolution_clock::now() - TimeLog;
-		return Adjust_Time( this->mTime, Duration.count() );
+		return Adjust_Time( mTime, Duration.count() );
 	}
 
 	std::string Timer::Toc_String()
 	{
-		auto time = Toc();
+		auto time = toc();
 
 		TimerPoint tp = mTime;
 		if ( tp == ADJUST )
@@ -76,14 +54,16 @@ namespace Util
 		}
 
 		// indicator
-		std::string spec;
-		if      ( tp == MIN ) spec = " (min)";
-		else if ( tp == SEC ) spec = " (sec)";
-		else if ( tp == MS )  spec = " (ms)";
-		else if ( tp == US )  spec = " (us)";
-		else if ( tp == NS )  spec = " (ns)";
+		std::string ret( mTitle );
+		ret += " Time: " + std::to_string( time );
 
-		return mTitle + " Time: " + std::to_string( time ) + spec;
+		if      ( tp == MIN ) ret += " (min)";
+		else if ( tp == SEC ) ret += " (sec)";
+		else if ( tp == MS )  ret += " (ms)";
+		else if ( tp == US )  ret += " (us)";
+		else if ( tp == NS )  ret += " (ns)";
+
+		return ret;
 	}
 
 	float Timer::Adjust_Time( TimerPoint TP, float Sec )
@@ -116,17 +96,17 @@ namespace Util
 		mHigh( 0.0f ),
 		mIteration( 0u )
 	{
-		this->mTimer.Tic();
+		this->mTimer.tic();
 	}
 
 	void StatTimer::Start()
 	{
-		this->mTimer.Tic();
+		this->mTimer.toc();
 	}
 
 	void StatTimer::Refresh()
 	{
-		float res = this->mTimer.Toc();
+		float res = this->mTimer.toc();
 		if ( mIteration == 0u )
 		{
 			mHigh = res;
@@ -140,7 +120,7 @@ namespace Util
 			mAvg = (mAvg * mIteration + res) / (mIteration + 1);
 		}
 		mIteration++;
-		this->mTimer.Tic();
+		this->mTimer.tic();
 	}
 
 	void StatTimer::Print_Result( TimerPoint TP )

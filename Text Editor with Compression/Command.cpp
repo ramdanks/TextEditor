@@ -4,6 +4,7 @@
 #include "../Utilities/Err.h"
 #include "Compressor/Compression.h"
 
+#define VERBOSE 0
 #define BENCHMARK_SIZE 1000000u
 #define FIRST_SPACING 3
 #define SECOND_SPACING 7
@@ -57,8 +58,6 @@ inline bool CMD::File_Exist( const std::string filepath )
 
 void CMD::Handle_Compression( int argc, const char* argv[], bool compress )
 {
-	Util::Timer timer( "", MS, false );
-
 	bool multi_thread = false;
 	if ( argc == 5 && isCommand( argv[4], CMD_MULTITHREAD ) ) multi_thread = true;
 	else if ( argc != 4 )
@@ -73,49 +72,51 @@ void CMD::Handle_Compression( int argc, const char* argv[], bool compress )
 	{
 		std::vector<uint8_t> pWrite;
 		auto read = Filestream::Read_Bin( fileread );
-		THROW_ERR_IF( read.empty(), "File not found or empty!" );
 
-		tm.Tic(); //start timer
+		tm.toc(); //start timer
 		float exec_ms, write_ms;
-		if ( compress )
-		{
-			sCompressInfo ci;
-			ci.pData = (uint8_t*) &read[0];
-			ci.SizeSource = read.size();
+		if ( read.size() > 0 )
+		{		
+			if ( compress )
+			{
+				sCompressInfo ci;
+				ci.pData = (uint8_t*) &read[0];
+				ci.SizeSource = read.size();
 
-			pWrite = Compression::Compress_Merge( ci, multi_thread );
-			THROW_ERR_IF( pWrite.empty(), "Compress to file failed. Compression seems cannot reduce original size!" );
+				pWrite = Compression::Compress_Merge( ci, multi_thread );
+				THROW_ERR_IFEMPTY( pWrite, "Compress to file failed. Compression seems cannot reduce original size!" );
 
-			//stop timer and log
-			exec_ms = tm.Toc();
-			printf( "Compress and Write file success!" );
-			if ( !FileLog.empty() ) clog.Log_File( LEVEL_INFO, "Compress and Write file success!", FileLog );
-		}
-		else
-		{
-			pWrite = Compression::Decompress_Merge( read, multi_thread );
-			THROW_ERR_IF( pWrite.empty(), "Decompress to file failed. May caused by logic or file integrity error!" );
+				//stop timer and log
+				exec_ms = tm.toc();
+				printf( "Compress and Write file success!" );
+				if ( !FileLog.empty() ) clog.Log_File( LV_INFO, "Compress and Write file success!", FileLog );
+			}
+			else
+			{
+				pWrite = Compression::Decompress_Merge( read, multi_thread );
+				THROW_ERR_IFEMPTY( pWrite, "Decompress to file failed. May caused by logic or file integrity error!" );
 			
-			//stop timer and log
-			exec_ms = tm.Toc();
-			printf( "Decompress and Write file success!" );
-			if ( !FileLog.empty() ) clog.Log_File( LEVEL_INFO, "Decompress and Write file success!", FileLog );
+				//stop timer and log
+				exec_ms = tm.toc();
+				printf( "Decompress and Write file success!" );
+				if ( !FileLog.empty() ) clog.Log_File( LV_INFO, "Decompress and Write file success!", FileLog );
+			}
 		}
 		//use timer when write to files
-		tm.Tic();
+		tm.tic();
 		Filestream::Write_Bin( (const char*) &pWrite[0], pWrite.size(), filewrite );
 		THROW_ERR_IFNOT( File_Exist( filewrite ), "Write file failed. File cannot be saved!" );
-		write_ms = tm.Toc();
+		write_ms = tm.toc();
 
 		//trace result
-		float combined_time = timer.Toc();
-		float exec_MBps = (double) read.size() / 1000 / exec_ms;
-		float write_MBps = (double) pWrite.size() / 1000 / write_ms;
+		float combined_time = exec_ms + write_ms;
+		float exec_MBps = (double) read.size() / 1024 / exec_ms;
+		float write_MBps = (double) pWrite.size() / 1024 / write_ms;
 
 		#define ftos(x) std::to_string(x)
 		std::string bandwidth = "MT:" + ftos(multi_thread) + ", Size:" + ftos( pWrite.size() ) + "(Bytes), [C/D]Bandwidth:" + ftos( exec_MBps ) +
 								"(MBps), Write:" + ftos( write_MBps ) + "(MBps), CombinedTime:" + ftos( combined_time ) + "(ms)";
-		if ( !FileLog.empty() ) clog.Log_File( LEVEL_TRACE, bandwidth, FileLog );
+		if ( !FileLog.empty() ) clog.Log_File( LV_TRACE, bandwidth, FileLog );
 	}
 	catch ( Util::Err& error )
 	{
@@ -138,29 +139,28 @@ void CMD::Handle_Benchmark( int argc, const char* argv[] )
 	{
 		for ( unsigned int i = 0; i < iteration; i++ )
 		{
-			int* block = (int*) malloc( BENCHMARK_SIZE );
-			for ( uint64_t i = 0; i < BENCHMARK_SIZE / sizeof( int ); i++ ) block[i] = rand() % 63;
-
+			uint8_t* block = new uint8_t[BENCHMARK_SIZE];
+;
 			Util::Timer tm( "Compression", MS, false );
 			sCompressInfo ci;
-			ci.pData = (uint8_t*) block;
+			ci.pData = block;
 			ci.SizeSource = BENCHMARK_SIZE;
 
-			tm.Tic();
+			tm.tic();
 			auto result_comp = Compression::Compress_Merge( ci, multi_thread );
-			auto compression_time = tm.Toc();
-			THROW_ERR_IF( result_comp.empty(), "Compression and Compression Failed!" );
+			auto compression_time = tm.toc();
+			THROW_ERR_IFEMPTY( result_comp, "Compression Failed!" );
 
-			tm.Tic();
+			tm.tic();
 			auto result_decomp = Compression::Decompress_Merge( result_comp, multi_thread );
-			auto decompression_time = tm.Toc();
-			THROW_ERR_IF( result_decomp.empty(), "Decompression and Compression Failed!" );
+			auto decompression_time = tm.toc();
+			THROW_ERR_IFEMPTY( result_decomp, "Decompression Failed!" );
 
-			double compress_speed = (double) BENCHMARK_SIZE / 1000 / compression_time;
-			double decompress_speed = (double) BENCHMARK_SIZE / 1000 / decompression_time;
+			double compress_speed = (double) BENCHMARK_SIZE / 1024. / compression_time;
+			double decompress_speed = (double) BENCHMARK_SIZE / 1024. / decompression_time;
 			printf( "[%u/%u]:Compression:%.2f(MBps), Decompression:%.2f(MBps)\n", i+1, iteration, compress_speed, decompress_speed );
 
-			free( block );
+			delete[] block;
 		}
 	}
 	catch ( Util::Err& error )

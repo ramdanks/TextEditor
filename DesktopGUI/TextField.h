@@ -5,11 +5,17 @@
 
 struct sPageData
 {
+	sPageData( bool change, bool temp, std::string&& fn, std::string&& fp )
+		: isChanged( change ), isTemporary( temp ), FileName( std::move( fn ) ), FilePath( std::move( fp ) ) {}
+	sPageData( bool change, bool temp, std::string const& fn, std::string const& fp )
+		: isChanged( change ), isTemporary( temp ), FileName( fn ), FilePath( fp ) {}
+
 	bool isChanged;
 	bool isTemporary;
+	std::string FileName;
 	std::string FilePath;
-	wxStyledTextCtrl* TextField;
-	wxString Suggestion;
+	wxStyledTextCtrl* TextField = nullptr;
+	wxString Suggestion = "";
 };
 
 //can manipulate MainFrame automatically
@@ -79,6 +85,7 @@ public:
 	static void OnGoto( wxCommandEvent& event );
 	static void OnFindNext( wxCommandEvent& event );
 	static void OnFindPrev( wxCommandEvent& event );
+	static void OnOpenMenuSearch( wxMenuEvent& event );
 
 private:
 	static void UpdateMenuWindow();
@@ -96,7 +103,7 @@ private:
 
 	static void FindText( wxStyledTextCtrl* stc, bool next );
 	static void MarginAutoAdjust();
-	static void CreateTempFile( const std::string& name );
+	static void CreateTempFile( const std::string& path );
 	static bool AlreadyOpened( const std::string& filepath, bool focus );
 
 	static void AddNewTab( sPageData& pd );
@@ -107,8 +114,8 @@ private:
 	static bool isGotoInit;
 	static bool isFindInit;
 	static bool isDictInit;
-	static bool isAutocomp;
-	
+
+	static std::mutex mMutex;
 	static std::future<void> mFuture;
 	static wxMenu* mMenuWnd;
 	static wxFrame* mParent;

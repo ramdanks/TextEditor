@@ -8,7 +8,8 @@ uint8_t* HuffmanCodes::Compress( sCompressInfo info, bool force )
 {
 	if ( info.SizeSource == 0 || info.pData == nullptr ) return nullptr;
 
-	bool* ByteCombination = (bool*) calloc( BYTESIZE, sizeof( bool ) );
+	bool ByteCombination[BYTESIZE];
+	memset( ByteCombination, 0x00, BYTESIZE );
 
 	//find amount of byte combination in source data
 	for ( uint64_t i = 0; i < info.SizeSource; i++ )
@@ -16,7 +17,10 @@ uint8_t* HuffmanCodes::Compress( sCompressInfo info, bool force )
 
 	//based on amount of byte combination in sourcedata, create new value and store old value
 	std::vector<uint8_t> OldValueTable;
-	uint8_t* NewValueTable = (uint8_t*) calloc( BYTESIZE, sizeof( bool ) );
+	OldValueTable.reserve( BYTESIZE );
+	uint8_t NewValueTable[BYTESIZE];
+	memset( NewValueTable, 0x00, BYTESIZE );
+
 	uint8_t NewValue = 0;
 	for ( size_t i = 0; i < BYTESIZE; i++ )
 	{
@@ -27,7 +31,7 @@ uint8_t* HuffmanCodes::Compress( sCompressInfo info, bool force )
 			//this trick is to seperates or identify where's the compressed data and the decoder, so no need to memorize location
 			NewValue++;
 			NewValueTable[i] = NewValue;
-			OldValueTable.push_back( i );
+			OldValueTable.emplace_back( i );
 		}
 	}
 
@@ -67,7 +71,7 @@ uint8_t* HuffmanCodes::Compress( sCompressInfo info, bool force )
 	header.DecoderLength = BitLenDecoder;
 	pCompressed[0] = Header_Create( header );
 
-	//combine header, compressed value, decoder tablo to pCompressed buffer.
+	//combine header, compressed value, decoder table to pCompressed buffer.
 	Merge_HuffmanCodes( &pCompressed[1], header, BufferCompressedData, OldValueTable );
 
 	return pCompressed;
@@ -77,7 +81,8 @@ void HuffmanCodes::Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo
 {
 	if ( info.SizeSource == 0 || info.pData == nullptr ) return;
 
-	bool* ByteCombination = (bool*) calloc( BYTESIZE, sizeof( bool ) );
+	bool ByteCombination[BYTESIZE];
+	memset( ByteCombination, 0x00, BYTESIZE );
 
 	//find amount of byte combination in source data
 	for ( uint64_t i = 0; i < info.SizeSource; i++ )
@@ -85,7 +90,10 @@ void HuffmanCodes::Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo
 
 	//based on amount of byte combination in sourcedata, create new value and store old value
 	std::vector<uint8_t> OldValueTable;
-	uint8_t* NewValueTable = (uint8_t*) calloc( BYTESIZE, sizeof( bool ) );
+	OldValueTable.reserve( BYTESIZE );
+	uint8_t NewValueTable[BYTESIZE];
+	memset( NewValueTable, 0x00, BYTESIZE );
+
 	uint8_t NewValue = 0;
 	for ( size_t i = 0; i < BYTESIZE; i++ )
 	{
@@ -96,7 +104,7 @@ void HuffmanCodes::Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo
 			//this trick is to seperates or identify where's the compressed data and the decoder, so no need to memorize location
 			NewValue++;
 			NewValueTable[i] = NewValue;
-			OldValueTable.push_back( i );
+			OldValueTable.emplace_back( i );
 		}
 	}
 	//calculate HuffmanCodes size

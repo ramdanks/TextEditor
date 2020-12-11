@@ -44,7 +44,11 @@ void StyleFrame::OnOK( wxCommandEvent& event )
 	Config::mStyle.LinenumFore = mSP.LinenumFore->GetColour().GetRGB();
 
 	for ( auto& page : TextField::mPageData )
+	{
 		TextField::LoadStyle( page.TextField );
+		DictionaryFrame::ResetStyling( page.FilePath );
+		DictionaryFrame::StartStyling( page.FilePath, Config::GetDictionaryFlags() );
+	}
 
 	TextField::MarginAutoAdjust();
 	this->Show( false );
@@ -85,19 +89,22 @@ void StyleFrame::UpdatePreview()
 	mSP.Preview->SetCaretLineBackground( mSP.LineBack->GetColour() );
 	mSP.Preview->SetCaretForeground( mSP.Caret->GetColour() );
 	mSP.Preview->SetSelBackground( true, mSP.Selection->GetColour() );
-	mSP.Preview->SetMarginWidth( 0, 27 );
 	mSP.Preview->SetMarginType( 0, wxSTC_MARGIN_NUMBER );
 	mSP.Preview->StyleSetBackground( wxSTC_STYLE_LINENUMBER, mSP.LinenumBack->GetColour() );
 	mSP.Preview->StyleSetForeground( wxSTC_STYLE_LINENUMBER, mSP.LinenumFore->GetColour() );
+
+	wxString lines = wxString::Format( wxT( "%i" ), mSP.Preview->GetLineCount() );
+	auto width = mSP.Preview->TextWidth( wxSTC_STYLE_LINENUMBER, lines + ' ' );
+	mSP.Preview->SetMarginWidth( 0, width );
 }
 
 void StyleFrame::AdjustColourPicker()
 {
-	mSP.TextBack->SetColour(    wxColour( Config::mStyle.TextBack ) );
-	mSP.TextFore->SetColour(    wxColour( Config::mStyle.TextFore ) );
-	mSP.Caret->SetColour(       wxColour( Config::mStyle.Caret ) );
-	mSP.LineBack->SetColour(    wxColour( Config::mStyle.LineBack ) );
-	mSP.Selection->SetColour(   wxColour( Config::mStyle.Selection ) );
+	mSP.TextBack->SetColour   ( wxColour( Config::mStyle.TextBack    ) );
+	mSP.TextFore->SetColour   ( wxColour( Config::mStyle.TextFore    ) );
+	mSP.Caret->SetColour      ( wxColour( Config::mStyle.Caret       ) );
+	mSP.LineBack->SetColour   ( wxColour( Config::mStyle.LineBack    ) );
+	mSP.Selection->SetColour  ( wxColour( Config::mStyle.Selection   ) );
 	mSP.LinenumBack->SetColour( wxColour( Config::mStyle.LinenumBack ) );
 	mSP.LinenumFore->SetColour( wxColour( Config::mStyle.LinenumFore ) );
 }

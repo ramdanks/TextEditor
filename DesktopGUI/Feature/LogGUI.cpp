@@ -192,33 +192,13 @@ void LogGUI::OnClose( wxCloseEvent& event )
 	mFrame->Show( false );
 }
 
-ProfileFunc::ProfileFunc( std::string&& func )
-	: mSeverity(LV_NONE)
-{
-	mTimer.Setting( std::move( func ), ADJUST, false );
-	mTimer.Tic();
-}
+ProfileFunc::ProfileFunc( const char* func, severity s, TimerPoint time )
+	: mTimer( func, time, false ), mSeverity( s )
+{}
 
-ProfileFunc::ProfileFunc( const std::string& func )
-	: mSeverity(LV_NONE)
-{
-	mTimer.Setting( func, ADJUST, false );
-	mTimer.Tic();
-}
-
-ProfileFunc::ProfileFunc( const std::string& func, severity s )
-	: mSeverity(s)
-{
-	mTimer.Setting( func, ADJUST, false );
-	mTimer.Tic();
-}
-
-ProfileFunc::ProfileFunc( const std::string& func, severity s, TimerPoint tp )
-	: mSeverity(s)
-{
-	mTimer.Setting( func, tp, false );
-	mTimer.Tic();
-}
+ProfileFunc::ProfileFunc( const std::string& func, severity s, TimerPoint time )
+	: mTimer( func.c_str(), time, false ), mSeverity( s )
+{}
 
 ProfileFunc::~ProfileFunc()
 {

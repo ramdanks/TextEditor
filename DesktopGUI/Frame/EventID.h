@@ -2,6 +2,7 @@
 
 enum Menu
 {
+    ID_TEXTFIELDCTRL,
     ID_HELLO,
     ID_HELP,
     ID_DOCUMENTATION,

@@ -8,11 +8,24 @@
 #define DICT_NAME         "Mémoriser - Dictionary"
 #define CONFIG_FILEPATH   "config.cfg"
 
+#define TYPE_BOOL 1
+#define TYPE_INT 4
+#define TYPE_STR 0
+
+#define DICT_ALL_DOCS 0
+#define DICT_OPN_DOCS 1
+#define DICT_TMP_DOCS 2
+
+#define TEMP_APPLY_ALL 0
+#define TEMP_APPLY_NEW 1
+
 struct sConfigReference
 {
-	sConfigReference( std::string tag, int* ref ) : Tag(tag), RefData(ref) {}
+	sConfigReference( uint8_t type, void* ref, const std::string& tag )
+		: Type( type ), RefData( ref ), Tag( tag ) {}
+	uint8_t Type;
+	void* RefData;
 	std::string Tag;
-	int* RefData;
 };
 
 class Config
@@ -28,9 +41,26 @@ class Config
 		int CloseBtnOn;
 	};
 
+	struct Dictionary
+	{
+		int UseGlobal;
+		int ApplyOn;
+		int MatchCase;
+		int MatchWhole;
+		int UniformClr;
+		std::string Directory;
+	};
+
+	struct Temporary
+	{
+		int UseTemp;
+		int ApplyOn;
+		std::string Directory;
+	};
+
 	struct Font
 	{
-		wxString Face;
+		std::string Face;
 		int Size;
 		int Weight;
 		int Family;
@@ -71,6 +101,7 @@ public:
 	static void SaveConfig();
 	static std::string GetSupportedFormat();
 
+	static int GetDictionaryFlags();
 	static int GetNotebookStyle();
 	static void SetNotebookStyle( int style );
 	static wxFont BuildFont();
@@ -83,15 +114,17 @@ public:
 	static AutoThread mAutohigh;
 	static AutoThread mAutocomp;
 	static Notebook mNotebook;
+	static Dictionary mDictionary;
+	static Temporary mTemp;
 
 private:
 	static void MakeTemplate();
 
-	static std::vector<sConfigReference> mConfTemplate;
+	static std::vector<sConfigReference> mTemplate;
 };
 
-#define MIN_AUTOCOMP_WORDS     1000
-#define MAX_AUTOCOMP_WORDS     10000
+#define MIN_AUTOCOMP_WORDS     100
+#define MAX_AUTOCOMP_WORDS     1000
 #define MIN_AUTOSAVE_INTERVAL  1
 #define MAX_AUTOSAVE_INTERVAL  60
 #define MIN_AUTOHIGH_INTERVAL  50

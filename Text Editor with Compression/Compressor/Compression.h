@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
+#include <future>
 #include "HuffmanCodes.h"
-#define COMPRESSION_REVISION "0.1a"
+#define COMPRESSION_REVISION "0.2a"
 
 struct sArchiveHeader
 {
@@ -30,10 +31,12 @@ private:
 	//return amount of bytes needed to store address value
 	static uint8_t inline Addressing_Size( uint64_t address );
 	//find compression size based on cluster size
-	static void Find_Compression_Merge_Size( uint32_t clusterSize, const sCompressInfo& info, uint32_t& bufferSize );
+	static uint32_t Find_Compression_Merge_Size( uint32_t clusterSize, const sCompressInfo& info );
 
 	//this function not include null address pointer, push_back(0) before entering this function
 	static void Store_Cluster_Address( const std::vector<uint32_t>& vList, uint8_t addressing, std::vector<uint8_t>& vBuffer );
 	//this function except null address pointer, and will return the vector without the null value
 	static std::vector<uint32_t> Retrieve_Cluster_Address( uint8_t addressing, const std::vector<uint8_t>& vBuffer );
+
+	static std::unordered_map<uint32_t, std::future<uint32_t>> mFuture;
 };

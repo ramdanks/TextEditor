@@ -9,7 +9,7 @@ public:
 	static void LoadSupportedFormat();
 	static std::string OpenDialog( wxWindow* parent, const wxString& defaultFilename );
 	static std::string SaveDialog( wxWindow* parent, const wxString& defaultFilename );
-	static wxArrayString GetDroppedFiles( wxString* dropped, uint32_t size );
+	static wxArrayString GetDroppedFiles( wxString const* dropped, uint32_t size );
 
 	static std::vector<uint8_t> OpenFileFormat( const std::string& filepath );
 	static void SaveFileFormat( const std::string& filepath, const char* pd, size_t size );
@@ -21,9 +21,9 @@ private:
 };
 
 #if defined( __WIN32__ )
-#define CMD_COMPRESS(file)     "Compressor -c temp/out " + file + " -mt"
-#define CMD_DECOMPRESS(file)   "Compressor -d " + file + " temp/in -mt"
+#define CMD_COMPRESS(file)     "Compressor -c out " + file + " -mt"
+#define CMD_DECOMPRESS(file)   "Compressor -d " + file + " in -mt"
 #elif defined ( __linux__ )
-#define CMD_COMPRESS(file)     "./Compressor -c temp/out " + file + " -mt"
-#define CMD_DECOMPRESS(file)   "./Compressor -d " + file + " temp/in -mt"
+#define CMD_COMPRESS(file)     "./Compressor -c out " + file + " -mt"
+#define CMD_DECOMPRESS(file)   "./Compressor -d " + file + " in -mt"
 #endif

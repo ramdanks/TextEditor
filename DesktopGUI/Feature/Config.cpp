@@ -9,19 +9,22 @@ Config::AutoThread Config::mAutosave;
 Config::AutoThread Config::mAutohigh;
 Config::AutoThread Config::mAutocomp;
 Config::Notebook Config::mNotebook;
-std::vector<sConfigReference> Config::mConfTemplate;
+Config::Dictionary Config::mDictionary;
+Config::Temporary Config::mTemp;
+std::vector<sConfigReference> Config::mTemplate;
 
 void Config::FetchData()
 {
 	PROFILE_FUNC();
 
+	Filestream::Create_Directories( "temp" );
 	if ( !Filestream::Is_Exist( CONFIG_FILEPATH ) )
 	{
 		LoadDefaultConfig();
 		Config::SaveConfig();
 		return;
 	}
-	if ( mConfTemplate.empty() ) MakeTemplate();
+	if ( mTemplate.empty() ) MakeTemplate();
 
 	try
 	{
@@ -31,19 +34,24 @@ void Config::FetchData()
 		std::string sRead = (const char*) &vRead[0];
 		auto vBuffer = Filestream::ParseString( sRead, '\n' );
 		THROW_ERR_IFEMPTY( vRead, "Failed to read configuration file!" );
-		THROW_ERR_IF( vBuffer.size() != mConfTemplate.size(), "Config file is compromised!" );
+		THROW_ERR_IF( vBuffer.size() != mTemplate.size(), "Config file is not compatible!" );
 
-		for ( int i = 0; i < mConfTemplate.size(); i++ )
+		for ( int i = 0; i < mTemplate.size(); i++ )
 		{
 			auto vConfig = Filestream::ParseString( vBuffer[i], '=' );
-			THROW_ERR_IF( vConfig[0] != mConfTemplate[i].Tag, "Config file is compromised!" );
-			*mConfTemplate[i].RefData = std::stoi( vConfig[1] );
+			THROW_ERR_IF( vConfig[0] != mTemplate[i].Tag, "Config file is not compatible!" );
+			THROW_ERR_IF( vConfig.size() != 2, "Config file doesnt expect empty value!" );
+
+			if ( mTemplate[i].Type == TYPE_INT )
+				*(int*) mTemplate[i].RefData = std::stoi( vConfig[1] );
+			else if ( mTemplate[i].Type == TYPE_STR )
+				*(std::string*) mTemplate[i].RefData = vConfig[1];
 		}
 		LOG_ALL( LV_INFO, "Loading configuration file success!" );
 	}
 	catch ( Util::Err& e )
 	{
-		LOG_ALL( LV_WARN, e.Seek().c_str() );
+		LOG_ALL( LV_WARN, e.Seek() );
 		LoadDefaultConfig();
 		Config::SaveConfig();
 	}
@@ -63,16 +71,36 @@ void Config::LoadDefaultConfig()
 	mGeneral.ZoomDefault   = 5;
 	mGeneral.UseStatbar    = true;
 	mGeneral.UseDragDrop   = true;
+	// notebook default
+	mNotebook.Hide         = false;
+	mNotebook.Orientation  = true;
+	mNotebook.LockMove     = false;
+	mNotebook.FixedWidth   = false;
+	mNotebook.MiddleClose  = true;
+	mNotebook.ShowCloseBtn = true;
+	mNotebook.CloseBtnOn   = false;
+	// dictionary defaukt
+	mDictionary.UseGlobal  = true;
+	mDictionary.ApplyOn    = DICT_ALL_DOCS;
+	mDictionary.Directory  = "dictionary";
+	mDictionary.UniformClr = false;
+	mDictionary.MatchCase  = false;
+	mDictionary.MatchWhole = true;
+	// temporary default
+	mTemp.UseTemp          = true;
+	mTemp.ApplyOn          = TEMP_APPLY_NEW;
+	mTemp.Directory        = "temp";
 	// autosave default
 	mAutosave.Use          = true;
-	mAutosave.Param        = 5000;
+	mAutosave.Param        = 60000;
 	// autohighlight default
 	mAutohigh.Use          = true;
-	mAutohigh.Param        = 5000;
+	mAutohigh.Param        = 500;
 	// autocompletion default
 	mAutocomp.Use          = true;
-	mAutocomp.Param        = 5000;
+	mAutocomp.Param        = 100;
 	// font default	       
+	mFont.Face             = "Calibri";
 	mFont.Size             = 10;
 	mFont.Family           = wxFONTFAMILY_MODERN;
 	mFont.Style            = wxFONTSTYLE_NORMAL;
@@ -91,13 +119,18 @@ void Config::LoadDefaultConfig()
 
 void Config::SaveConfig()
 {
-	if ( mConfTemplate.empty() ) MakeTemplate();
+	if ( mTemplate.empty() ) MakeTemplate();
 
 	try
 	{
 		std::string ConfigText;
-		for ( auto t : mConfTemplate )
-			ConfigText += t.Tag + '=' + std::to_string( *t.RefData ) + '\n';
+		for ( auto t : mTemplate )
+		{
+			if ( t.Type == TYPE_INT ) 
+				ConfigText += t.Tag + '=' + std::to_string( *(int*)t.RefData ) + '\n';
+			else if ( t.Type == TYPE_STR )
+				ConfigText += t.Tag + '=' + *(std::string*) t.RefData + '\n';
+		}
 		ConfigText.pop_back();
 	
 		Filestream::Write_Bin( ConfigText.c_str(), ConfigText.size(), CONFIG_FILEPATH );
@@ -115,9 +148,15 @@ std::string Config::GetSupportedFormat()
 	supp = "All types (*.*)|*.*";
 	supp += "|Normal text file (*.txt)|*.txt";
 	supp += "|Memoriser file (*.mtx)|*.mtx";
-	supp += "|Memoriser dictionary (*.mdt)|*.mdt";
-	supp += "|Memoriser archive (*.mac)|*.mac";
 	return supp;
+}
+
+int Config::GetDictionaryFlags()
+{
+	int flags = 0;
+	if ( Config::mDictionary.MatchWhole ) flags |= wxSTC_FIND_WHOLEWORD;
+	if ( Config::mDictionary.MatchCase )  flags |= wxSTC_FIND_MATCHCASE;
+	return flags;
 }
 
 int Config::GetNotebookStyle()
@@ -163,34 +202,44 @@ void Config::SetFont( wxFont font )
 
 void Config::MakeTemplate()
 {
-	mConfTemplate.reserve( 30 );
-	mConfTemplate.emplace_back( "Hide",              &mNotebook.Hide );
-	mConfTemplate.emplace_back( "Orientation",       &mNotebook.Orientation );
-	mConfTemplate.emplace_back( "LockMove",          &mNotebook.LockMove );
-	mConfTemplate.emplace_back( "FixedWidth",        &mNotebook.FixedWidth );
-	mConfTemplate.emplace_back( "MiddleMouseClose",  &mNotebook.MiddleClose );
-	mConfTemplate.emplace_back( "ShowCloseBtn",      &mNotebook.ShowCloseBtn );
-	mConfTemplate.emplace_back( "CloseBtnOn",        &mNotebook.CloseBtnOn );
-	mConfTemplate.emplace_back( "SplashScreen",      &mGeneral.UseSplash );
-	mConfTemplate.emplace_back( "UseStatusbar",      &mGeneral.UseStatbar );
-	mConfTemplate.emplace_back( "UseDragDrop",       &mGeneral.UseDragDrop );
-	mConfTemplate.emplace_back( "SystemLanguage",    &mGeneral.LanguageID );
-	mConfTemplate.emplace_back( "ZoomDefault",       &mGeneral.ZoomDefault );
-	mConfTemplate.emplace_back( "UseAutosave",       &mAutosave.Use );
-	mConfTemplate.emplace_back( "AutosaveInterval",  &mAutosave.Param );
-	mConfTemplate.emplace_back( "UseAutohigh",       &mAutohigh.Use );
-	mConfTemplate.emplace_back( "AutohighInterval",  &mAutohigh.Param );
-	mConfTemplate.emplace_back( "UseAutocomp",       &mAutocomp.Use );
-	mConfTemplate.emplace_back( "AutocompWords",     &mAutocomp.Param );
-	mConfTemplate.emplace_back( "TextBack",          &mStyle.TextBack );
-	mConfTemplate.emplace_back( "TextFore",          &mStyle.TextFore );
-	mConfTemplate.emplace_back( "Caret",             &mStyle.Caret );
-	mConfTemplate.emplace_back( "LineBack",          &mStyle.LineBack );
-	mConfTemplate.emplace_back( "Selection",         &mStyle.Selection );
-	mConfTemplate.emplace_back( "LinenumBack",       &mStyle.LinenumBack );
-	mConfTemplate.emplace_back( "LinenumFore",       &mStyle.LinenumFore );
-	mConfTemplate.emplace_back( "FontSize",          &mFont.Size );
-	mConfTemplate.emplace_back( "FontStyle",         &mFont.Style );
-	mConfTemplate.emplace_back( "FontFamily",        &mFont.Family );
-	mConfTemplate.emplace_back( "FontWeight",        &mFont.Weight );
+	mTemplate.reserve( 30 );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.Hide,         "Hide"             );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.Orientation,  "Orientation"      );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.LockMove,     "LockMove"         );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.FixedWidth,   "FixedWidth"       );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.MiddleClose,  "MiddleMouseClose" );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.ShowCloseBtn, "ShowCloseBtn"     );
+	mTemplate.emplace_back( TYPE_INT, &mNotebook.CloseBtnOn,   "CloseBtnOn"       );
+	mTemplate.emplace_back( TYPE_INT, &mGeneral.UseSplash,     "SplashScreen"     );
+	mTemplate.emplace_back( TYPE_INT, &mGeneral.UseStatbar,    "UseStatusbar"     );
+	mTemplate.emplace_back( TYPE_INT, &mGeneral.UseDragDrop,   "UseDragDrop"      );
+	mTemplate.emplace_back( TYPE_INT, &mGeneral.LanguageID,    "SystemLanguage"   );
+	mTemplate.emplace_back( TYPE_INT, &mGeneral.ZoomDefault,   "ZoomDefault"      );
+	mTemplate.emplace_back( TYPE_INT, &mDictionary.UseGlobal,  "UseGlobal"        );
+	mTemplate.emplace_back( TYPE_INT, &mDictionary.ApplyOn,    "DictApplyOn"      );
+	mTemplate.emplace_back( TYPE_STR, &mDictionary.Directory,  "DictGlobalDir"    );
+	mTemplate.emplace_back( TYPE_INT, &mTemp.UseTemp,          "UseTemp"          );
+	mTemplate.emplace_back( TYPE_INT, &mTemp.ApplyOn,          "TempApplyOn"      );
+	mTemplate.emplace_back( TYPE_STR, &mTemp.Directory,        "TempDir"          );
+	mTemplate.emplace_back( TYPE_INT, &mDictionary.MatchCase,  "MatchCase"        );
+	mTemplate.emplace_back( TYPE_INT, &mDictionary.MatchWhole, "MatchWhole"       );
+	mTemplate.emplace_back( TYPE_INT, &mDictionary.UniformClr, "UniformColour"    );
+	mTemplate.emplace_back( TYPE_INT, &mAutosave.Use,          "UseAutosave"      );
+	mTemplate.emplace_back( TYPE_INT, &mAutosave.Param,        "AutosaveInterval" );
+	mTemplate.emplace_back( TYPE_INT, &mAutohigh.Use,          "UseAutohigh"      );
+	mTemplate.emplace_back( TYPE_INT, &mAutohigh.Param,        "AutohighInterval" );
+	mTemplate.emplace_back( TYPE_INT, &mAutocomp.Use,          "UseAutocomp"      );
+	mTemplate.emplace_back( TYPE_INT, &mAutocomp.Param,        "AutocompWords"    );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.TextBack,        "TextBack"         );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.TextFore,        "TextFore"         );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.Caret,           "Caret"            );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.LineBack,        "LineBack"         );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.Selection,       "Selection"        );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.LinenumBack,     "LinenumBack"      );
+	mTemplate.emplace_back( TYPE_INT, &mStyle.LinenumFore,     "LinenumFore"      );
+	mTemplate.emplace_back( TYPE_STR, &mFont.Face,             "FontFace"         );
+	mTemplate.emplace_back( TYPE_INT, &mFont.Size,             "FontSize"         );
+	mTemplate.emplace_back( TYPE_INT, &mFont.Style,            "FontStyle"        );
+	mTemplate.emplace_back( TYPE_INT, &mFont.Family,           "FontFamily"       );
+	mTemplate.emplace_back( TYPE_INT, &mFont.Weight,           "FontWeight"       );
 }

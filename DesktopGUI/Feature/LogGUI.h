@@ -53,10 +53,9 @@ private:
 struct ProfileFunc
 {
 public:
-	ProfileFunc( std::string&& func );
-	ProfileFunc( const std::string& func );
-	ProfileFunc( const std::string& func, severity s );
-	ProfileFunc( const std::string& func, severity s, TimerPoint tp );
+	ProfileFunc() = default;
+	ProfileFunc( const char* func, severity s = LV_NONE, TimerPoint time = ADJUST );
+	ProfileFunc( const std::string& func, severity s = LV_NONE, TimerPoint time = ADJUST );
 	~ProfileFunc();
 
 private:
@@ -96,4 +95,8 @@ private:
 	#define LOG_ALL_FORMAT(l,msg,...)
 #endif
 
+#ifdef _MSC_VER
 #define PROFILE_FUNC() ProfileFunc obj(__FUNCSIG__)
+#else
+#define PROFILE_FUNC() ProfileFunc obj(__PRETTY_FUNCTION__)
+#endif

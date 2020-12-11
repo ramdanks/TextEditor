@@ -51,7 +51,7 @@ bool ShareFrame::isFileAlreadyListed( const wxString& path )
 
 void ShareFrame::OnDropFiles( wxDropFilesEvent& event )
 {
-	Util::Timer tm( "Drop Files", MS, false );
+	PROFILE_FUNC();
 	try
 	{
 		wxBusyCursor busyCursor;
@@ -77,7 +77,6 @@ void ShareFrame::OnDropFiles( wxDropFilesEvent& event )
 		LOG_ALL( LV_ERROR, e.Seek() );
 		return;
 	}
-	LOG_ALL_FORMAT( LV_TRACE, "Drag n Drop Shared Files: %d, Time: %f (ms)", event.GetNumberOfFiles(), tm.Toc() );
 }
 
 void ShareFrame::OnOpenFiles( wxCommandEvent& event )

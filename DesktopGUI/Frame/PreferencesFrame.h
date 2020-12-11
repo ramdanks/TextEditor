@@ -27,6 +27,11 @@ class PreferencesFrame
 	struct DictionaryPage
 	{
 		wxPanel* Panel;
+		wxCheckBox* Disable;
+		wxDirPickerCtrl* DirPick;
+		wxRadioButton* OnAll;
+		wxRadioButton* OnTemp;
+		wxRadioButton* OnOpen;
 		wxCheckBox* CB_AC;
 		wxCheckBox* CB_AH;
 		wxSpinCtrl* SC_AC;
@@ -38,6 +43,10 @@ class PreferencesFrame
 	struct TempPage
 	{
 		wxPanel* Panel;
+		wxCheckBox* Disable;
+		wxDirPickerCtrl* DirPick;
+		wxRadioButton* OnAll;
+		wxRadioButton* OnNew;
 		wxCheckBox* CB_AS;
 		wxSlider* SL_AS;
 		wxSpinCtrl* SC_AS;
@@ -67,13 +76,21 @@ private:
 	static void CreateContent();
 	static void RefreshMessage();
 
+	static void UpdateDictionary();
 	static void UpdateNotebook();
 	static void UpdateDragDrop();
 	static void UpdateAutocomp();
 	static void UpdateAutohigh();
 	static void UpdateAutosave();
 	static void UpdateStatbar();
+	static void UpdateTemp();
 
+	static void UpdatePanelAuto( int id );
+	static void UpdatePanelDict( int id );
+	static void UpdatePanelTemp( int id );
+
+	static void OnCheckTemp( wxCommandEvent& event );
+	static void OnCheckDict( wxCommandEvent& event );
 	static void OnCheckAuto( wxCommandEvent& event );
 	static void OnCheckHide( wxCommandEvent& event );
 	static void OnCheckShowClose( wxCommandEvent& event );

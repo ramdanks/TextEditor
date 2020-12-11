@@ -96,3 +96,4 @@ private:
 #define MSG_EOLWIN              "Windows (CR-LF)"
 #define MSG_CASECONV            "Case Conversion"
 #define MSG_EOLCONV             "EOL Conversion"
+#define MSG_WINDOW              "Window"

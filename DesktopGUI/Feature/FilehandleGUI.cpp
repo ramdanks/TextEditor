@@ -19,7 +19,7 @@ std::string FilehandleGUI::SaveDialog( wxWindow* parent, const wxString& default
     return FileDialog( parent, "Save As", defaultFilename, wxFD_SAVE );
 }
 
-wxArrayString FilehandleGUI::GetDroppedFiles( wxString* dropped, uint32_t size )
+wxArrayString FilehandleGUI::GetDroppedFiles( wxString const* dropped, uint32_t size )
 {
     wxArrayString files;
     files.reserve( size );
@@ -47,8 +47,8 @@ std::vector<uint8_t> FilehandleGUI::OpenFileFormat( const std::string& filepath 
         wxBusyCursor busyCursor;
         wxBusyInfo busyInfo( "Decompressing files, please wait..." );
         while ( wxProcess::Exists( proc->GetPid() ) );
-        vRead = Filestream::Read_Bin( "temp/in" );
-        Filestream::Delete_File( "temp/in" );
+        vRead = Filestream::Read_Bin( "in" );
+        Filestream::Delete_File( "in" );
     }
     else
     {
@@ -60,11 +60,10 @@ std::vector<uint8_t> FilehandleGUI::OpenFileFormat( const std::string& filepath 
 void FilehandleGUI::SaveFileFormat( const std::string& filepath, const char* pd, size_t size )
 {
     auto format = Filestream::FileExtension( filepath );
-    if ( pd == nullptr || size == 0 ) return;
 
-    if ( format == "mtx" )
+    if ( format == "mtx" && size > 0 )
     {
-        Filestream::Write_Bin( pd, size, "temp/out" );
+        Filestream::Write_Bin( pd, size, "out" );
 
         std::string cmd = CMD_COMPRESS( filepath );
         auto proc = wxProcess::Open( cmd );
@@ -74,7 +73,7 @@ void FilehandleGUI::SaveFileFormat( const std::string& filepath, const char* pd,
         wxBusyCursor busyCursor;
         wxBusyInfo busyInfo( "Compressing files, please wait..." );
         while ( wxProcess::Exists( proc->GetPid() ) );
-        Filestream::Delete_File( "temp/out" );
+        Filestream::Delete_File( "out" );
     }
     else
     {

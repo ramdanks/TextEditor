@@ -98,7 +98,7 @@ wxString FontEncoding::GetEncodingString( const wxFontEncoding& enc )
 
 bool FontEncoding::ConvertEOLString( wxString& str, int mode )
 {
-    Util::Timer Tm( "Adjust EOL", MS, false );
+    PROFILE_FUNC();
 
     if ( str.empty() ) return true;
     int before = GetEOLMode( str );
@@ -135,7 +135,6 @@ bool FontEncoding::ConvertEOLString( wxString& str, int mode )
     }
     str += vLines.back();
 
-    LOG_ALL_FORMAT( LV_TRACE, "Adjust EOL time: %f (ms)", Tm.Toc() );
     return true;
 }
 

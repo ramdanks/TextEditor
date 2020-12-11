@@ -136,7 +136,7 @@ void AutoThread::RoutineAutoHighlight()
 		if ( hash( text ) != hashBefore )
 		{
 			hashBefore = hash( text );
-			if ( !DictionaryFrame::StartStyling( textPath ) ) continue;
+			if ( !DictionaryFrame::StartStyling( textPath, Config::GetDictionaryFlags() ) ) continue;
 			LOG_THREAD_FORMAT( LV_TRACE, "AutoThread Highlighting at page: %d", page );
 		}	
 	}	
