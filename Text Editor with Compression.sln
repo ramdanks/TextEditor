@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Compressor", "Text Editor w
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DesktopGUI", "DesktopGUI\DesktopGUI.vcxproj", "{02C017A8-BB5E-433A-A0D8-9E345239E9C2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tester", "Tester\Tester.vcxproj", "{173B518A-CC51-4798-B41D-FA4CB2A4C36A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,18 @@ Global
 		{02C017A8-BB5E-433A-A0D8-9E345239E9C2}.Release|x64.Build.0 = Release|x64
 		{02C017A8-BB5E-433A-A0D8-9E345239E9C2}.Release|x86.ActiveCfg = Release|Win32
 		{02C017A8-BB5E-433A-A0D8-9E345239E9C2}.Release|x86.Build.0 = Release|Win32
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Debug|x64.ActiveCfg = Debug|x64
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Debug|x64.Build.0 = Debug|x64
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Debug|x86.ActiveCfg = Debug|Win32
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Debug|x86.Build.0 = Debug|Win32
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Dist|x64.ActiveCfg = Debug|x64
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Dist|x64.Build.0 = Debug|x64
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Dist|x86.ActiveCfg = Debug|Win32
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Dist|x86.Build.0 = Debug|Win32
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Release|x64.ActiveCfg = Release|x64
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Release|x64.Build.0 = Release|x64
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Release|x86.ActiveCfg = Release|Win32
+		{173B518A-CC51-4798-B41D-FA4CB2A4C36A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <cmath>
 
+#define EMPTY_CPINFO { nullptr, 0 }
 constexpr uint8_t MaskTemplate[9] = { 0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF };
 
 uint8_t* HuffmanCodes::Compress( sCompressInfo info, bool force )
@@ -145,9 +146,9 @@ void HuffmanCodes::Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo
 	Merge_HuffmanCodes( &vBuffer[1], header, BufferCompressedData, OldValueTable );
 }
 
-uint8_t* HuffmanCodes::Decompress( const uint8_t* pCompressed )
+cpinfo HuffmanCodes::Decompress( const uint8_t* pCompressed )
 {
-	if ( pCompressed == nullptr ) return nullptr;
+	if ( !pCompressed ) return EMPTY_CPINFO;
 
 	uint8_t* pOriginal = nullptr;
 	sCompressHeader header = Header_Read( pCompressed );
@@ -156,16 +157,16 @@ uint8_t* HuffmanCodes::Decompress( const uint8_t* pCompressed )
 	Expand_HuffmanCodes( pCompressed, header, vBufferData, vBufferDecoder );
 
 	//allocate, original size is determined
-	pOriginal = (uint8_t*) malloc( vBufferData.size() * sizeof( uint8_t ) );
-	this->DecompressedSize = vBufferData.size();
+	size_t size = vBufferData.size() * sizeof uint8_t;
+	pOriginal = (uint8_t*) malloc( size );
 
 	//translation with decoder table
-	for ( size_t i = 0; i < vBufferData.size(); i++ )
+	for ( size_t i = 0; i < size; i++ )
 	{
 		auto val = vBufferData[i];
 		pOriginal[i] = vBufferDecoder[val-1];
 	}
-	return pOriginal;
+	return { pOriginal, size };
 }
 
 void HuffmanCodes::Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed )
@@ -184,17 +185,17 @@ void HuffmanCodes::Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8
 		vBuffer[i] = vBufferDecoder[vBufferData[i] - 1];
 }
 
-uint8_t* HuffmanCodes::Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize )
+cpinfo HuffmanCodes::Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize )
 {
 	sCompressHeader header = Header_Read( pCompressed );
 	if ( !needDecompression( header ) )
 	{
 		//pSize is size of an uncompressed format
 		//the actual size if (size-1) because we ignore HuffmanCodes header which cost 1 byte.
-		this->DecompressedSize = pSize - 1;
-		uint8_t* pOriginal = (uint8_t*) malloc( this->DecompressedSize );
-		memcpy( pOriginal, &pCompressed[1], this->DecompressedSize );
-		return pOriginal;
+		auto size = (pSize - 1) * sizeof uint8_t;
+		uint8_t* pOriginal = (uint8_t*) malloc( size );
+		memcpy( pOriginal, &pCompressed[1], size );
+		return { pOriginal, size };
 	}
 	return Decompress( pCompressed );
 }

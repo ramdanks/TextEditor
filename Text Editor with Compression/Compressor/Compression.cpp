@@ -1,12 +1,13 @@
 #include "Compression.h"
 #include <iostream>
+#include <future>
 #include "../../Utilities/Timer.h"
 #include "../../Utilities/Logging.h"
 
 #define ITERATION_SIZE 8096
 #define EXCEPTION_SIZE 8096
 
-std::unordered_map<uint32_t, std::future<uint32_t>> Compression::mFuture;
+using namespace std;
 
 std::vector<uint8_t> Compression::Compress_Merge( const sCompressInfo& info, bool mt )
 {
@@ -45,21 +46,23 @@ std::vector<uint8_t> Compression::Compress_Merge( const sCompressInfo& info, boo
 			uint32_t WorkSize = info.SizeSource / IterationSize;
 			if ( info.SizeSource % IterationSize != 0 ) WorkSize++;
 
+			unordered_map<uint32_t, future<uint32_t>> mFuture;
 			mFuture.reserve( WorkSize );
+
 			for ( uint32_t i = 0; i < WorkSize; i++ )
 			{
 				uint32_t ClusterSize = (i+1) * IterationSize;
 				if ( ClusterSize > info.SizeSource ) ClusterSize = info.SizeSource;
-				mFuture[ClusterSize] = std::async( std::launch::async, Find_Compression_Merge_Size, ClusterSize, info );
+				mFuture[ClusterSize] = async( launch::async, Find_Compression_Merge_Size, ClusterSize, info );
 			}
 
-			std::unordered_map<uint32_t, uint32_t> Map;
+			unordered_map<uint32_t, uint32_t> Map;
 			Map.reserve( WorkSize );
 			for ( auto& future : mFuture )
 				Map[future.first] = future.second.get();
 
 			typedef std::pair<const uint32_t, uint32_t> MyPair;
-			auto res = std::min_element( Map.begin(), Map.end(), []( MyPair& a, MyPair& b )
+			auto res = min_element( Map.begin(), Map.end(), []( MyPair& a, MyPair& b )
 			{
 				return a.second < b.second;
 			});
@@ -76,7 +79,7 @@ std::vector<uint8_t> Compression::Compress_Merge( const sCompressInfo& info, boo
 		uint8_t* pUncompressed = cp.Uncompressed( info );
 		std::vector<uint8_t> vUncompressedMerge( 1 + cp.Compressed_Size() );
 		vUncompressedMerge[0] = 0; //null addressing
-		memcpy( &vUncompressedMerge[1], pUncompressed, cp.Compressed_Size() );
+		memmove( &vUncompressedMerge[1], pUncompressed, cp.Compressed_Size() );
 		return vUncompressedMerge;
 	}
 
@@ -189,39 +192,39 @@ std::vector<uint8_t> Compression::Compress_Merge_Greedy( const sCompressInfo& in
 std::vector<uint8_t> Compression::Compress_Merge_Fix( uint32_t clusterSize, const sCompressInfo& info, bool mt )
 {
 	//multi-thread based on amount of cluster
-	uint32_t threadSize = std::ceil( (double) info.SizeSource / clusterSize );
-	std::vector<std::vector<uint8_t>> vBufferCompressed( threadSize );
+	uint32_t workSize = std::ceil( (double) info.SizeSource / clusterSize );
+	vector<vector<uint8_t>> vBufferCompressed( workSize );
 
 	sCompressInfo lastCluster;
-	lastCluster.pData = (uint8_t*) &info.pData[( threadSize - 1 ) * clusterSize];
+	lastCluster.pData = (uint8_t*) &info.pData[( workSize - 1 ) * clusterSize];
 	if ( clusterSize == info.SizeSource ) lastCluster.SizeSource = info.SizeSource;
 	else                                  lastCluster.SizeSource = info.SizeSource % clusterSize;
 
 	//single-thread workload if not enable mt or only 1 cluster
-	if ( !mt || threadSize == 1 )
+	if ( !mt || workSize == 1 )
 	{
-		for ( uint32_t i = 0; i < threadSize - 1; i++ )
+		for ( uint32_t i = 0; i < workSize - 1; i++ )
 		{
 			sCompressInfo ci;
 			ci.pData = (uint8_t*) &info.pData[i * clusterSize];
 			ci.SizeSource = clusterSize;
 			HuffmanCodes::Compress_Buffer( vBufferCompressed[i], ci, true );
 		}
-		HuffmanCodes::Compress_Buffer( vBufferCompressed[threadSize - 1], lastCluster, true );
+		HuffmanCodes::Compress_Buffer( vBufferCompressed[workSize - 1], lastCluster, true );
 	}
 	//multi-thread workload
 	else
 	{
 		std::vector<std::future<void>> vFutures;
-		vFutures.reserve( threadSize );
-		for ( uint32_t i = 0; i < threadSize - 1; i++ )
+		vFutures.reserve( workSize );
+		for ( uint32_t i = 0; i < workSize - 1; i++ )
 		{
 			sCompressInfo ci;
 			ci.pData = (uint8_t*) &info.pData[i * clusterSize];
 			ci.SizeSource = clusterSize;
-			vFutures.emplace_back( std::async( std::launch::async, HuffmanCodes::Compress_Buffer, std::ref( vBufferCompressed[i] ), ci, true ) );
+			vFutures.emplace_back( async( launch::async, HuffmanCodes::Compress_Buffer, std::ref( vBufferCompressed[i] ), ci, true ) );
 		}
-		vFutures.emplace_back( std::async( std::launch::async, HuffmanCodes::Compress_Buffer, std::ref( vBufferCompressed[threadSize - 1] ), lastCluster, true ) );
+		vFutures.emplace_back( async( launch::async, HuffmanCodes::Compress_Buffer, std::ref( vBufferCompressed[workSize - 1] ), lastCluster, true ) );
 	}
 
 	//find total cluster size
@@ -232,11 +235,11 @@ std::vector<uint8_t> Compression::Compress_Merge_Fix( uint32_t clusterSize, cons
 	//store cluster address if more than 1 cluster
 	uint32_t addressingSize = 0;
 	std::vector<uint32_t> addressList;
-	if ( threadSize > 1 )
+	if ( workSize > 1 )
 	{
-		addressList.reserve( threadSize + 1 ); //include null address pointer
+		addressList.reserve( workSize + 1 ); //include null address pointer
 		addressList.emplace_back( 1 ); //first address always be 1
-		for ( uint32_t i = 0; i < threadSize - 1; i++ )
+		for ( uint32_t i = 0; i < workSize - 1; i++ )
 		{
 			uint32_t nextAddress = addressList.back() + vBufferCompressed[i].size();
 			addressList.emplace_back( nextAddress );
@@ -252,8 +255,8 @@ std::vector<uint8_t> Compression::Compress_Merge_Fix( uint32_t clusterSize, cons
 	vCompressed.reserve( CombinedSize );
 	vCompressed.emplace_back( addressingSize ); //insert header
 
-	//threadSize also indicates the amount of cluster, only store store address if more than 1 cluster
-	if ( threadSize > 1 ) Store_Cluster_Address( addressList, addressingSize, vCompressed );
+	//workSize also indicates the amount of cluster, only store store address if more than 1 cluster
+	if ( workSize > 1 ) Store_Cluster_Address( addressList, addressingSize, vCompressed );
 
 	//save compressed format
 	for ( auto i : vBufferCompressed )
@@ -275,7 +278,7 @@ std::vector<uint8_t> Compression::Decompress_Merge( const std::vector<uint8_t>& 
 	}
 	else
 	{
-		std::vector<uint32_t> vAddress;
+		vector<uint32_t> vAddress;
 		vAddress = Retrieve_Cluster_Address( addressingSize, merged );
 
 		//skipping address block (including null address)
@@ -284,8 +287,9 @@ std::vector<uint8_t> Compression::Decompress_Merge( const std::vector<uint8_t>& 
 			vAddress[i] += offset;
 		vAddress.push_back( merged.size() ); //add null address pointer
 		
-		const uint32_t threadSize = vAddress.size() - 1; //skip null address pointer
-		std::vector<std::vector<uint8_t>> vDecompressedBuffer( threadSize );
+		const uint32_t workSize = vAddress.size() - 1; //skip null address pointer
+		vector<cpinfo> vDecomp;
+		vDecomp.reserve( workSize );
 
 		//single threaded
 		HuffmanCodes cp;
@@ -295,31 +299,37 @@ std::vector<uint8_t> Compression::Decompress_Merge( const std::vector<uint8_t>& 
 			//if the we are decompressing an Uncompressed format, this function can handle
 			//we should give the pointer size as a reference, to tell how large the originalsize of uncompressed format
 			for ( uint32_t i = 0; i < vAddress.size() - 1; i++ )
-				HuffmanCodes::Decompress_Reference_Buffer( vDecompressedBuffer[i], &merged[vAddress[i]], vAddress[i + 1] - vAddress[i] );
+				vDecomp.emplace_back( HuffmanCodes::Decompress_Reference( &merged[vAddress[i]], vAddress[i + 1] - vAddress[i] ) );
 		}
 		//multi threaded
 		else
 		{
-			std::vector<std::thread> pThread( threadSize );
+			vector<future<cpinfo>> futures;
+			futures.reserve( workSize );
 
-			for ( uint32_t i = 0; i < threadSize; i++ )
-				pThread[i] = std::thread( HuffmanCodes::Decompress_Reference_Buffer, std::ref( vDecompressedBuffer[i] ), &merged[vAddress[i]], vAddress[i + 1] - vAddress[i] );
-
-			for ( uint32_t i = 0; i < threadSize; i++ )
-				pThread[i].join();
+			for ( uint32_t i = 0; i < workSize; i++ )
+				futures.emplace_back( async( launch::async,
+									  HuffmanCodes::Decompress_Reference,
+									  &merged[vAddress[i]],
+									  vAddress[i + 1] - vAddress[i] ) );
+			
+			for ( auto& ft : futures )
+				vDecomp.emplace_back( ft.get() );
 		}
 
 		//calculate OriginalSize
-		uint32_t OriginalSize = 0;
-		for ( auto i : vDecompressedBuffer )
-			OriginalSize += i.size();
+		uint32_t originSize = 0;
+		for ( auto& i : vDecomp )
+			originSize += i.Size;
 
-		std::vector<uint8_t> vDecompressed;
-		vDecompressed.reserve( OriginalSize );
-
-		for ( auto i : vDecompressedBuffer )
-			for ( auto j : i )
-				vDecompressed.push_back( j );	
+		//move to vector
+		vector<uint8_t> vDecompressed( originSize );
+		size_t write = 0;
+		for ( auto& i : vDecomp )
+		{
+			memmove( &vDecompressed[write], i.pData, i.Size );
+			write += i.Size;
+		}
 
 		return vDecompressed;
 	}

@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <sys/stat.h>
+#include <time.h>
 
 class Filestream
 {
@@ -38,7 +38,7 @@ public:
 		return stat( filepath, &buffer ) == 0;
 	}
 
-	static bool Is_Exist( const std::string& filepath )
+	static bool Exist( const std::string& filepath )
 	{
 		struct stat buffer;
 		return stat( filepath.c_str(), &buffer ) == 0;
@@ -48,9 +48,7 @@ public:
 	{
 		auto myfile = std::fstream( filepath, std::ios::app );
 		if ( myfile )
-		{
 			myfile.write( string.c_str(), string.size() );
-		}
 		myfile.close();
 	}
 
@@ -72,10 +70,18 @@ public:
 		}
 	}
 
-	static std::vector<uint8_t> Read_Bin( const std::string& filepath )
+	static bool adjust_seperator(const char* fp)
+	{
+		for ( const char* i = fp; i != NULL; i++ )
+			if ( *i == '\\' && *( i + 1 ) != '\\' ) return false;
+			else if ( *i == '/' ) return true;
+		return true;
+	}
+
+	static std::vector<uint8_t> Read_Bin( const char* fp )
 	{
 		std::vector<uint8_t> buf;
-		auto myfile = std::fstream( filepath, std::ios::in | std::ios::binary );
+		auto myfile = std::fstream( fp, std::ios::in | std::ios::binary );
 		if ( myfile )
 		{
 			myfile.seekg( 0, myfile.end );
@@ -89,6 +95,11 @@ public:
 			myfile.close();
 		}
 		return buf;
+	}
+
+	static std::vector<uint8_t> Read_Bin( const std::string& filepath )
+	{
+		return Read_Bin( filepath.c_str() );
 	}
 
 	static std::string FileExtension( const std::string& s )
@@ -160,20 +171,24 @@ public:
 
 	static std::string GetLastModified( std::string filepath )
 	{
+		tm* time;
 		struct stat attrib;
 		stat( filepath.c_str(), &attrib );
-		struct tm* time = gmtime( &attrib.st_mtime );
-		char* asctime = std::asctime( time );
-		return std::string( asctime, strlen( asctime ) - 1 );
+		gmtime_s( time, &attrib.st_mtime );
+		char asctime[64];
+		asctime_s( asctime, sizeof asctime, time );
+		return std::string( asctime );
 	}
 
 	static std::string GetLastCreated( std::string filepath )
 	{
+		tm* time;
 		struct stat attrib;
 		stat( filepath.c_str(), &attrib );
-		struct tm* time = gmtime( &attrib.st_ctime );
-		char* asctime = std::asctime( time );
-		return std::string( asctime, strlen( asctime ) - 1 );
+		gmtime_s( time, &attrib.st_mtime );
+		char asctime[64];
+		asctime_s( asctime, sizeof asctime, time );
+		return std::string( asctime );
 	}
 
 	static size_t GetFileSize( std::string filepath )

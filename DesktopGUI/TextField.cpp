@@ -153,9 +153,49 @@ int TextField::GetActivePage()
     return mNotebook->GetSelection();
 }
 
+bool TextField::LoadFile( const std::string& filepath )
+{
+    if ( !Filestream::Exist( filepath ) ) return false;
+
+    auto vRead = FilehandleGUI::OpenFileFormat( filepath );
+    uint32_t readSizes = vRead.size();
+    auto text = wxString( &vRead[0], readSizes );
+    auto filename = Filestream::GetFileName( filepath );
+ 
+    IF_FIELD_UNOCCUPIED
+    {
+        Filestream::Delete_File( mPageData[0].FilePath );
+        mPageData[0].isChanged = false;
+        mPageData[0].isTemporary = false;
+        mPageData[0].FileName = filename;
+        mPageData[0].FilePath = filepath;
+        mPageData[0].Suggestion.clear();
+    }
+    else
+    {
+        mPageData.emplace_back( false, false, filename, filepath );
+    }
+    AddNewTab( mPageData.back() );
+
+    auto stc = mPageData.back().TextField;
+    stc->SetEOLMode( FontEncoding::GetEOLMode( text ) );
+    stc->SetText( text );
+
+    // update indicator
+    UpdateStatusEncoding( stc );
+    UpdateStatusEOL( stc );
+    UpdateStatusPos( stc );
+    UpdateParentName();
+    UpdateSaveIndicator( true );
+    UpdateMenuWindow();
+
+    LOG_ALL_FORMAT( LV_TRACE, "File opened, size: %u (bytes)", readSizes );
+    return true;
+}
+
 void TextField::OnDropFiles( wxDropFilesEvent& event )
 {
-    Util::Timer tm( "Drop Files", MS, false );
+    TIMER_ONLY( tm, MS, false );
 
     wxBusyCursor busyCursor;
     wxWindowDisabler disabler;
@@ -165,25 +205,13 @@ void TextField::OnDropFiles( wxDropFilesEvent& event )
     auto files = FilehandleGUI::GetDroppedFiles( event.GetFiles(), event.GetNumberOfFiles() );
     if ( files.size() == 0 ) return;
 
-    uint64_t readSizes = 0;
     for ( int i = 0; i < files.size(); i++ )
     {
-        if ( AlreadyOpened( std::string( files[i] ), true ) ) continue;
-
         auto filepath = std::string( files[i] );
-        auto vRead = FilehandleGUI::OpenFileFormat( filepath );
-        auto text = wxString( &vRead[0], vRead.size() );
-        readSizes += vRead.size();
-
-        auto filename = Filestream::GetFileName( filepath );
-        mPageData.emplace_back( false, false, std::move(filename), std::move(filepath) );
-        AddNewTab( mPageData.back() );
-        mPageData.back().TextField->SetEOLMode( FontEncoding::GetEOLMode( text ) );
-        mPageData.back().TextField->SetText( text );
-        UpdateSaveIndicator( true );
+        if ( !AlreadyOpened( filepath, true ) ) LoadFile( filepath );
     }
 
-    LOG_ALL_FORMAT( LV_TRACE, "Drag n Drop Items: %d, Size: %d, Time: %f (ms)", files.size(), readSizes, tm.toc() );
+    LOG_ALL_FORMAT( LV_TRACE, "Drag n Drop Items: %d, Time: %f (ms)", files.size(), tm.toc() );
 }
 
 void TextField::UpdateMenuWindow()
@@ -549,7 +577,7 @@ void TextField::OnRenameFile( wxCommandEvent& event )
         std::string newName = std::string( RenameDlg.GetValue().mb_str() );
         std::string newPath = mPageData[sel].FilePath.substr( 0, pathSize ) + newName;
 
-        if ( Filestream::Is_Exist( newPath ) )
+        if ( Filestream::Exist( newPath ) )
         {
             auto prompt = wxMessageDialog( mParent, "File with that name already exist!\n"
                                            "Are you sure want to overwrite?", "Overwrite", wxYES_NO );
@@ -572,54 +600,7 @@ void TextField::OnOpenFile( wxCommandEvent& event )
 {
     std::string filepath = FilehandleGUI::OpenDialog( mParent, "" );
     if ( filepath.empty() ) return;
-    
-    try
-    {
-        Util::Timer tm( "Open File", ADJUST, false );
-        
-        if ( AlreadyOpened( filepath, true ) ) return;
-        auto filename = Filestream::GetFileName( filepath );
-
-        auto vRead = FilehandleGUI::OpenFileFormat( filepath );
-        LOG_ALL( LV_TRACE, "Opened Filepath: " + filepath );
-        
-        wxString text;
-        if( !vRead.empty() ) text = wxString::FromUTF8( (char*) &vRead[0], vRead.size() );
-
-        IF_FIELD_UNOCCUPIED
-        {
-            Filestream::Delete_File( mPageData[0].FilePath );
-            mPageData[0].isChanged = false;
-            mPageData[0].isTemporary = false;
-            mPageData[0].FileName = std::move(filename);
-            mPageData[0].FilePath = filepath;
-            mPageData[0].Suggestion.clear();
-        }
-        else
-        {
-            mPageData.emplace_back( false, false, std::move(filename), std::move(filepath) );
-        }
-        AddNewTab( mPageData.back() );
-
-        auto stc = mPageData.back().TextField;
-        stc->SetEOLMode( FontEncoding::GetEOLMode( text ) );
-        stc->SetText( text );
-
-        // update indicator
-        UpdateStatusEncoding( stc );
-        UpdateStatusEOL( stc );
-        UpdateStatusPos( stc );
-        UpdateParentName();
-        UpdateSaveIndicator( true );
-        UpdateMenuWindow();
-
-        LOG_ALL_FORMAT( LV_TRACE, "Document size: %llu (chars)", vRead.size() );
-        LOG_ALL( LV_TRACE, tm.Toc_String() );
-    }
-    catch ( Util::Err& e )
-    {
-        LOG_ALL( LV_ERROR, e.Seek() );
-    }
+    if ( !AlreadyOpened( filepath, true ) ) LoadFile( filepath );
 }
 
 void TextField::OnPageClose( wxCommandEvent& evt )

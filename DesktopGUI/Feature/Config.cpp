@@ -18,7 +18,7 @@ void Config::FetchData()
 	PROFILE_FUNC();
 
 	Filestream::Create_Directories( "temp" );
-	if ( !Filestream::Is_Exist( CONFIG_FILEPATH ) )
+	if ( !Filestream::Exist( CONFIG_FILEPATH ) )
 	{
 		LoadDefaultConfig();
 		Config::SaveConfig();
@@ -134,7 +134,7 @@ void Config::SaveConfig()
 		ConfigText.pop_back();
 	
 		Filestream::Write_Bin( ConfigText.c_str(), ConfigText.size(), CONFIG_FILEPATH );
-		THROW_ERR_IFNOT( Filestream::Is_Exist( CONFIG_FILEPATH ), "Cannot save configuration file!" );
+		THROW_ERR_IFNOT( Filestream::Exist( CONFIG_FILEPATH ), "Cannot save configuration file!" );
 	}
 	catch ( Util::Err& e )
 	{

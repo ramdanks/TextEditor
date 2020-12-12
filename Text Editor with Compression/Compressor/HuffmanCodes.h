@@ -11,6 +11,12 @@ struct sCompressInfo
 	uint32_t SizeSource;
 };
 
+struct cpinfo
+{
+	uint8_t* pData;
+	size_t Size;
+};
+
 struct sCompressHeader
 {
 	uint8_t DataLength : 4;
@@ -30,11 +36,11 @@ public:
 	//function will leave vBuffer empty if fail to reduce size. force=true will compress it anyway
 	static void Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo info, bool force = false );
 	//this function expect param contain compressed format
-	uint8_t* Decompress( const uint8_t* pCompressed );
+	static cpinfo Decompress( const uint8_t* pCompressed );
 	//this function expect param contain compressed format
 	static void Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed );
 	//this function will accept uncompressed format, please give the correct pointer size
-	uint8_t* Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize );
+	static cpinfo Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize );
 	//this function will accept uncompressed format, please give the correct pointer size
 	static void Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed, uint32_t pSize );
 

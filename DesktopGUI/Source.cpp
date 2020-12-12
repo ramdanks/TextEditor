@@ -4,6 +4,7 @@
 #include "Feature/Language.h"
 #include "Feature/Image.h"
 #include "Frame/AppFrame.h"
+#include "TextField.h"
 
 class MyApp : public wxApp
 {
@@ -16,6 +17,7 @@ private:
     void ShowSplashScreen();
     void HideSplashScreen();
     void DestroySplashScreen();
+    bool CatchArgs();
 
     AppFrame* mMainFrame;
     wxSplashScreen* mSplash;
@@ -51,6 +53,11 @@ bool MyApp::OnInit()
         mMainFrame = new AppFrame( wxPoint( 200, 200 ), wxSize( 800, 600 ) );
         THROW_ERR_IFNULLPTR( mMainFrame, "Problem creating Application Frame OnInit wxApp!" );
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
+
+        //catch expect argument to text file
+        if ( CatchArgs() ) {
+            LOG_ALL( LV_INFO, "Argument catched!" );
+        }
 
         //finally
         if ( Config::mGeneral.UseSplash ) DestroySplashScreen();
@@ -106,4 +113,28 @@ void MyApp::HideSplashScreen()
 void MyApp::DestroySplashScreen()
 {
     mSplash->Destroy();
+}
+
+bool MyApp::CatchArgs()
+{
+    if ( wxGetApp().argc == 1 ) return false;
+    try
+    {
+        bool ok;
+        std::string fpath;
+
+        if ( wxIsAbsolutePath( wxGetApp().argv[1] ) )
+            fpath = std::string( wxGetApp().argv[1] );
+        else                                         
+            fpath = std::string( wxGetCwd() ) + '\\' + wxGetApp().argv[1];
+
+        ok = TextField::LoadFile( fpath );
+        THROW_ERR_IFNOT( ok, "TextField cannot load file:" + fpath );
+    }
+    catch ( Util::Err& e )
+    {
+        LOG_ALL( LV_ERROR, e.Seek() );
+        return false;
+    }
+    return true;
 }

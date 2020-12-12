@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "Timer.h"
 #include <iostream>
 #include <direct.h>

@@ -33,6 +33,7 @@ public:
 	static int GetActivePage();
 
 	// feature
+	static bool LoadFile( const std::string& filepath );
 	static void OnDropFiles( wxDropFilesEvent& event );
 
 	// internal changes

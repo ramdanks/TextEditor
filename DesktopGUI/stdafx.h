@@ -25,6 +25,7 @@
 #include <wx/snglinst.h>
 #include <wx/statbox.h>
 #include <wx/stattext.h>
+#include <wx/stdpaths.h>
 #include <wx/socket.h>
 #include <wx/slider.h>
 #include <wx/spinctrl.h>

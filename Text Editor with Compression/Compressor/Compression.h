@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <future>
 #include "HuffmanCodes.h"
 #define COMPRESSION_REVISION "0.2a"
 
@@ -37,6 +36,4 @@ private:
 	static void Store_Cluster_Address( const std::vector<uint32_t>& vList, uint8_t addressing, std::vector<uint8_t>& vBuffer );
 	//this function except null address pointer, and will return the vector without the null value
 	static std::vector<uint32_t> Retrieve_Cluster_Address( uint8_t addressing, const std::vector<uint8_t>& vBuffer );
-
-	static std::unordered_map<uint32_t, std::future<uint32_t>> mFuture;
 };
