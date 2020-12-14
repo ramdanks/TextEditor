@@ -47,8 +47,7 @@ public:
 	static void Append_Text( const std::string& string, const std::string& filepath )
 	{
 		auto myfile = std::fstream( filepath, std::ios::app );
-		if ( myfile )
-			myfile.write( string.c_str(), string.size() );
+		if ( myfile ) myfile.write( string.c_str(), string.size() );
 		myfile.close();
 	}
 
@@ -169,9 +168,9 @@ public:
 		return "";
 	}
 
-	static std::string GetLastModified( std::string filepath )
+	static std::string GetLastModified( const std::string& filepath )
 	{
-		tm* time;
+		tm* time = new tm;
 		struct stat attrib;
 		stat( filepath.c_str(), &attrib );
 		gmtime_s( time, &attrib.st_mtime );
@@ -180,9 +179,9 @@ public:
 		return std::string( asctime );
 	}
 
-	static std::string GetLastCreated( std::string filepath )
+	static std::string GetLastCreated( const std::string& filepath )
 	{
-		tm* time;
+		tm* time = new tm;
 		struct stat attrib;
 		stat( filepath.c_str(), &attrib );
 		gmtime_s( time, &attrib.st_mtime );

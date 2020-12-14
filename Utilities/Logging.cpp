@@ -11,7 +11,7 @@ std::string Util::Logging::Log_String( severity level, std::string&& str )
 {
 	static char buffer[100];
 	std::string combined;
-	if ( this->mFormat.empty() ) combined = std::move( str );
+	if ( mFormat.empty() ) combined = std::move( str );
 	else
 	{
 		for ( auto format : this->mFormat )

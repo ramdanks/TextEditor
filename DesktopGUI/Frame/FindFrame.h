@@ -14,7 +14,6 @@ class FindFrame
 	static char buf[256];
 public:
 	static void Init( wxWindow* parent );
-	static void UpdateInfo( wxStyledTextCtrl* tf, wxString filepath = "" );
 	static void ShowAndFocus( bool find = true );
 
 private:
@@ -25,17 +24,20 @@ private:
 	static void OnReplace( wxCommandEvent& event );
 	static void OnReplaceAll( wxCommandEvent& event );
 	
-	static void IFind( bool reverse );
+	static int IFind( bool reverse, const wxString& text );
 
 	static void CreateFindPage();
 	static void CreateReplacePage();
 	static void OnPageChanged( wxBookCtrlEvent& event );
 	static void OnCloseWindow( wxCloseEvent& event );
 	static void OnClose( wxCommandEvent& event );
+
+	static bool IsMatchWhole();
+	static bool IsMatchCase();
+	static bool IsWrapAround();
 	static int GetFlags();
 
 	static wxFrame* mFrame;
-	static wxStyledTextCtrl* mTextField;
 
 	static wxNotebook* mNotebook;
 	static wxTextCtrl* mEntryReplace;

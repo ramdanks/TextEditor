@@ -35,13 +35,13 @@ void StyleFrame::OnOK( wxCommandEvent& event )
 	wxBusyInfo busyInfo( "Applying new Style" );
 
 	Config::SetFont( mSP.FontPicker->GetSelectedFont() );
-	Config::mStyle.TextBack    = mSP.TextBack->GetColour().GetRGB();
-	Config::mStyle.TextFore    = mSP.TextFore->GetColour().GetRGB();
-	Config::mStyle.Caret       = mSP.Caret->GetColour().GetRGB();
-	Config::mStyle.LineBack    = mSP.LineBack->GetColour().GetRGB();
-	Config::mStyle.Selection   = mSP.Selection->GetColour().GetRGB();
-	Config::mStyle.LinenumBack = mSP.LinenumBack->GetColour().GetRGB();
-	Config::mStyle.LinenumFore = mSP.LinenumFore->GetColour().GetRGB();
+	Config::sStyle.TextBack    = mSP.TextBack->GetColour().GetRGB();
+	Config::sStyle.TextFore    = mSP.TextFore->GetColour().GetRGB();
+	Config::sStyle.Caret       = mSP.Caret->GetColour().GetRGB();
+	Config::sStyle.LineBack    = mSP.LineBack->GetColour().GetRGB();
+	Config::sStyle.Selection   = mSP.Selection->GetColour().GetRGB();
+	Config::sStyle.LinenumBack = mSP.LinenumBack->GetColour().GetRGB();
+	Config::sStyle.LinenumFore = mSP.LinenumFore->GetColour().GetRGB();
 
 	for ( auto& page : TextField::mPageData )
 	{
@@ -100,13 +100,13 @@ void StyleFrame::UpdatePreview()
 
 void StyleFrame::AdjustColourPicker()
 {
-	mSP.TextBack->SetColour   ( wxColour( Config::mStyle.TextBack    ) );
-	mSP.TextFore->SetColour   ( wxColour( Config::mStyle.TextFore    ) );
-	mSP.Caret->SetColour      ( wxColour( Config::mStyle.Caret       ) );
-	mSP.LineBack->SetColour   ( wxColour( Config::mStyle.LineBack    ) );
-	mSP.Selection->SetColour  ( wxColour( Config::mStyle.Selection   ) );
-	mSP.LinenumBack->SetColour( wxColour( Config::mStyle.LinenumBack ) );
-	mSP.LinenumFore->SetColour( wxColour( Config::mStyle.LinenumFore ) );
+	mSP.TextBack->SetColour   ( wxColour( Config::sStyle.TextBack    ) );
+	mSP.TextFore->SetColour   ( wxColour( Config::sStyle.TextFore    ) );
+	mSP.Caret->SetColour      ( wxColour( Config::sStyle.Caret       ) );
+	mSP.LineBack->SetColour   ( wxColour( Config::sStyle.LineBack    ) );
+	mSP.Selection->SetColour  ( wxColour( Config::sStyle.Selection   ) );
+	mSP.LinenumBack->SetColour( wxColour( Config::sStyle.LinenumBack ) );
+	mSP.LinenumFore->SetColour( wxColour( Config::sStyle.LinenumFore ) );
 }
 
 void StyleFrame::CreateContent()

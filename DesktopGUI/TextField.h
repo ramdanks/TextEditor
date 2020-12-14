@@ -31,6 +31,7 @@ public:
 	static bool ExistChangedFile();
 	static bool SaveToExit();
 	static int GetActivePage();
+	static wxStyledTextCtrl* GetSTC( int page );
 
 	// feature
 	static bool LoadFile( const std::string& filepath );

@@ -29,14 +29,14 @@ private:
 	static std::vector<wxString> mMessage;
 };
 
-#define LANG_ENGLISH_FILEPATH      "resource/lang/english.txt"
-#define LANG_BAHASA_FILEPATH       "resource/lang/bahasa.txt"
-#define LANG_SPANISH_FILEPATH      "resource/lang/spanish.txt"
-#define LANG_PORTUGUESE_FILEPATH   "resource/lang/portuguese.txt"
-#define LANG_GERMAN_FILEPATH       "resource/lang/german.txt"
-#define LANG_ITALIAN_FILEPATH      "resource/lang/italian.txt"
-#define LANG_FRENCH_FILEPATH       "resource/lang/french.txt"
-#define LANG_DUTCH_FILEPATH        "resource/lang/dutch.txt"
+#define LANG_ENGLISH_FILEPATH      "\\resource\\lang\\english.txt"
+#define LANG_BAHASA_FILEPATH       "\\resource\\lang\\bahasa.txt"
+#define LANG_SPANISH_FILEPATH      "\\resource\\lang\\spanish.txt"
+#define LANG_PORTUGUESE_FILEPATH   "\\resource\\lang\\portuguese.txt"
+#define LANG_GERMAN_FILEPATH       "\\resource\\lang\\german.txt"
+#define LANG_ITALIAN_FILEPATH      "\\resource\\lang\\italian.txt"
+#define LANG_FRENCH_FILEPATH       "\\resource\\lang\\french.txt"
+#define LANG_DUTCH_FILEPATH        "\\resource\\lang\\dutch.txt"
 
 #define EMPTY_IDENTIFIER        "<NULL>"
 #define MSG_LANG                Language::GetMessage(0)

@@ -1,5 +1,6 @@
 #include "Language.h"
 #include "LogGUI.h"
+#include "Config.h"
 
 //translation unit for static member
 std::vector<wxString> Language::mMessage;
@@ -84,14 +85,14 @@ bool Language::LoadMessage( LanguageID id )
     try
     {
         std::vector<uint8_t> vRead;
-        if      ( id == ENGLISH )      vRead = Filestream::Read_Bin( LANG_ENGLISH_FILEPATH );
-        else if ( id == BAHASA )       vRead = Filestream::Read_Bin( LANG_BAHASA_FILEPATH );
-        else if ( id == SPANISH )      vRead = Filestream::Read_Bin( LANG_SPANISH_FILEPATH );
-        else if ( id == PORTUGUESE )   vRead = Filestream::Read_Bin( LANG_PORTUGUESE_FILEPATH );
-        else if ( id == GERMAN )       vRead = Filestream::Read_Bin( LANG_GERMAN_FILEPATH );
-        else if ( id == ITALIAN )      vRead = Filestream::Read_Bin( LANG_ITALIAN_FILEPATH );
-        else if ( id == FRENCH )       vRead = Filestream::Read_Bin( LANG_FRENCH_FILEPATH );
-        else if ( id == DUTCH )        vRead = Filestream::Read_Bin( LANG_DUTCH_FILEPATH );
+        if      ( id == ENGLISH )      vRead = Filestream::Read_Bin( Config::sAppPath + LANG_ENGLISH_FILEPATH );
+        else if ( id == BAHASA )       vRead = Filestream::Read_Bin( Config::sAppPath + LANG_BAHASA_FILEPATH );
+        else if ( id == SPANISH )      vRead = Filestream::Read_Bin( Config::sAppPath + LANG_SPANISH_FILEPATH );
+        else if ( id == PORTUGUESE )   vRead = Filestream::Read_Bin( Config::sAppPath + LANG_PORTUGUESE_FILEPATH );
+        else if ( id == GERMAN )       vRead = Filestream::Read_Bin( Config::sAppPath + LANG_GERMAN_FILEPATH );
+        else if ( id == ITALIAN )      vRead = Filestream::Read_Bin( Config::sAppPath + LANG_ITALIAN_FILEPATH );
+        else if ( id == FRENCH )       vRead = Filestream::Read_Bin( Config::sAppPath + LANG_FRENCH_FILEPATH );
+        else if ( id == DUTCH )        vRead = Filestream::Read_Bin( Config::sAppPath + LANG_DUTCH_FILEPATH );
         
         // load file
         THROW_ERR_IFEMPTY( vRead, "Problem loading a language file from LoadMessage()!" );

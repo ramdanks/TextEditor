@@ -1,2 +1,0 @@
-Language use LF Formatting (Unix) which use \n for newline
-Normal text created in windows use CRLF Formatting (DOS) which use \r\n for newline

@@ -61,9 +61,9 @@ void TextField::MarginAutoAdjust()
 void TextField::FetchTempFile()
 {
     uint32_t amount = 0;
-    if ( Config::mTemp.UseTemp )
+    if ( Config::sTemp.UseTemp )
     {
-        auto vTempFile = Filestream::File_List( Config::mTemp.Directory );
+        auto vTempFile = Filestream::File_List( Config::sTemp.Directory );
         amount = vTempFile.size();
         if ( amount == 0 ) OnNewFile( NullCmdEvent );
         else
@@ -138,7 +138,7 @@ bool TextField::SaveToExit()
     for ( size_t i = 0; i < mPageData.size(); i++  )
     {
         if ( !mPageData[i].isTemporary && mPageData[i].isChanged
-             || ( mPageData[i].isTemporary && !Config::mTemp.UseTemp ) )
+             || ( mPageData[i].isTemporary && !Config::sTemp.UseTemp ) )
         {
             mNotebook->SetSelection( i );
             return false;
@@ -151,6 +151,12 @@ int TextField::GetActivePage()
 {
     if ( mNotebook == nullptr ) return -1;
     return mNotebook->GetSelection();
+}
+
+wxStyledTextCtrl* TextField::GetSTC( int page )
+{
+    if ( page == wxNOT_FOUND ) return nullptr;
+    return mPageData[page].TextField;
 }
 
 bool TextField::LoadFile( const std::string& filepath )
@@ -372,7 +378,7 @@ void TextField::OnUpdateUI( wxStyledTextEvent& event )
 void TextField::OnTextChanged( wxStyledTextEvent& event )
 {
     PROFILE_FUNC();
-    if ( Config::mAutocomp.Use ) ShowAutoComp();
+    if ( Config::sAutocomp.Use ) ShowAutoComp();
     UpdateSaveIndicator( false );
     MarginAutoAdjust();
 }
@@ -435,17 +441,17 @@ void TextField::OnTextSummary( wxCommandEvent& event )
     message += mNotebook->GetPageText( sel );
     message += "\nTemporary: ";
     message += pd.isTemporary ? "Yes" : "No";
+    message += "\nCharacters: ";
+    message += wxString::Format( wxT( "%d" ), pd.TextField->GetTextLength() );
+    message += "\nLines: ";
+    message += wxString::Format( wxT( "%d" ), pd.TextField->GetLineCount() );
     message += "\nEOL Mode: ";
     message += FontEncoding::EOLModeString( pd.TextField->GetEOLMode() );
-    message += "\nCharacters: ";
-    message += TO_STR( pd.TextField->GetTextLength() );
-    message += "\nLines: ";
-    message += TO_STR( pd.TextField->GetLineCount() );
     message += "\nLast Created: ";
     message += Filestream::GetLastCreated( pd.FilePath );
-    message += "\nLast Modified: ";
+    message += "Last Modified: ";
     message += Filestream::GetLastModified( pd.FilePath );
-    message += "\nFilepath: ";
+    message += "Filepath: ";
     message += pd.FilePath;
 
     auto SumDialog = wxMessageDialog( mParent, message, "Text Summary", wxOK | wxSTAY_ON_TOP );
@@ -535,14 +541,14 @@ void TextField::OnNewFile( wxCommandEvent& event )
 {
     PROFILE_FUNC();
 
-    if ( Config::mTemp.UseTemp )
+    if ( Config::sTemp.UseTemp )
     {
         char filepath[1024];
         char filename[32];
         for ( uint32_t counter = 1; ; counter++ )
         {
             snprintf( filename, sizeof filename, "new%d.tmp", counter );
-            snprintf( filepath, sizeof filepath, "%s\\%s", Config::mTemp.Directory.c_str(), filename );
+            snprintf( filepath, sizeof filepath, "%s\\%s", Config::sTemp.Directory.c_str(), filename );
             if ( !Filestream::Exist( filepath ) ) break;
         }
         CreateTempFile( filepath );
@@ -627,9 +633,9 @@ void TextField::OnPageClose( wxCommandEvent& evt )
 
          if ( mNotebook->GetPageCount() == 1 )
          {
-             if ( Config::mTemp.UseTemp )
+             if ( Config::sTemp.UseTemp )
              {
-                 std::string tempPath = Config::mTemp.Directory + "\\new1.tmp";
+                 std::string tempPath = Config::sTemp.Directory + "\\new1.tmp";
                  CreateTempFile( tempPath );
                  mPageData[0].FileName = "new1.tmp";
                  mPageData[0].FilePath = std::move( tempPath );
@@ -674,10 +680,10 @@ void TextField::OnPageCloseAll( wxCommandEvent& event )
             }
             mPageData.clear();
             mNotebook->DeleteAllPages();
-            if ( Config::mTemp.UseTemp )
+            if ( Config::sTemp.UseTemp )
             {
                 CreateTempFile( "new1.tmp" );
-                auto filepath = Config::mTemp.Directory + "\\new1.tmp";
+                auto filepath = Config::sTemp.Directory + "\\new1.tmp";
                 mPageData.emplace_back( false, true, "new1.tmp", std::move(filepath) );
             }
             else mPageData.emplace_back( false, true, "new", "" );
@@ -840,7 +846,7 @@ void TextField::OnZoomOut( wxCommandEvent& event )
 void TextField::OnZoomRestore( wxCommandEvent& event )
 {
     auto sel = mNotebook->GetSelection();
-    mPageData[sel].TextField->SetZoom( Config::mGeneral.ZoomDefault );
+    mPageData[sel].TextField->SetZoom( Config::sGeneral.ZoomDefault );
 }
 
 void TextField::OnFind( wxCommandEvent& event )
@@ -851,7 +857,6 @@ void TextField::OnFind( wxCommandEvent& event )
         isFindInit = true;
     }
     auto sel = mNotebook->GetSelection();
-    FindFrame::UpdateInfo( mPageData[sel].TextField, wxString::FromUTF8( mPageData[sel].FilePath ) );
     FindFrame::ShowAndFocus( true );
 }
 
@@ -863,7 +868,6 @@ void TextField::OnReplace( wxCommandEvent& event )
         isFindInit = true;
     }
     auto sel = mNotebook->GetSelection();
-    FindFrame::UpdateInfo( mPageData[sel].TextField, wxString::FromUTF8( mPageData[sel].FilePath ) );
     FindFrame::ShowAndFocus( false );
 }
 
@@ -902,7 +906,7 @@ void TextField::AddNewTab( sPageData& pd )
     }
     else mNotebook->SetPageText( mNotebook->GetSelection(), pd.FileName );
 
-    pd.TextField->SetZoom( Config::mGeneral.ZoomDefault );
+    pd.TextField->SetZoom( Config::sGeneral.ZoomDefault );
     pd.TextField->SetScrollWidth( 1 ); //avoid large horizontal scroll width by default
 
     LoadStyle( pd.TextField );
@@ -926,13 +930,13 @@ void TextField::AddNewTab( sPageData& pd )
 
     try
     {
-        if ( Config::mDictionary.UseGlobal )
+        if ( Config::sDictionary.UseGlobal )
         {
-            if ( Config::mDictionary.ApplyOn == DICT_ALL_DOCS
-                 || ( pd.isTemporary && Config::mDictionary.ApplyOn == DICT_TMP_DOCS )
-                 || ( !pd.isTemporary && Config::mDictionary.ApplyOn == DICT_OPN_DOCS ) )
+            if ( Config::sDictionary.ApplyOn == DICT_ALL_DOCS
+                 || ( pd.isTemporary && Config::sDictionary.ApplyOn == DICT_TMP_DOCS )
+                 || ( !pd.isTemporary && Config::sDictionary.ApplyOn == DICT_OPN_DOCS ) )
             {
-                DictionaryFrame::LoadFromDir( pd.FilePath, Config::mDictionary.Directory );
+                DictionaryFrame::LoadFromDir( pd.FilePath, Config::sDictionary.Directory );
                 DictionaryFrame::ResetStyling( pd.FilePath );
                 DictionaryFrame::CreateSuggestion( pd.FilePath );
             }
@@ -948,16 +952,16 @@ void TextField::LoadStyle( wxStyledTextCtrl* stc )
 {
     PROFILE_FUNC();
     stc->StyleSetFont( wxSTC_STYLE_DEFAULT, Config::BuildFont() );
-    stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, wxColour( Config::mStyle.TextFore ) ); //foreground such as text
-    stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( Config::mStyle.TextBack ) ); //background for field
+    stc->StyleSetForeground( wxSTC_STYLE_DEFAULT, wxColour( Config::sStyle.TextFore ) ); //foreground such as text
+    stc->StyleSetBackground( wxSTC_STYLE_DEFAULT, wxColour( Config::sStyle.TextBack ) ); //background for field
     stc->StyleClearAll();
     stc->SetCaretLineVisible( true ); //set caret line background visible
-    stc->SetCaretLineBackground( wxColour( Config::mStyle.LineBack ) ); //caret line background
-    stc->SetCaretForeground( wxColour( Config::mStyle.Caret ) ); //caret colour
-    stc->SetSelBackground( true, wxColour( Config::mStyle.Selection ) ); //background of selected text
+    stc->SetCaretLineBackground( wxColour( Config::sStyle.LineBack ) ); //caret line background
+    stc->SetCaretForeground( wxColour( Config::sStyle.Caret ) ); //caret colour
+    stc->SetSelBackground( true, wxColour( Config::sStyle.Selection ) ); //background of selected text
     stc->SetMarginType( 0, wxSTC_MARGIN_NUMBER );
-    stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mStyle.LinenumBack ) ); //linenumber back color
-    stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER, wxColour( Config::mStyle.LinenumFore ) ); //linenumber fore color
+    stc->StyleSetBackground( wxSTC_STYLE_LINENUMBER, wxColour( Config::sStyle.LinenumBack ) ); //linenumber back color
+    stc->StyleSetForeground( wxSTC_STYLE_LINENUMBER, wxColour( Config::sStyle.LinenumFore ) ); //linenumber fore color
     //stc->StyleSetSpec( wxSTC_STYLE_LINENUMBER, "fore:#dd96cc,back:#3c3c3c" ); //linenumber color with one func
 }
 

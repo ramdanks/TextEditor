@@ -36,56 +36,61 @@ void PreferencesFrame::Update()
 
 	wxCommandEvent evt = wxEVT_NULL;
 
-	mGP.CB_SB->SetValue( Config::mGeneral.UseStatbar );
-	mGP.CB_DD->SetValue( Config::mGeneral.UseDragDrop );
-	mGP.CB_SS->SetValue( Config::mGeneral.UseSplash );
-	mGP.LocalizationCB->SetSelection( Config::mGeneral.LanguageID );
+	mGP.CB_SB->SetValue( Config::sGeneral.UseStatbar );
+	mGP.CB_DD->SetValue( Config::sGeneral.UseDragDrop );
+	mGP.CB_SS->SetValue( Config::sGeneral.UseSplash );
+	mGP.LocalizationCB->SetSelection( Config::sGeneral.LanguageID );
 
 	// notebook setting
-	mGP.CB_NB_Hide->SetValue  ( Config::mNotebook.Hide         );
-	mGP.RB_NB_Top->SetValue   ( Config::mNotebook.Orientation  );
-	mGP.RB_NB_Bot->SetValue   ( !Config::mNotebook.Orientation );
-	mGP.CB_NB_Fixed->SetValue ( Config::mNotebook.FixedWidth   );
-	mGP.CB_NB_Lock->SetValue  ( Config::mNotebook.LockMove     );
-	mGP.CB_NB_Middle->SetValue( Config::mNotebook.MiddleClose  );
-	mGP.CB_NB_Close->SetValue ( Config::mNotebook.ShowCloseBtn );
-	mGP.RB_NB_OnAll->SetValue ( Config::mNotebook.CloseBtnOn   );
-	mGP.RB_NB_OnAct->SetValue ( !Config::mNotebook.CloseBtnOn  );
+	mGP.CB_NB_Hide->SetValue  ( Config::sNotebook.Hide         );
+	mGP.RB_NB_Top->SetValue   ( Config::sNotebook.Orientation  );
+	mGP.RB_NB_Bot->SetValue   ( !Config::sNotebook.Orientation );
+	mGP.CB_NB_Fixed->SetValue ( Config::sNotebook.FixedWidth   );
+	mGP.CB_NB_Lock->SetValue  ( Config::sNotebook.LockMove     );
+	mGP.CB_NB_Middle->SetValue( Config::sNotebook.MiddleClose  );
+	mGP.CB_NB_Close->SetValue ( Config::sNotebook.ShowCloseBtn );
+	mGP.RB_NB_OnAll->SetValue ( Config::sNotebook.CloseBtnOn   );
+	mGP.RB_NB_OnAct->SetValue ( !Config::sNotebook.CloseBtnOn  );
 	OnCheckHide( evt );
 	OnCheckShowClose( evt );
 
 	// dictionary
-	mDP.Disable->SetValue( !Config::mDictionary.UseGlobal );
-	mDP.OnAll->SetValue( Config::mDictionary.ApplyOn == DICT_ALL_DOCS );
-	mDP.OnTemp->SetValue( Config::mDictionary.ApplyOn == DICT_TMP_DOCS );
-	mDP.OnOpen->SetValue( Config::mDictionary.ApplyOn == DICT_OPN_DOCS );
-	mDP.DirPick->SetPath( Config::mDictionary.Directory );
+	mDP.Disable->SetValue( !Config::sDictionary.UseGlobal );
+	mDP.OnAll->SetValue  ( Config::sDictionary.ApplyOn == DICT_ALL_DOCS );
+	mDP.OnTemp->SetValue ( Config::sDictionary.ApplyOn == DICT_TMP_DOCS );
+	mDP.OnOpen->SetValue ( Config::sDictionary.ApplyOn == DICT_OPN_DOCS );
+	mDP.DirPick->SetPath ( Config::sDictionary.Directory );
 	OnCheckDict( evt );
 
 	// autohighlight setting
-	mDP.CB_AH->SetValue( !Config::mAutohigh.Use );
-	mDP.SL_AH->SetValue( Config::mAutohigh.Param );
-	mDP.SC_AH->SetValue( Config::mAutohigh.Param );
+	mDP.CB_AH->SetValue( !Config::sAutohigh.Use );
+	mDP.SL_AH->SetValue( Config::sAutohigh.Param );
+	mDP.SC_AH->SetValue( Config::sAutohigh.Param );
 	UpdatePanelAuto( WND_ID_SAUTOHIGH );
 
 	// autocompletion setting
-	mDP.CB_AC->SetValue( !Config::mAutocomp.Use );
-	mDP.SL_AC->SetValue( Config::mAutocomp.Param );
-	mDP.SC_AC->SetValue( Config::mAutocomp.Param );
+	mDP.CB_AC->SetValue( !Config::sAutocomp.Use );
+	mDP.SL_AC->SetValue( Config::sAutocomp.Param );
+	mDP.SC_AC->SetValue( Config::sAutocomp.Param );
 	UpdatePanelAuto( WND_ID_SAUTOCOMP );
 
 	// temporary
-	mTP.Disable->SetValue( !Config::mTemp.UseTemp );
-	mTP.DirPick->SetPath( Config::mTemp.Directory );
-	mTP.OnAll->SetValue( Config::mTemp.ApplyOn == TEMP_APPLY_ALL );
-	mTP.OnNew->SetValue( Config::mTemp.ApplyOn == TEMP_APPLY_NEW );
+	mTP.Disable->SetValue( !Config::sTemp.UseTemp );
+	mTP.DirPick->SetPath ( Config::sTemp.Directory );
+	mTP.OnAll->SetValue  ( Config::sTemp.ApplyOn == TEMP_APPLY_ALL );
+	mTP.OnNew->SetValue  ( Config::sTemp.ApplyOn == TEMP_APPLY_NEW );
 	OnCheckTemp( evt );
 
 	// autosave setting
-	mTP.CB_AS->SetValue( !Config::mAutosave.Use );
-	mTP.SL_AS->SetValue( Config::mAutosave.Param / 1000 );
-	mTP.SC_AS->SetValue( Config::mAutosave.Param / 1000 );
+	mTP.CB_AS->SetValue( !Config::sAutosave.Use );
+	mTP.SL_AS->SetValue( Config::sAutosave.Param / 1000 );
+	mTP.SC_AS->SetValue( Config::sAutosave.Param / 1000 );
 	UpdatePanelAuto( WND_ID_SAUTOSAVE );
+
+	// toolbar doesnt available yey
+	mGP.CB_TB_Hide->Disable();
+	mGP.RB_TB_Std->Disable();
+	mGP.RB_TB_Big->Disable();
 }
 
 void PreferencesFrame::CreateContent()
@@ -294,24 +299,24 @@ void PreferencesFrame::RefreshMessage()
 
 void PreferencesFrame::UpdateDictionary()
 {
-	Config::mDictionary.UseGlobal = !mDP.Disable->GetValue();
-	Config::mDictionary.Directory = mDP.DirPick->GetPath();
-	if      ( mDP.OnAll->GetValue() ) Config::mDictionary.ApplyOn = DICT_ALL_DOCS;
-	else if ( mDP.OnTemp->GetValue() ) Config::mDictionary.ApplyOn = DICT_TMP_DOCS;
-	else if ( mDP.OnOpen->GetValue() ) Config::mDictionary.ApplyOn = DICT_OPN_DOCS;
+	Config::sDictionary.UseGlobal = !mDP.Disable->GetValue();
+	Config::sDictionary.Directory = mDP.DirPick->GetPath();
+	if      ( mDP.OnAll->GetValue() ) Config::sDictionary.ApplyOn = DICT_ALL_DOCS;
+	else if ( mDP.OnTemp->GetValue() ) Config::sDictionary.ApplyOn = DICT_TMP_DOCS;
+	else if ( mDP.OnOpen->GetValue() ) Config::sDictionary.ApplyOn = DICT_OPN_DOCS;
 }
 
 void PreferencesFrame::UpdateNotebook()
 {
-	Config::mNotebook.Hide         = mGP.CB_NB_Hide->GetValue();
-	Config::mNotebook.Orientation  = mGP.RB_NB_Top->GetValue();
-	Config::mNotebook.FixedWidth   = mGP.CB_NB_Fixed->GetValue();
-	Config::mNotebook.LockMove     = mGP.CB_NB_Lock->GetValue();
-	Config::mNotebook.MiddleClose  = mGP.CB_NB_Middle->GetValue();
-	Config::mNotebook.ShowCloseBtn = mGP.CB_NB_Close->GetValue();
-	Config::mNotebook.CloseBtnOn   = mGP.RB_NB_OnAll->GetValue();
+	Config::sNotebook.Hide         = mGP.CB_NB_Hide->GetValue();
+	Config::sNotebook.Orientation  = mGP.RB_NB_Top->GetValue();
+	Config::sNotebook.FixedWidth   = mGP.CB_NB_Fixed->GetValue();
+	Config::sNotebook.LockMove     = mGP.CB_NB_Lock->GetValue();
+	Config::sNotebook.MiddleClose  = mGP.CB_NB_Middle->GetValue();
+	Config::sNotebook.ShowCloseBtn = mGP.CB_NB_Close->GetValue();
+	Config::sNotebook.CloseBtnOn   = mGP.RB_NB_OnAll->GetValue();
 	
-	if ( Config::mNotebook.Hide )  TextField::mNotebook->Show( false );
+	if ( Config::sNotebook.Hide )  TextField::mNotebook->Show( false );
 	else                           TextField::mNotebook->Show( true );
 	
 	TextField::mNotebook->SetWindowStyle( Config::GetNotebookStyle() );
@@ -320,9 +325,9 @@ void PreferencesFrame::UpdateNotebook()
 void PreferencesFrame::UpdateDragDrop()
 {
 	auto isDragDrop = mGP.CB_DD->GetValue();
-	if ( Config::mGeneral.UseDragDrop != isDragDrop )
+	if ( Config::sGeneral.UseDragDrop != isDragDrop )
 	{
-		Config::mGeneral.UseDragDrop = isDragDrop;
+		Config::sGeneral.UseDragDrop = isDragDrop;
 		for ( const auto& page : TextField::mPageData )
 			page.TextField->DragAcceptFiles( isDragDrop );		
 	}
@@ -331,18 +336,18 @@ void PreferencesFrame::UpdateDragDrop()
 void PreferencesFrame::UpdateAutocomp()
 {
 	auto isAutocomp = !mDP.CB_AC->GetValue();
-	Config::mAutocomp.Param = mDP.SC_AC->GetValue();
-	if ( Config::mAutocomp.Use != isAutocomp )
-		Config::mAutocomp.Use = isAutocomp;
+	Config::sAutocomp.Param = mDP.SC_AC->GetValue();
+	if ( Config::sAutocomp.Use != isAutocomp )
+		Config::sAutocomp.Use = isAutocomp;
 }
 
 void PreferencesFrame::UpdateAutohigh()
 {
 	auto isAutohigh = !mDP.CB_AH->GetValue();
-	Config::mAutohigh.Param = mDP.SC_AH->GetValue();
-	if ( Config::mAutohigh.Use != isAutohigh )
+	Config::sAutohigh.Param = mDP.SC_AH->GetValue();
+	if ( Config::sAutohigh.Use != isAutohigh )
 	{
-		Config::mAutohigh.Use = isAutohigh;
+		Config::sAutohigh.Use = isAutohigh;
 		if ( isAutohigh )
 			if ( AutoThread::isDeploy( THREAD_HIGHLIGHTER ) ) AutoThread::Continue( THREAD_HIGHLIGHTER );
 			else                                              AutoThread::DeployThread( THREAD_HIGHLIGHTER );
@@ -353,10 +358,10 @@ void PreferencesFrame::UpdateAutohigh()
 void PreferencesFrame::UpdateAutosave()
 {
 	auto isAutosave = !mTP.CB_AS->GetValue();
-	Config::mAutosave.Param = mTP.SC_AS->GetValue() * 1000;
-	if ( Config::mAutosave.Use != isAutosave )
+	Config::sAutosave.Param = mTP.SC_AS->GetValue() * 1000;
+	if ( Config::sAutosave.Use != isAutosave )
 	{
-		Config::mAutosave.Use = isAutosave;
+		Config::sAutosave.Use = isAutosave;
 		if ( isAutosave )
 			if ( AutoThread::isDeploy( THREAD_SAVER ) ) AutoThread::Continue( THREAD_SAVER );
 			else                                        AutoThread::DeployThread( THREAD_SAVER );
@@ -367,9 +372,9 @@ void PreferencesFrame::UpdateAutosave()
 void PreferencesFrame::UpdateStatbar()
 {
 	auto isStatbar = mGP.CB_SB->GetValue();
-	if ( Config::mGeneral.UseStatbar != isStatbar )
+	if ( Config::sGeneral.UseStatbar != isStatbar )
 	{
-		Config::mGeneral.UseStatbar = isStatbar;
+		Config::sGeneral.UseStatbar = isStatbar;
 		auto size = mMF.Frame->GetSize();
 		if ( isStatbar )
 		{
@@ -387,10 +392,10 @@ void PreferencesFrame::UpdateStatbar()
 
 void PreferencesFrame::UpdateTemp()
 {
-	Config::mTemp.UseTemp = !mTP.Disable->GetValue();
-	Config::mTemp.Directory = mTP.DirPick->GetPath();
-	if      ( mTP.OnAll->GetValue() ) Config::mTemp.ApplyOn = TEMP_APPLY_ALL;
-	else if ( mTP.OnNew->GetValue() ) Config::mTemp.ApplyOn = TEMP_APPLY_NEW;
+	Config::sTemp.UseTemp = !mTP.Disable->GetValue();
+	Config::sTemp.Directory = mTP.DirPick->GetPath();
+	if      ( mTP.OnAll->GetValue() ) Config::sTemp.ApplyOn = TEMP_APPLY_ALL;
+	else if ( mTP.OnNew->GetValue() ) Config::sTemp.ApplyOn = TEMP_APPLY_NEW;
 }
 
 void PreferencesFrame::UpdatePanelAuto( int id )
@@ -521,7 +526,7 @@ void PreferencesFrame::OnOK( wxCommandEvent& event )
 	UpdateNotebook();
 	UpdateDictionary();
 	UpdateTemp();
-	Config::mGeneral.UseSplash = mGP.CB_SS->GetValue();
+	Config::sGeneral.UseSplash = mGP.CB_SS->GetValue();
 
 	mFrame->Show( false );
 }
@@ -538,9 +543,9 @@ void PreferencesFrame::OnLocalization( wxCommandEvent& event )
 	auto sel = mGP.LocalizationCB->GetSelection();
 	if ( sel == wxID_NONE ) return;
 
-	if ( Config::mGeneral.LanguageID != sel )
+	if ( Config::sGeneral.LanguageID != sel )
 	{
-		Config::mGeneral.LanguageID = sel;
+		Config::sGeneral.LanguageID = sel;
 		if ( Language::LoadMessage( static_cast<LanguageID>( sel ) ) )
 			sFuture = std::async( std::launch::async, RefreshMessage );
 	}

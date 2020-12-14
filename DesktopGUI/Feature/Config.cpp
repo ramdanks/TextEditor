@@ -2,35 +2,37 @@
 #include "LogGUI.h"
 
 //translation unit for static member
-Config::Font Config::mFont;
-Config::Style Config::mStyle;
-Config::General Config::mGeneral;
-Config::AutoThread Config::mAutosave;
-Config::AutoThread Config::mAutohigh;
-Config::AutoThread Config::mAutocomp;
-Config::Notebook Config::mNotebook;
-Config::Dictionary Config::mDictionary;
-Config::Temporary Config::mTemp;
+wxString Config::sAppPath;
+wxString Config::mConfigFilepath;
+Config::Font Config::sFont;
+Config::Style Config::sStyle;
+Config::General Config::sGeneral;
+Config::AutoThread Config::sAutosave;
+Config::AutoThread Config::sAutohigh;
+Config::AutoThread Config::sAutocomp;
+Config::Notebook Config::sNotebook;
+Config::Dictionary Config::sDictionary;
+Config::Temporary Config::sTemp;
 std::vector<sConfigReference> Config::mTemplate;
+
+void Config::Init()
+{
+	wxFileName f( wxStandardPaths::Get().GetExecutablePath() );
+	Config::sAppPath = f.GetPath();
+}
 
 void Config::FetchData()
 {
 	PROFILE_FUNC();
 
-	Filestream::Create_Directories( "temp" );
-	if ( !Filestream::Exist( CONFIG_FILEPATH ) )
-	{
-		LoadDefaultConfig();
-		Config::SaveConfig();
-		return;
-	}
-	if ( mTemplate.empty() ) MakeTemplate();
-
 	try
 	{
-		auto vRead = Filestream::Read_Bin( CONFIG_FILEPATH );
+		mConfigFilepath = sAppPath + '\\' + CONFIG_FILE;
+		auto vRead = Filestream::Read_Bin( std::string( mConfigFilepath ) );
 		THROW_ERR_IFEMPTY( vRead, "Failed to read configuration file!" );
 		
+		if ( mTemplate.empty() ) MakeTemplate();
+
 		std::string sRead = (const char*) &vRead[0];
 		auto vBuffer = Filestream::ParseString( sRead, '\n' );
 		THROW_ERR_IFEMPTY( vRead, "Failed to read configuration file!" );
@@ -61,58 +63,62 @@ void Config::FetchData()
 		LoadDefaultConfig();
 		Config::SaveConfig();
 	}
+
+	//create temporary dir if not exists
+	if ( !wxDir::Exists( sTemp.Directory ) )
+		wxDir::Make( sTemp.Directory );
 }
 
 void Config::LoadDefaultConfig()
 {
 	// system default
-	mGeneral.UseSplash     = true;
-	mGeneral.LanguageID    = 0;
-	mGeneral.ZoomDefault   = 5;
-	mGeneral.UseStatbar    = true;
-	mGeneral.UseDragDrop   = true;
+	sGeneral.UseSplash     = true;
+	sGeneral.LanguageID    = 0;
+	sGeneral.ZoomDefault   = 5;
+	sGeneral.UseStatbar    = true;
+	sGeneral.UseDragDrop   = true;
 	// notebook default
-	mNotebook.Hide         = false;
-	mNotebook.Orientation  = true;
-	mNotebook.LockMove     = false;
-	mNotebook.FixedWidth   = false;
-	mNotebook.MiddleClose  = true;
-	mNotebook.ShowCloseBtn = true;
-	mNotebook.CloseBtnOn   = false;
+	sNotebook.Hide         = false;
+	sNotebook.Orientation  = true;
+	sNotebook.LockMove     = false;
+	sNotebook.FixedWidth   = false;
+	sNotebook.MiddleClose  = true;
+	sNotebook.ShowCloseBtn = true;
+	sNotebook.CloseBtnOn   = false;
 	// dictionary defaukt
-	mDictionary.UseGlobal  = true;
-	mDictionary.ApplyOn    = DICT_ALL_DOCS;
-	mDictionary.Directory  = "dictionary";
-	mDictionary.UniformClr = false;
-	mDictionary.MatchCase  = false;
-	mDictionary.MatchWhole = true;
+	sDictionary.UseGlobal  = true;
+	sDictionary.ApplyOn    = DICT_ALL_DOCS;
+	sDictionary.Directory  = sAppPath + "\\dictionary";
+	sDictionary.UniformClr = false;
+	sDictionary.MatchCase  = false;
+	sDictionary.MatchWhole = true;
 	// temporary default
-	mTemp.UseTemp          = true;
-	mTemp.ApplyOn          = TEMP_APPLY_NEW;
-	mTemp.Directory        = "temp";
+	sTemp.UseTemp          = true;
+	sTemp.ApplyOn          = TEMP_APPLY_NEW;
+	sTemp.Directory        = sAppPath + "\\temp";
 	// autosave default
-	mAutosave.Use          = true;
-	mAutosave.Param        = 60000;
+	sAutosave.Use          = true;
+	sAutosave.Param        = 30000;
 	// autohighlight default
-	mAutohigh.Use          = true;
-	mAutohigh.Param        = 500;
+	sAutohigh.Use          = true;
+	sAutohigh.Param        = 200;
 	// autocompletion default
-	mAutocomp.Use          = true;
-	mAutocomp.Param        = 100;
+	sAutocomp.Use          = true;
+	sAutocomp.Param        = 100;
 	// font default	       
-	mFont.Face             = "Calibri";
-	mFont.Size             = 10;
-	mFont.Family           = wxFONTFAMILY_MODERN;
-	mFont.Style            = wxFONTSTYLE_NORMAL;
-	mFont.Weight           = wxFONTWEIGHT_NORMAL;
+	sFont.Face             = "Calibri";
+	sFont.Size             = 10;
+	sFont.Family           = wxFONTFAMILY_MODERN;
+	sFont.Style            = wxFONTSTYLE_NORMAL;
+	sFont.Weight           = wxFONTWEIGHT_NORMAL;
 	// style default       
-	mStyle.TextBack        = 2302755;
-	mStyle.TextFore        = 16777215;
-	mStyle.Caret           = 13405661;
-	mStyle.LineBack        = 4605510;
-	mStyle.Selection       = 13203258;
-	mStyle.LinenumBack     = 3945010;
-	mStyle.LinenumFore     = 13408221;
+	sStyle.TextBack        = 2302755;
+	sStyle.TextFore        = 16777215;
+	sStyle.Caret           = 13405661;
+	sStyle.LineBack        = 4605510;
+	sStyle.Selection       = 13203258;
+	sStyle.LinenumBack     = 3945010;
+	sStyle.LinenumFore     = 13408221;
 
 	LOG_ALL( LV_INFO, "Loading default configuration file!" );
 }
@@ -132,9 +138,9 @@ void Config::SaveConfig()
 				ConfigText += t.Tag + '=' + *(std::string*) t.RefData + '\n';
 		}
 		ConfigText.pop_back();
-	
-		Filestream::Write_Bin( ConfigText.c_str(), ConfigText.size(), CONFIG_FILEPATH );
-		THROW_ERR_IFNOT( Filestream::Exist( CONFIG_FILEPATH ), "Cannot save configuration file!" );
+		
+		Filestream::Write_Bin( ConfigText.c_str(), ConfigText.size(), std::string( mConfigFilepath ) );
+		THROW_ERR_IFNOT( wxFile::Exists( mConfigFilepath ), "Cannot save configuration file!" );
 	}
 	catch ( Util::Err& e )
 	{
@@ -154,22 +160,22 @@ std::string Config::GetSupportedFormat()
 int Config::GetDictionaryFlags()
 {
 	int flags = 0;
-	if ( Config::mDictionary.MatchWhole ) flags |= wxSTC_FIND_WHOLEWORD;
-	if ( Config::mDictionary.MatchCase )  flags |= wxSTC_FIND_MATCHCASE;
+	if ( Config::sDictionary.MatchWhole ) flags |= wxSTC_FIND_WHOLEWORD;
+	if ( Config::sDictionary.MatchCase )  flags |= wxSTC_FIND_MATCHCASE;
 	return flags;
 }
 
 int Config::GetNotebookStyle()
 {
-	int style = 0;
-	if ( Config::mNotebook.Orientation )   style |= wxAUI_NB_TOP;
+	int style = wxAUI_NB_SCROLL_BUTTONS;
+	if ( Config::sNotebook.Orientation )   style |= wxAUI_NB_TOP;
 	else                                   style |= wxAUI_NB_BOTTOM;
-	if ( Config::mNotebook.FixedWidth )    style |= wxAUI_NB_TAB_FIXED_WIDTH;
-	if ( !Config::mNotebook.LockMove )     style |= wxAUI_NB_TAB_MOVE;
-	if ( Config::mNotebook.MiddleClose )   style |= wxAUI_NB_MIDDLE_CLICK_CLOSE;
-	if ( Config::mNotebook.ShowCloseBtn )
+	if ( Config::sNotebook.FixedWidth )    style |= wxAUI_NB_TAB_FIXED_WIDTH;
+	if ( !Config::sNotebook.LockMove )     style |= wxAUI_NB_TAB_MOVE;
+	if ( Config::sNotebook.MiddleClose )   style |= wxAUI_NB_MIDDLE_CLICK_CLOSE;
+	if ( Config::sNotebook.ShowCloseBtn )
 	{
-		if ( Config::mNotebook.CloseBtnOn )    style |= wxAUI_NB_CLOSE_ON_ALL_TABS;
+		if ( Config::sNotebook.CloseBtnOn )    style |= wxAUI_NB_CLOSE_ON_ALL_TABS;
 		else                                   style |= wxAUI_NB_CLOSE_ON_ACTIVE_TAB;
 	}
 	return style;
@@ -177,69 +183,69 @@ int Config::GetNotebookStyle()
 
 void Config::SetNotebookStyle( int style )
 {
-	Config::mNotebook.Orientation  = style & wxAUI_NB_TOP;
-	Config::mNotebook.FixedWidth   = style & wxAUI_NB_BOTTOM;
-	Config::mNotebook.LockMove     = style & wxAUI_NB_TAB_FIXED_WIDTH;
-	Config::mNotebook.MiddleClose  = style & wxAUI_NB_TAB_MOVE;
-	Config::mNotebook.ShowCloseBtn = style & wxAUI_NB_MIDDLE_CLICK_CLOSE;
-	Config::mNotebook.CloseBtnOn   = style & wxAUI_NB_CLOSE_ON_ALL_TABS;
+	Config::sNotebook.Orientation  = style & wxAUI_NB_TOP;
+	Config::sNotebook.FixedWidth   = style & wxAUI_NB_BOTTOM;
+	Config::sNotebook.LockMove     = style & wxAUI_NB_TAB_FIXED_WIDTH;
+	Config::sNotebook.MiddleClose  = style & wxAUI_NB_TAB_MOVE;
+	Config::sNotebook.ShowCloseBtn = style & wxAUI_NB_MIDDLE_CLICK_CLOSE;
+	Config::sNotebook.CloseBtnOn   = style & wxAUI_NB_CLOSE_ON_ALL_TABS;
 }
 
 wxFont Config::BuildFont()
 {
-	return wxFont( mFont.Size, (wxFontFamily) mFont.Family, (wxFontStyle) mFont.Style,
-				   (wxFontWeight) mFont.Weight, false, mFont.Face );
+	return wxFont( sFont.Size, (wxFontFamily) sFont.Family, (wxFontStyle) sFont.Style,
+				   (wxFontWeight) sFont.Weight, false, sFont.Face );
 }
 
 void Config::SetFont( wxFont font )
 {
-	mFont.Face   = font.GetFaceName();
-	mFont.Size   = font.GetPointSize();
-	mFont.Style  = font.GetStyle();
-	mFont.Family = font.GetFamily();
-	mFont.Weight = font.GetWeight();
+	sFont.Face   = font.GetFaceName();
+	sFont.Size   = font.GetPointSize();
+	sFont.Style  = font.GetStyle();
+	sFont.Family = font.GetFamily();
+	sFont.Weight = font.GetWeight();
 }
 
 void Config::MakeTemplate()
 {
 	mTemplate.reserve( 30 );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.Hide,         "Hide"             );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.Orientation,  "Orientation"      );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.LockMove,     "LockMove"         );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.FixedWidth,   "FixedWidth"       );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.MiddleClose,  "MiddleMouseClose" );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.ShowCloseBtn, "ShowCloseBtn"     );
-	mTemplate.emplace_back( TYPE_INT, &mNotebook.CloseBtnOn,   "CloseBtnOn"       );
-	mTemplate.emplace_back( TYPE_INT, &mGeneral.UseSplash,     "SplashScreen"     );
-	mTemplate.emplace_back( TYPE_INT, &mGeneral.UseStatbar,    "UseStatusbar"     );
-	mTemplate.emplace_back( TYPE_INT, &mGeneral.UseDragDrop,   "UseDragDrop"      );
-	mTemplate.emplace_back( TYPE_INT, &mGeneral.LanguageID,    "SystemLanguage"   );
-	mTemplate.emplace_back( TYPE_INT, &mGeneral.ZoomDefault,   "ZoomDefault"      );
-	mTemplate.emplace_back( TYPE_INT, &mDictionary.UseGlobal,  "UseGlobal"        );
-	mTemplate.emplace_back( TYPE_INT, &mDictionary.ApplyOn,    "DictApplyOn"      );
-	mTemplate.emplace_back( TYPE_STR, &mDictionary.Directory,  "DictGlobalDir"    );
-	mTemplate.emplace_back( TYPE_INT, &mTemp.UseTemp,          "UseTemp"          );
-	mTemplate.emplace_back( TYPE_INT, &mTemp.ApplyOn,          "TempApplyOn"      );
-	mTemplate.emplace_back( TYPE_STR, &mTemp.Directory,        "TempDir"          );
-	mTemplate.emplace_back( TYPE_INT, &mDictionary.MatchCase,  "MatchCase"        );
-	mTemplate.emplace_back( TYPE_INT, &mDictionary.MatchWhole, "MatchWhole"       );
-	mTemplate.emplace_back( TYPE_INT, &mDictionary.UniformClr, "UniformColour"    );
-	mTemplate.emplace_back( TYPE_INT, &mAutosave.Use,          "UseAutosave"      );
-	mTemplate.emplace_back( TYPE_INT, &mAutosave.Param,        "AutosaveInterval" );
-	mTemplate.emplace_back( TYPE_INT, &mAutohigh.Use,          "UseAutohigh"      );
-	mTemplate.emplace_back( TYPE_INT, &mAutohigh.Param,        "AutohighInterval" );
-	mTemplate.emplace_back( TYPE_INT, &mAutocomp.Use,          "UseAutocomp"      );
-	mTemplate.emplace_back( TYPE_INT, &mAutocomp.Param,        "AutocompWords"    );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.TextBack,        "TextBack"         );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.TextFore,        "TextFore"         );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.Caret,           "Caret"            );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.LineBack,        "LineBack"         );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.Selection,       "Selection"        );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.LinenumBack,     "LinenumBack"      );
-	mTemplate.emplace_back( TYPE_INT, &mStyle.LinenumFore,     "LinenumFore"      );
-	mTemplate.emplace_back( TYPE_STR, &mFont.Face,             "FontFace"         );
-	mTemplate.emplace_back( TYPE_INT, &mFont.Size,             "FontSize"         );
-	mTemplate.emplace_back( TYPE_INT, &mFont.Style,            "FontStyle"        );
-	mTemplate.emplace_back( TYPE_INT, &mFont.Family,           "FontFamily"       );
-	mTemplate.emplace_back( TYPE_INT, &mFont.Weight,           "FontWeight"       );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.Hide,         "Hide"             );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.Orientation,  "Orientation"      );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.LockMove,     "LockMove"         );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.FixedWidth,   "FixedWidth"       );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.MiddleClose,  "MiddleMouseClose" );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.ShowCloseBtn, "ShowCloseBtn"     );
+	mTemplate.emplace_back( TYPE_INT, &sNotebook.CloseBtnOn,   "CloseBtnOn"       );
+	mTemplate.emplace_back( TYPE_INT, &sGeneral.UseSplash,     "SplashScreen"     );
+	mTemplate.emplace_back( TYPE_INT, &sGeneral.UseStatbar,    "UseStatusbar"     );
+	mTemplate.emplace_back( TYPE_INT, &sGeneral.UseDragDrop,   "UseDragDrop"      );
+	mTemplate.emplace_back( TYPE_INT, &sGeneral.LanguageID,    "SystemLanguage"   );
+	mTemplate.emplace_back( TYPE_INT, &sGeneral.ZoomDefault,   "ZoomDefault"      );
+	mTemplate.emplace_back( TYPE_INT, &sDictionary.UseGlobal,  "UseGlobal"        );
+	mTemplate.emplace_back( TYPE_INT, &sDictionary.ApplyOn,    "DictApplyOn"      );
+	mTemplate.emplace_back( TYPE_STR, &sDictionary.Directory,  "DictGlobalDir"    );
+	mTemplate.emplace_back( TYPE_INT, &sTemp.UseTemp,          "UseTemp"          );
+	mTemplate.emplace_back( TYPE_INT, &sTemp.ApplyOn,          "TempApplyOn"      );
+	mTemplate.emplace_back( TYPE_STR, &sTemp.Directory,        "TempDir"          );
+	mTemplate.emplace_back( TYPE_INT, &sDictionary.MatchCase,  "MatchCase"        );
+	mTemplate.emplace_back( TYPE_INT, &sDictionary.MatchWhole, "MatchWhole"       );
+	mTemplate.emplace_back( TYPE_INT, &sDictionary.UniformClr, "UniformColour"    );
+	mTemplate.emplace_back( TYPE_INT, &sAutosave.Use,          "UseAutosave"      );
+	mTemplate.emplace_back( TYPE_INT, &sAutosave.Param,        "AutosaveInterval" );
+	mTemplate.emplace_back( TYPE_INT, &sAutohigh.Use,          "UseAutohigh"      );
+	mTemplate.emplace_back( TYPE_INT, &sAutohigh.Param,        "AutohighInterval" );
+	mTemplate.emplace_back( TYPE_INT, &sAutocomp.Use,          "UseAutocomp"      );
+	mTemplate.emplace_back( TYPE_INT, &sAutocomp.Param,        "AutocompWords"    );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.TextBack,        "TextBack"         );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.TextFore,        "TextFore"         );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.Caret,           "Caret"            );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.LineBack,        "LineBack"         );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.Selection,       "Selection"        );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.LinenumBack,     "LinenumBack"      );
+	mTemplate.emplace_back( TYPE_INT, &sStyle.LinenumFore,     "LinenumFore"      );
+	mTemplate.emplace_back( TYPE_STR, &sFont.Face,             "FontFace"         );
+	mTemplate.emplace_back( TYPE_INT, &sFont.Size,             "FontSize"         );
+	mTemplate.emplace_back( TYPE_INT, &sFont.Style,            "FontStyle"        );
+	mTemplate.emplace_back( TYPE_INT, &sFont.Family,           "FontFamily"       );
+	mTemplate.emplace_back( TYPE_INT, &sFont.Weight,           "FontWeight"       );
 }

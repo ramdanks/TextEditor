@@ -21,6 +21,13 @@ namespace Util
 		std::transform( buffer.begin(), buffer.end(), buffer.begin(), ::toupper );
 	}
 
+	int Find( const wxString& text, const wxString& find, size_t from, size_t to )
+	{
+		auto it = std::find( text.begin() + from, text.begin() + to, find );
+		if ( it == text.end() ) return wxNOT_FOUND;
+		return std::distance( text.begin(), it );
+	}
+
 	size_t ReplaceAll( std::string& buffer, const std::string& replace, sFindAttrib& attr )
 	{
 		if ( buffer.empty() || attr.Find.empty() ) return 0;

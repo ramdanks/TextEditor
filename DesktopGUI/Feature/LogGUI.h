@@ -1,10 +1,11 @@
 #pragma once
 #include "../Frame/AppFrame.h"
 
-#define ERR_FILEPATH	"log/AppError.txt"
-#define LOG_FILEPATH	"log/AppLog.txt"
-#define TO_STR(data)    std::to_string(data)
-#define CV_STR(str)     std::string(str)
+#define LOG_DIR_RELATIVE    "\\log"
+#define ERR_PATH_RELATIVE	"\\log\\AppError.txt"
+#define LOG_PATH_RELATIVE	"\\log\\AppLog.txt"
+#define TO_STR(data)        std::to_string(data)
+#define CV_STR(str)         std::string(str)
 
 class LogGUI
 {

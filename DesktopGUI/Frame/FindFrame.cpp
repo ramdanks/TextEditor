@@ -2,11 +2,11 @@
 #include "../Feature/Language.h"
 #include "../Feature/LogGUI.h"
 #include "../../Utilities/FindReplace.h"
+#include "../TextField.h"
 
 wxFrame* FindFrame::mFrame;
 wxTextCtrl* FindFrame::mEntryReplace;
 wxNotebook* FindFrame::mNotebook;
-wxStyledTextCtrl* FindFrame::mTextField;
 sPageAttrib* FindFrame::mFindAttrib;
 sPageAttrib* FindFrame::mReplaceAttrib;
 char FindFrame::buf[256];
@@ -42,20 +42,16 @@ void FindFrame::Init( wxWindow* parent )
 	mNotebook->Bind( wxEVT_NOTEBOOK_PAGE_CHANGED, &OnPageChanged );
 }
 
-void FindFrame::UpdateInfo( wxStyledTextCtrl* tf, wxString filepath )
-{
-	mTextField = tf;
-	if ( !filepath.IsEmpty() )
-		mFrame->SetTitle( MSG_FIND + " - " + filepath );
-}
-
 void FindFrame::ShowAndFocus( bool find )
 {
-	if ( mFrame == nullptr ) return;
-	find ? mNotebook->SetSelection( FIND_PAGE ) : mNotebook->SetSelection( REPLACE_PAGE );
-	mFrame->SetStatusText( wxString() );
-	mFrame->Show();
-	mFrame->SetFocus();
+	if ( mFrame )
+	{
+		if ( find ) mNotebook->SetSelection( FIND_PAGE );
+		else        mNotebook->SetSelection( REPLACE_PAGE );
+		mFrame->SetStatusText( wxString() );
+		mFrame->Show();
+		mFrame->SetFocus();
+	}
 }
 
 inline wxString FindFrame::GetFindEntry()
@@ -67,22 +63,25 @@ inline wxString FindFrame::GetFindEntry()
 
 void FindFrame::OnFindNext( wxCommandEvent& event )
 {
-	IFind( false );
+	IFind( false, GetFindEntry() );
 }
 
 void FindFrame::OnFindPrev( wxCommandEvent& event )
 {
-	IFind( true );
+	IFind( true, GetFindEntry() );
 }
 
 void FindFrame::OnCount( wxCommandEvent& event )
 {
-	Util::Timer tm( "Counting Words", MS, false );
+	TIMER_ONLY( tm, MS, false );
+
+	auto ac = TextField::GetActivePage();
+	auto stc = TextField::GetSTC( ac );
 
 	auto text = GetFindEntry();
 	if ( text.IsEmpty() )
 	{
-		mFrame->SetStatusText( "Cannot find empty word" );
+		mFrame->SetStatusText( "Cannot Find: No Entry" );
 		return;
 	}
 
@@ -90,48 +89,44 @@ void FindFrame::OnCount( wxCommandEvent& event )
 	uint32_t count = -1;
 	do
 	{
-		get = mTextField->FindText( get + 1, mTextField->GetTextLength(), text, GetFlags() );
+		get = stc->FindText( get + 1, stc->GetTextLength(), text, GetFlags() );
 		count++;
 	} while ( get != -1 );
 
 	SETBUF( "Total words count: %u", count );
 	mFrame->SetStatusText( buf );
 
-	LOG_ALL_FORMAT( LV_TRACE, "Counting (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.toc() );
+	LOG_ALL_FORMAT( LV_TRACE, "Counting (%u) words from document size (%d): %.2f (ms)", count, stc->GetTextLength(), tm.toc() );
 }
 
 void FindFrame::OnReplace( wxCommandEvent& event )
 {
+	auto ac = TextField::GetActivePage();
+	auto stc = TextField::GetSTC( ac );
+
 	auto text = GetFindEntry();
 	if ( text.IsEmpty() )
 	{
 		mFrame->SetStatusText( "Cannot replace empty word" );
 		return;
 	}
-	if ( mEntryReplace->GetValue() == text )
-	{
-		mFrame->SetStatusText( "Find and Replace word already equal" );
-		return;
-	}
-	
-	if ( mTextField->GetSelectedText() != text )
-	{
-		auto NullCmdEvent = wxCommandEvent( wxEVT_NULL );
-		OnFindNext( NullCmdEvent );
-		return;
-	}
 
-	mTextField->ReplaceSelection( mEntryReplace->GetValue() );
+	auto search = mReplaceAttrib->EntryFind->GetValue();
+	if ( IFind( false, search ) != wxNOT_FOUND )
+		stc->ReplaceSelection( mEntryReplace->GetValue() );
 }
 
 void FindFrame::OnReplaceAll( wxCommandEvent& event )
 {
-	Util::Timer tm( "Replace All", MS, false );
+	TIMER_ONLY( tm, MS, false );
+
+	auto ac = TextField::GetActivePage();
+	auto stc = TextField::GetSTC( ac );
 
 	auto text = GetFindEntry();
 	if ( text.IsEmpty() )
 	{
-		mFrame->SetStatusText( "Cannot replace empty word" );
+		mFrame->SetStatusText( "Cannot Find: No Entry" );
 		return;
 	}
 	if ( mEntryReplace->GetValue() == text )
@@ -146,78 +141,82 @@ void FindFrame::OnReplaceAll( wxCommandEvent& event )
 	attrib.MatchCase = BOXMC( mReplaceAttrib )->GetValue();
 	attrib.MatchWholeWord = BOXMW( mReplaceAttrib )->GetValue();
 	if ( !BOXWA( mReplaceAttrib )->GetValue() )
-		attrib.StartPos = mTextField->GetSelectionStart();
+		attrib.StartPos = stc->GetSelectionStart();
 
-	std::string buffer = std::string( mTextField->GetValue() );
+	std::string buffer = std::string( stc->GetValue() );
 	auto count = Util::ReplaceAll( buffer, std::string( mEntryReplace->GetValue() ), attrib );
 	if ( count == 0 )
 	{
-		mFrame->SetStatusText( "Cannot find that word from current page!" );
+		if ( IsWrapAround() ) mFrame->SetStatusText( "Cannot Find: Not Exists." );
+		else                  mFrame->SetStatusText( "Cannot Find: End of Line Reached." );
 		return;
 	}
-	mTextField->SetText( buffer );
+	stc->SetText( buffer );
 
 	SETBUF( "Total replaced words: %u", count );
 	mFrame->SetStatusText( buf );
 
-	LOG_ALL_FORMAT( LV_TRACE, "Replace (%u) words from document size (%d): %f (ms)", count, mTextField->GetTextLength(), tm.toc() );
+	LOG_ALL_FORMAT( LV_TRACE, "Replace (%u) words from document size (%d): %.2f (ms)", count, stc->GetTextLength(), tm.toc() );
 }
 
-void FindFrame::IFind( bool reverse )
+int FindFrame::IFind( bool reverse, const wxString& text )
 {
-	Util::Timer tm( "Find Word", MS, false );
+	TIMER_ONLY( tm, MS, false );
 
-	auto text = GetFindEntry();
 	if ( text.IsEmpty() )
 	{
-		mFrame->SetStatusText( "Cannot find empty word" );
-		return;
+		mFrame->SetStatusText( "Cannot Find: No Entry" );
+		return wxNOT_FOUND;
 	}
 
+	auto ac = TextField::GetActivePage();
+	auto stc = TextField::GetSTC( ac );
+
 	int atPos;
-	auto flags = GetFlags();
-	int selection = mTextField->GetSelectionStart();
+	const int flags = GetFlags();
+	const int selection = stc->GetSelectionStart();
 	if ( reverse )
 	{
-		mTextField->SetSelectionStart( selection - 1 );
-		mTextField->SearchAnchor();
-		atPos = mTextField->SearchPrev( flags, text );
-		if ( atPos == -1 && BOXWA( mFindAttrib )->GetValue() )
+		stc->SearchAnchor();
+		atPos = stc->SearchPrev( flags, text );
+		if ( atPos == wxNOT_FOUND && IsWrapAround() )
 		{
-			mTextField->SetSelectionStart( mTextField->GetTextLength() );
-			mTextField->SearchAnchor();
-			atPos = mTextField->SearchPrev( flags, text );
+			stc->SetSelectionStart( stc->GetTextLength() );
+			stc->SearchAnchor();
+			atPos = stc->SearchPrev( flags, text );
 		}
 	}
 	else
 	{
-		mTextField->SetSelectionStart( selection + 1 );
-		mTextField->SearchAnchor();
-		atPos = mTextField->SearchNext( flags, text );
-		if ( atPos == -1 && BOXWA( mFindAttrib )->GetValue() )
+		stc->SetSelectionStart( selection + 1 );
+		stc->SearchAnchor();
+		atPos = stc->SearchNext( flags, text );
+		if ( atPos == wxNOT_FOUND && IsWrapAround() )
 		{
-			mTextField->SetSelectionStart( 0 );
-			mTextField->SearchAnchor();
-			atPos = mTextField->SearchNext( flags, text );
+			stc->SetSelectionStart( 0 );
+			stc->SearchAnchor();
+			atPos = stc->SearchNext( flags, text );
 		}
 	}
 
 	// if still not found, then it's not there
-	if ( atPos == -1 )
+	if ( atPos == wxNOT_FOUND )
 	{
-		mTextField->SetSelectionStart( selection ); //reset
-		mFrame->SetStatusText( "Cannot find that word from current page!" );
-		return;
+		stc->SetSelectionStart( selection ); //reset
+		if ( IsWrapAround() ) mFrame->SetStatusText( "Cannot Find: Not Exists." );
+		else                  mFrame->SetStatusText( "Cannot Find: End of Line Reached." );
+		return wxNOT_FOUND;
 	}
 
 	// finally go there
-	mTextField->SetSelection( atPos, atPos + text.size() );
-	mTextField->ScrollToLine( mTextField->GetCurrentLine() );
+	stc->SetSelection( atPos, atPos + text.size() );
+	stc->ScrollToLine( stc->GetCurrentLine() );
 	
-	SETBUF( "Word found at pos: %d, line: %d", atPos, mTextField->GetCurrentLine() + 1 );
+	SETBUF( "Word found at pos: %d, line: %d", atPos, stc->GetCurrentLine() + 1 );
 	mFrame->SetStatusText( buf );
 
-	LOG_DEBUG_FORMAT( LV_TRACE, "Find word: %f (ms)", tm.toc() );
+	LOG_DEBUG_FORMAT( LV_TRACE, "Find word: %.2f (ms)", tm.toc() );
+	return atPos;
 }
 
 void FindFrame::CreateFindPage()
@@ -281,14 +280,41 @@ void FindFrame::OnClose( wxCommandEvent& event )
 	mFrame->Show( false );
 }
 
+bool FindFrame::IsMatchWhole()
+{
+	auto sel = mNotebook->GetSelection();
+	if ( sel == wxNOT_FOUND ) return 0;
+	if ( sel == FIND_PAGE ) return mFindAttrib->BoxMatchWhole->GetValue();
+	return mReplaceAttrib->BoxMatchWhole->GetValue();
+}
+
+bool FindFrame::IsMatchCase()
+{
+	auto sel = mNotebook->GetSelection();
+	if ( sel == wxNOT_FOUND ) return 0;
+	if ( sel == FIND_PAGE ) return mFindAttrib->BoxMatchCase->GetValue();
+	return mReplaceAttrib->BoxMatchCase->GetValue();
+}
+
+bool FindFrame::IsWrapAround()
+{
+	auto sel = mNotebook->GetSelection();
+	if ( sel == wxNOT_FOUND ) return 0;
+	if ( sel == FIND_PAGE ) return mFindAttrib->BoxWrapAround->GetValue();
+	return mReplaceAttrib->BoxWrapAround->GetValue();
+}
+
 int FindFrame::GetFlags()
 {
-	auto currentPage = mNotebook->GetSelection();
-	sPageAttrib* where = mReplaceAttrib;
-	if ( currentPage == FIND_PAGE ) where = mFindAttrib;
+	auto sel = mNotebook->GetSelection();
+	if ( sel == wxNOT_FOUND ) return 0;
+
+	sPageAttrib* where = nullptr;
+	if ( sel == FIND_PAGE ) where = mFindAttrib;
+	else where = mReplaceAttrib;
 
 	int flags = 0;
-	if ( BOXMW( where )->GetValue() ) flags = flags | wxSTC_FIND_WHOLEWORD;
-	if ( BOXMC( where )->GetValue() ) flags = flags | wxSTC_FIND_MATCHCASE;
+	if ( BOXMW( where )->GetValue() ) flags |= wxSTC_FIND_WHOLEWORD;
+	if ( BOXMC( where )->GetValue() ) flags |= wxSTC_FIND_MATCHCASE;
 	return flags;
 }

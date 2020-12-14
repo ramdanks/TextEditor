@@ -104,7 +104,7 @@ void AutoThread::RoutineAutoSave()
 	mSaver.isJoin = false;
 	while ( !mSaver.isJoin )
 	{
-		std::this_thread::sleep_for( std::chrono::milliseconds( Config::mAutosave.Param ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( Config::sAutosave.Param ) );
 		if ( mSaver.isJoin ) break;
 		if ( mSaver.isPause ) continue;
 
@@ -119,7 +119,7 @@ void AutoThread::RoutineAutoHighlight()
 	mHighlighter.isJoin = false;
 	while ( !mHighlighter.isJoin )
 	{
-		std::this_thread::sleep_for( std::chrono::milliseconds( Config::mAutohigh.Param ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( Config::sAutohigh.Param ) );
 		if ( mHighlighter.isJoin ) break;
 		if ( mHighlighter.isPause ) continue;
 
@@ -133,9 +133,10 @@ void AutoThread::RoutineAutoHighlight()
 		if ( !DictionaryFrame::ExistList( textPath ) ) continue;
 
 		auto text = TextField::mPageData[page].TextField->GetText().mbc_str();
-		if ( hash( text ) != hashBefore )
+		size_t hashNow = hash( text );
+		if ( hashNow != hashBefore )
 		{
-			hashBefore = hash( text );
+			hashBefore = hashNow;
 			if ( !DictionaryFrame::StartStyling( textPath, Config::GetDictionaryFlags() ) ) continue;
 			LOG_THREAD_FORMAT( LV_TRACE, "AutoThread Highlighting at page: %d", page );
 		}	

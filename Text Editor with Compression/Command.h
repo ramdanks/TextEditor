@@ -23,7 +23,6 @@ public:
 	CMD operator = ( const CMD& other ) = delete;
 
 	//initialize cmd list, no logging and error logging will be reported.
-	static void Init();
 	//initialize cmd list, logging and error logging will be reported to the desired filepath.
 	static void Init( const std::string& err_filepath, const std::string& log_filepath );
 	static void Recognize( int argc, const char* argv[] );
@@ -31,6 +30,7 @@ public:
 	static void Handle_Unknown();
 
 private:
+	static void CommandList();
 	static inline bool File_Exist( const std::string filepath );
 	
 	static void Handle_Compression( int argc, const char* argv[], bool compress );

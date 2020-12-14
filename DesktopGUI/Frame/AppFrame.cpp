@@ -21,6 +21,17 @@ EVT_MENU( wxID_EXIT, AppFrame::OnClose )
 EVT_CLOSE( AppFrame::OnCloseWindow )
 wxEND_EVENT_TABLE()
 
+#if defined( _WIN32 )
+#define OS_CMDEXPLORE "explorer "
+#define OS_CMDWEB "start "
+#elif defined( __APPLE__ )
+#define OS_CMDEXPLORE "open "
+#define OS_CMDWEB "open "
+#elif defined ( __linux__ )
+#define OS_CMDEXPLORE "nautilus "
+#define OS_CMDWEB "xdg-open "
+#endif
+
 AppFrame::AppFrame( const wxPoint& pos, const wxSize& size )
     : wxFrame( NULL, -1, APP_NAME, pos, size ), isShareInit(false), isPrefInit(false)
 {
@@ -28,7 +39,7 @@ AppFrame::AppFrame( const wxPoint& pos, const wxSize& size )
 
     mStatusBar = CreateStatusBar();
     mStatusBar->SetStatusText( MSG_STATUSBAR );
-    if ( !Config::mGeneral.UseStatbar ) mStatusBar->Show( false );
+    if ( !Config::sGeneral.UseStatbar ) mStatusBar->Show( false );
 
     CreateMenu();
     BindMenu();
@@ -38,9 +49,9 @@ AppFrame::AppFrame( const wxPoint& pos, const wxSize& size )
     ShareFrame::Init( this );
     PreferencesFrame::mMF.Frame = this;
 
-    AutoThread::DeployAutoConnect( Config::mGeneral.CheckConnectionInterval );
-    if ( Config::mAutosave.Use ) AutoThread::DeployAutoSave();
-    if ( Config::mAutohigh.Use ) AutoThread::DeployAutoHighlight();
+    //AutoThread::DeployAutoConnect( Config::sGeneral.CheckConnectionInterval );
+    if ( Config::sAutosave.Use ) AutoThread::DeployAutoSave();
+    if ( Config::sAutohigh.Use ) AutoThread::DeployAutoHighlight();
 }
 
 void AppFrame::CreateMenu()
@@ -214,9 +225,10 @@ void AppFrame::OnCloseWindow( wxCloseEvent & event )
     {
         if ( !TextField::SaveToExit() )
         {
-            auto prompt = wxMessageDialog( this, "Any changes made to the documents will be ignored.\n"
-                                           "Please save your work before exiting, You sure want to Continue ?",
-                                           "Close Window", wxYES_NO );
+            wxString pMsg = "Any changes made to the documents will be ignored.\n"
+                            "Please save your work before exiting\n"
+                            "You want to ignore change?";
+            auto prompt = wxMessageDialog( this, pMsg, "Close Window", wxYES_NO );
             if ( prompt.ShowModal() == wxID_NO )
             {
                 event.Veto();
@@ -243,36 +255,21 @@ void AppFrame::OnAbout( wxCommandEvent& event )
 }
 
 void AppFrame::OnDocumentation( wxCommandEvent& event )
-{
-#if defined( _WIN32 )       
-    system( "start https://github.com/ramdanks/TextEditor" );
-#elif defined( __APPLE__ )  
-    system( "open https://github.com/ramdanks/TextEditor" );
-#elif defined ( __linux__ ) 
-    system( "xdg-open https://github.com/ramdanks/TextEditor" );
-#endif
+{    
+    auto cmd = wxString( OS_CMDWEB ) + "https://github.com/ramdanks/TextEditor";
+    system( cmd );
 }
 
 void AppFrame::OnLogDir( wxCommandEvent& event )
 {
-#if defined( _WIN32 )       
-    system( "explorer log" );
-#elif defined( __APPLE__ )  
-    system( "open log" );
-#elif defined ( __linux__ ) 
-    system( "nautilus log" );
-#endif
+    auto cmd = OS_CMDEXPLORE + Config::sAppPath + LOG_DIR_RELATIVE;
+    system( cmd );
 }
 
 void AppFrame::OnReportBug( wxCommandEvent& event )
 {
-#if defined( _WIN32 )       
-    system( "start https://forms.gle/2Cu4BBEr3V5YGwpZA" );
-#elif defined( __APPLE__ )  
-    system( "open https://forms.gle/2Cu4BBEr3V5YGwpZA" );
-#elif defined ( __linux__ ) 
-    system( "xdg-open https://forms.gle/2Cu4BBEr3V5YGwpZA" );
-#endif
+    auto cmd = wxString( OS_CMDWEB ) + "https://forms.gle/2Cu4BBEr3V5YGwpZA";
+    system( cmd );
 }
 
 void AppFrame::OnStayOnTop( wxCommandEvent& event )

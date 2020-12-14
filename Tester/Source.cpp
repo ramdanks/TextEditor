@@ -55,7 +55,7 @@ bool worker( const filesystem::path& filepath )
 
 int main( int argc, const char** argv )
 {
-    TIMER_FUNCTION( timer, MS, false );
+    TIMER_FUNCTION( timer, MS, true );
 
     if ( argc != 2 )
     {

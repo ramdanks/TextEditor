@@ -6,7 +6,7 @@
 #define APP_NAME          "Mémoriser"
 #define DEBUG_NAME        "Mémoriser - Debug Console"
 #define DICT_NAME         "Mémoriser - Dictionary"
-#define CONFIG_FILEPATH   "config.cfg"
+#define CONFIG_FILE       "config.cfg"
 
 #define TYPE_BOOL 1
 #define TYPE_INT 4
@@ -96,6 +96,7 @@ class Config
 	};
 
 public:
+	static void Init();
 	static void FetchData();
 	static void LoadDefaultConfig();
 	static void SaveConfig();
@@ -107,18 +108,20 @@ public:
 	static wxFont BuildFont();
 	static void SetFont( wxFont font );
 
-	static Font mFont;
-	static Style mStyle;
-	static General mGeneral;
-	static AutoThread mAutosave;
-	static AutoThread mAutohigh;
-	static AutoThread mAutocomp;
-	static Notebook mNotebook;
-	static Dictionary mDictionary;
-	static Temporary mTemp;
+	static wxString sAppPath;
+	static Font sFont;
+	static Style sStyle;
+	static General sGeneral;
+	static AutoThread sAutosave;
+	static AutoThread sAutohigh;
+	static AutoThread sAutocomp;
+	static Notebook sNotebook;
+	static Dictionary sDictionary;
+	static Temporary sTemp;
 
 private:
 	static void MakeTemplate();
+	static wxString mConfigFilepath;
 
 	static std::vector<sConfigReference> mTemplate;
 };

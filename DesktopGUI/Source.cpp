@@ -6,6 +6,12 @@
 #include "Frame/AppFrame.h"
 #include "TextField.h"
 
+#ifndef _DIST
+#define DEBUG_CONSOLE true
+#else
+#define DEBUG_CONSOLE false
+#endif
+
 class MyApp : public wxApp
 {
 public:
@@ -28,25 +34,25 @@ wxIMPLEMENT_APP( MyApp ); //entry point program
 
 bool MyApp::OnInit()
 {
-    Util::Timer tm( "Application Init", ADJUST, false );
+    TIMER_SCOPE( tm, "Application Init", ADJUST, false );
 
     if ( InstanceExist() ) return false;
-#ifndef _DIST 
-    LogGUI::Init( NULL, true ); 
-#else
-    LogGUI::Init( NULL, false );
-#endif
+
+    Config::Init();
+    LogGUI::Init( NULL, DEBUG_CONSOLE );
+
     try
     {
         //initialization
         Config::FetchData();
         Image::FetchData();
 
-        if ( Config::mGeneral.UseSplash ) ShowSplashScreen();
+        if ( Config::sGeneral.UseSplash ) ShowSplashScreen();
 
         //load language from configuration
-        if ( !Language::LoadMessage( static_cast<LanguageID>( Config::mGeneral.LanguageID ) ) ) {
-            LOG_ALL_FORMAT( LV_INFO, "Problem importing language with ID: %d", Config::mGeneral.LanguageID ); 
+        if ( !Language::LoadMessage( static_cast<LanguageID>( Config::sGeneral.LanguageID ) ) )
+        {
+            LOG_ALL_FORMAT( LV_INFO, "Problem importing language with ID: %d", Config::sGeneral.LanguageID ); 
         }
 
         //create main frame
@@ -55,12 +61,13 @@ bool MyApp::OnInit()
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
 
         //catch expect argument to text file
-        if ( CatchArgs() ) {
+        if ( CatchArgs() )
+        {
             LOG_ALL( LV_INFO, "Argument catched!" );
         }
 
         //finally
-        if ( Config::mGeneral.UseSplash ) DestroySplashScreen();
+        if ( Config::sGeneral.UseSplash ) DestroySplashScreen();
         mMainFrame->Show();
         mMainFrame->Raise();
     }
@@ -74,6 +81,7 @@ bool MyApp::OnInit()
         LOG_FILE( LV_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
+
     LOG_ALL( LV_INFO, tm.Toc_String() );
     return true;
 }
@@ -124,9 +132,13 @@ bool MyApp::CatchArgs()
         std::string fpath;
 
         if ( wxIsAbsolutePath( wxGetApp().argv[1] ) )
+        {
             fpath = std::string( wxGetApp().argv[1] );
+        }
         else                                         
-            fpath = std::string( wxGetCwd() ) + '\\' + wxGetApp().argv[1];
+        {
+            fpath = std::string( wxGetCwd() + '\\' + wxGetApp().argv[1] );
+        }
 
         ok = TextField::LoadFile( fpath );
         THROW_ERR_IFNOT( ok, "TextField cannot load file:" + fpath );

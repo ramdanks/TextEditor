@@ -5,7 +5,7 @@ class Image
 public:
 	static void FetchData();
 	static wxBitmap& GetImg( size_t index );
-	static size_t AddImg( const std::string& filepath );
+	static size_t AddImg( const wxString& filepath );
 
 private:
 	static std::vector<wxBitmap> mImageVector;
@@ -16,7 +16,7 @@ private:
 #define IMG_SAVE      Image::GetImg(2)
 #define IMG_UNSAVE    Image::GetImg(3)
 
-#define IMG_NULL_FILEPATH      "resource/img/gallery.bmp"
-#define IMG_SPLASH_FILEPATH    "resource/splash.bmp"
-#define IMG_SAVE_FILEPATH      "resource/img/save.bmp"
-#define IMG_UNSAVE_FILEPATH    "resource/img/unsave.bmp"
+#define IMG_NULL_FILEPATH      "\\resource\\img\\gallery.bmp"
+#define IMG_SPLASH_FILEPATH    "\\resource\\splash.bmp"
+#define IMG_SAVE_FILEPATH      "\\resource\\img\\save.bmp"
+#define IMG_UNSAVE_FILEPATH    "\\resource\\img\\unsave.bmp"

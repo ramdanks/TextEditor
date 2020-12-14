@@ -13,10 +13,11 @@ wxStyledTextCtrl* LogGUI::mThreadTC;
 
 void LogGUI::Init( wxWindow* parent, bool GUI )
 {
-	Filestream::Create_Directories( "log" );
+	if ( !wxDir::Exists( Config::sAppPath + LOG_DIR_RELATIVE ) )
+		wxDir::Make( Config::sAppPath + LOG_DIR_RELATIVE );
 
-	mLogFile = LOG_FILEPATH;
-	mErrFile = ERR_FILEPATH;
+	mLogFile = Config::sAppPath + LOG_PATH_RELATIVE;
+	mErrFile = Config::sAppPath + ERR_PATH_RELATIVE;
 
 	std::vector<uint8_t> Format = { FORMAT_TIME, FORMAT_SPACE, FORMAT_LEVEL, FORMAT_SPACE, FORMAT_MSG };
 	mLog = new Util::Logging( Format );

@@ -13,22 +13,8 @@
 Util::Timer tm( "", MS, false );
 Util::Logging clog( { FORMAT_LEVEL, FORMAT_TIME, FORMAT_SPACE, FORMAT_MSG } );
 
-void CMD::Init()
-{
-	CmdList.reserve( 10 );
-	//command list:      "cmd"                   argument                             info
-	CmdList.push_back( { CMD_HELP,				"",						            "help, show all usable command"									} );
-	CmdList.push_back( { CMD_VERSION,			"",						            "version, show current revision of compressor"					} );
-	CmdList.push_back( { CMD_ABOUT,				"",						            "about, show information about compressor"						} );
-	CmdList.push_back( { CMD_BENCHMARK,			"iteration    <-mt>",               "benchmark, test your device compression speed"					} );
-	CmdList.push_back( { CMD_COMPRESS,			"input        output    <-mt>",     "compress, compress input file and output to compressed format" } );
-	CmdList.push_back( { CMD_DECOMPRESS,		"input        output    <-mt>",	    "decompress, decompress file and return to original format"		} );
-	CmdList.push_back( { CMD_READSIZE,			"input",				            "read size, check your file compression and original size"		} );
-}
-
 void CMD::Init( const std::string& err_filepath, const std::string& log_filepath )
 {
-	Init();
 	FileErr = err_filepath;
 	FileLog = log_filepath;
 }
@@ -48,6 +34,19 @@ void CMD::Recognize( int argc, const char* argv[] )
 bool CMD::isCommand( const char* arg, const char* other )
 {
 	return !strcmp( arg, other );
+}
+
+void CMD::CommandList()
+{
+	CmdList.reserve( 10 );
+	//command list:      "cmd"                   argument                             info
+	CmdList.push_back( { CMD_HELP,				"",						            "help, show all usable command" } );
+	CmdList.push_back( { CMD_VERSION,			"",						            "version, show current revision of compressor" } );
+	CmdList.push_back( { CMD_ABOUT,				"",						            "about, show information about compressor" } );
+	CmdList.push_back( { CMD_BENCHMARK,			"iteration    <-mt>",               "benchmark, test your device compression speed" } );
+	CmdList.push_back( { CMD_COMPRESS,			"input        output    <-mt>",     "compress, compress input file and output to compressed format" } );
+	CmdList.push_back( { CMD_DECOMPRESS,		"input        output    <-mt>",	    "decompress, decompress file and return to original format" } );
+	CmdList.push_back( { CMD_READSIZE,			"input",				            "read size, check your file compression and original size" } );
 }
 
 inline bool CMD::File_Exist( const std::string filepath )
@@ -239,6 +238,7 @@ void CMD::Handle_About()
 
 void CMD::Handle_Help()
 {
+	if ( CmdList.empty() ) CommandList();
 	printf( "Options:\n" );
 	for ( auto i : CmdList )
 	{

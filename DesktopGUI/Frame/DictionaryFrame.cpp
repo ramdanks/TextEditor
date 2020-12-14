@@ -4,6 +4,7 @@
 #include "../Feature/LogGUI.h"
 #include "../Feature/Config.h"
 #include "../TextField.h"
+#include <execution>
 
 wxWindow* DictionaryFrame::mParent;
 wxFrame* DictionaryFrame::mFrame;
@@ -247,9 +248,9 @@ void DictionaryFrame::CreateContent()
 
 void DictionaryFrame::Update()
 {
-	MatchCase->SetValue( Config::mDictionary.MatchCase );
-	MatchWhole->SetValue( Config::mDictionary.MatchWhole );
-	UniformClr->SetValue( Config::mDictionary.UniformClr );
+	MatchCase->SetValue( Config::sDictionary.MatchCase );
+	MatchWhole->SetValue( Config::sDictionary.MatchWhole );
+	UniformClr->SetValue( Config::sDictionary.UniformClr );
 }
 
 void DictionaryFrame::UpdatePreview( const wxString& textPath, const wxColour& clr )
@@ -409,9 +410,9 @@ void DictionaryFrame::OnOK( wxCommandEvent& event )
 {
 	PROFILE_FUNC();
 
-	Config::mDictionary.MatchCase = MatchCase->GetValue();
-	Config::mDictionary.MatchWhole = MatchWhole->GetValue();
-	Config::mDictionary.UniformClr = UniformClr->GetValue();
+	Config::sDictionary.MatchCase = MatchCase->GetValue();
+	Config::sDictionary.MatchWhole = MatchWhole->GetValue();
+	Config::sDictionary.UniformClr = UniformClr->GetValue();
 
 	for ( auto const& pages : mData )
 	{
@@ -442,7 +443,7 @@ void DictionaryFrame::ResetStyling( const wxString& textPath )
 	int style = 40;
 	for ( auto& dict : *list )
 	{
-		if ( Config::mDictionary.UniformClr ) dict.Style = style;
+		if ( Config::sDictionary.UniformClr ) dict.Style = style;
 		else dict.Style = style++;
 		stc->StyleSetForeground( dict.Style, dict.TextColour );
 	}
@@ -454,16 +455,20 @@ void DictionaryFrame::ResetStyling( const wxString& textPath )
 bool DictionaryFrame::StartStyling( const wxString& textPath, int flags )
 {
 	PROFILE_FUNC();
+	static std::mutex sMutex;
+	std::lock_guard<std::mutex> lock( sMutex );
 
 	auto stc = RequestSTC( textPath );
 	auto list = RequestDictionaryList( textPath );
 	if ( !list ) return false;
 
+	auto maxPos = stc->GetTextLength();
 	for ( auto const& dict : *list )
 		for ( auto const& word : dict.Dict.GetContent() )
 			for ( int get = -1; ; )
 			{
-				get = stc->FindText( get + 1, stc->GetTextLength(), word.first, flags );
+				// findtext bug if working on large text := beacause thread?
+				get = stc->FindText( get + 1, maxPos, word.first, flags );
 				if ( get == -1 ) break;
 
 				stc->StartStyling( get );
@@ -486,13 +491,13 @@ void DictionaryFrame::CreateSuggestion( const wxString& textPath )
 		auto content = dict.Dict.GetContent();
 		for ( auto& key : content )
 		{
-			if ( words.size() > Config::mAutocomp.Param ) break;
+			if ( words.size() > Config::sAutocomp.Param ) break;
 			words.emplace_back( key.first );
 		}
 	}
 
 	// sort for auto completion
-	std::sort( words.begin(), words.end(), []( std::string const& a, std::string const& b )
+	std::sort( std::execution::par, words.begin(), words.end(), []( std::string const& a, std::string const& b )
 	{ return a < b; } );
 
 	// insert autocompletion with seperator and already sorted
