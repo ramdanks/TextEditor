@@ -85,7 +85,7 @@ public:
 		{
 			myfile.seekg( 0, myfile.end );
 			auto filesize = myfile.tellg();
-			if ( filesize > 0 )
+			if (filesize)
 			{
 				myfile.seekg( 0 );
 				buf.resize( filesize );
@@ -195,34 +195,5 @@ public:
 		auto myfile = std::fstream( filepath, std::ios::in | std::ios::binary );
 		myfile.seekg( 0, myfile.end );
 		return size_t( myfile.tellg() );
-	}
-
-	struct sCompressedInfo
-	{
-		size_t ClusterSize;
-		size_t AddressingSize;
-		size_t CompressedSize;
-		size_t OriginalSize;
-	};
-
-	static sCompressedInfo GetCompressedInfo( std::string filepath )
-	{
-		sCompressedInfo info;
-		auto vCompressed = Read_Bin( filepath );
-		info.ClusterSize = 0;
-		info.CompressedSize = vCompressed.size();
-		info.AddressingSize = vCompressed[0];
-
-		if ( info.AddressingSize == 0 ) return info;
-
-		constexpr uint32_t MaskBytes[] = { 0x0, 0xFF, 0xFFFF, 0xFFFFFF, 0xFFFFFFFF };
-		for ( uint32_t readIndex = 1; ; readIndex += info.AddressingSize )
-		{
-			uint32_t readAddress = *(uint32_t*) &vCompressed[readIndex];
-			readAddress = readAddress & MaskBytes[info.AddressingSize];
-			if ( readAddress == 0 ) break;
-			info.ClusterSize++;
-		}
-		return info;
 	}
 };

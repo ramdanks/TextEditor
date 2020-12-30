@@ -358,7 +358,7 @@ void PreferencesFrame::UpdateAutohigh()
 void PreferencesFrame::UpdateAutosave()
 {
 	auto isAutosave = !mTP.CB_AS->GetValue();
-	Config::sAutosave.Param = mTP.SC_AS->GetValue() * 1000;
+	Config::sAutosave.Param = mTP.SC_AS->GetValue() * 1000; //change from ms to sec
 	if ( Config::sAutosave.Use != isAutosave )
 	{
 		Config::sAutosave.Use = isAutosave;

@@ -34,9 +34,10 @@ wxIMPLEMENT_APP( MyApp ); //entry point program
 
 bool MyApp::OnInit()
 {
-    TIMER_SCOPE( tm, "Application Init", ADJUST, false );
+    PROFILE_FUNC();
 
-    if ( InstanceExist() ) return false;
+    if ( InstanceExist() )
+        return false;
 
     Config::Init();
     LogGUI::Init( NULL, DEBUG_CONSOLE );
@@ -47,7 +48,8 @@ bool MyApp::OnInit()
         Config::FetchData();
         Image::FetchData();
 
-        if ( Config::sGeneral.UseSplash ) ShowSplashScreen();
+        if ( Config::sGeneral.UseSplash )
+            ShowSplashScreen();
 
         //load language from configuration
         if ( !Language::LoadMessage( static_cast<LanguageID>( Config::sGeneral.LanguageID ) ) )
@@ -57,17 +59,15 @@ bool MyApp::OnInit()
 
         //create main frame
         mMainFrame = new AppFrame( wxPoint( 200, 200 ), wxSize( 800, 600 ) );
-        THROW_ERR_IFNULLPTR( mMainFrame, "Problem creating Application Frame OnInit wxApp!" );
         mMainFrame->SetIcon( wxICON( ICON_APP ) );
 
         //catch expect argument to text file
-        if ( CatchArgs() )
-        {
-            LOG_ALL( LV_INFO, "Argument catched!" );
-        }
+        if( wxGetApp().argc != 1 )
+            CatchArgs();
 
         //finally
-        if ( Config::sGeneral.UseSplash ) DestroySplashScreen();
+        if ( Config::sGeneral.UseSplash )
+            DestroySplashScreen();
         mMainFrame->Show();
         mMainFrame->Raise();
     }
@@ -81,8 +81,6 @@ bool MyApp::OnInit()
         LOG_FILE( LV_FATAL, "Unhandled Exception at OnInit wxApp!" );
         return false;
     }
-
-    LOG_ALL( LV_INFO, tm.Toc_String() );
     return true;
 }
 
@@ -125,7 +123,8 @@ void MyApp::DestroySplashScreen()
 
 bool MyApp::CatchArgs()
 {
-    if ( wxGetApp().argc == 1 ) return false;
+    PROFILE_FUNC();
+
     try
     {
         bool ok;

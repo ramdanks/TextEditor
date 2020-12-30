@@ -5,150 +5,112 @@
 #define EMPTY_CPINFO { nullptr, 0 }
 constexpr uint8_t MaskTemplate[9] = { 0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF };
 
-uint8_t* HuffmanCodes::Compress( sCompressInfo info, bool force )
+sCompressInfo HuffmanCodes::Compress( const uint8_t* src, size_t size, bool force )
 {
-	if ( info.SizeSource == 0 || info.pData == nullptr ) return nullptr;
+	sCompressInfo res;
+	res.pData = nullptr;
+	res.Size = 0;
+
+	if (size == 0 || src == nullptr) return res;
 
 	bool ByteCombination[BYTESIZE];
-	memset( ByteCombination, 0x00, BYTESIZE );
+	memset(ByteCombination, 0x00, BYTESIZE);
 
 	//find amount of byte combination in source data
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		ByteCombination[info.pData[i]] = true;
+	for ( uint64_t i = 0; i < size; i++ )
+		ByteCombination[src[i]] = true;
 
 	//based on amount of byte combination in sourcedata, create new value and store old value
 	std::vector<uint8_t> OldValueTable;
-	OldValueTable.reserve( BYTESIZE );
+	OldValueTable.reserve(BYTESIZE);
 	uint8_t NewValueTable[BYTESIZE];
-	memset( NewValueTable, 0x00, BYTESIZE );
+	memset(NewValueTable, 0x00, BYTESIZE);
 
 	uint8_t NewValue = 0;
-	for ( size_t i = 0; i < BYTESIZE; i++ )
+	for ( size_t i = 0; i < BYTESIZE; ++i )
 	{
 		if ( ByteCombination[i] )
 		{
 			//the reason NewValue starts at "1" is because we need "0" to represent a terminating pointer
 			//when we merge the compressed value, at the end we put "0" to indicate the end of data
 			//this trick is to seperates or identify where's the compressed data and the decoder, so no need to memorize location
-			NewValue++;
-			NewValueTable[i] = NewValue;
-			OldValueTable.emplace_back( i );
+			NewValueTable[i] = ++NewValue;
+			OldValueTable.emplace_back(i);
+			if (NewValue > 0x7F) break;
 		}
 	}
 
-	//calculate HuffmanCodes size
+	// newvalue needs 8 bit so compression isn't going to help
+	if (NewValue > 0x7F)
+	{ 
+		if (!force) return res;
+		return HuffmanCodes::Uncompressed(src, size);
+	}
+
+	// calculate HuffmanCodes size
 	auto BitLenData = Len_Bit( NewValue ); //find bit length to represent Highest number of new value
 	auto BitLenDecoder = Len_Bit( OldValueTable.back() ); //find bit length to represent Highest number of old value
 
-	//NewValue represent how much combination of bytes in compressed format
-	uint64_t TotalAllocationData = std::ceil( (double) BitLenData * (info.SizeSource + 1) / 8 ); //find amount of bytes to store compressed data
+	// NewValue represent how much combination of bytes in compressed format
+	uint64_t TotalAllocationData = std::ceil( (double) BitLenData * (size + 1) / 8 ); //find amount of bytes to store compressed data
 	uint64_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 ); //find amount of bytes to store old (original) data
 	uint64_t TotalAllocationCombined = 1 + TotalAllocationData + TotalAllocationDecoder; //header need 1 byte
-	this->CompressedSize = TotalAllocationCombined;
 
-	//if HuffmanCodes doesnt reduce it's original size, then return null
-	if ( TotalAllocationCombined >= info.SizeSource )
+	// if doesnt reduce original size then compression isn't going to help
+	if (TotalAllocationCombined >= size)
 	{
-		if ( !force ) return nullptr;
-		else
-		{
-			this->CompressedSize = 1 + info.SizeSource;
-			return HuffmanCodes::Uncompressed( info );
-		}
+		if (!force) return res;
+		return HuffmanCodes::Uncompressed(src, size);
 	}
 
-	uint8_t* pCompressed = (uint8_t*) calloc( this->CompressedSize, sizeof( uint8_t ) );
+	//allocate compressed size
+	res.Size  = TotalAllocationCombined;
+	res.pData = new uint8_t[TotalAllocationCombined];
 
+
+	// TODO: i think we can elliminate this
 	//create buffer for HuffmanCodes data based on original order
-	std::vector<uint8_t> BufferCompressedData;
-	BufferCompressedData.resize( info.SizeSource + 1 ); //additional bytes for null pointer
-	BufferCompressedData[info.SizeSource] = 0; //add terminating pointer at the end
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		BufferCompressedData[i] = NewValueTable[info.pData[i]];
+	uint8_t* BufferCompressedData = new uint8_t[size + 1]; //additional bytes for null pointer
+	BufferCompressedData[size] = 0; //add terminating pointer at the end
+	for ( size_t i = 0; i < size; i++ )
+		BufferCompressedData[i] = NewValueTable[src[i]];
 	
 	//create header
 	sCompressHeader header;
 	header.DataLength = BitLenData;
 	header.DecoderLength = BitLenDecoder;
-	pCompressed[0] = Header_Create( header );
+	res.pData[0] = Header_Create( header );
 
 	//combine header, compressed value, decoder table to pCompressed buffer.
-	Merge_HuffmanCodes( &pCompressed[1], header, BufferCompressedData, OldValueTable );
+	Merger( &res.pData[1], BitLenData, BufferCompressedData, size + 1 );
+	Merger( &res.pData[1 + TotalAllocationData], BitLenDecoder, &OldValueTable[0], OldValueTable.size() );
 
-	return pCompressed;
+	delete[] BufferCompressedData;
+
+	return res;
 }
 
-void HuffmanCodes::Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo info, bool force )
+sCompressInfo HuffmanCodes::Decompress( const sCompressInfo& src )
 {
-	if ( info.SizeSource == 0 || info.pData == nullptr ) return;
-
-	bool ByteCombination[BYTESIZE];
-	memset( ByteCombination, 0x00, BYTESIZE );
-
-	//find amount of byte combination in source data
-	for ( uint64_t i = 0; i < info.SizeSource; i++ )
-		ByteCombination[info.pData[i]] = true;
-
-	//based on amount of byte combination in sourcedata, create new value and store old value
-	std::vector<uint8_t> OldValueTable;
-	OldValueTable.reserve( BYTESIZE );
-	uint8_t NewValueTable[BYTESIZE];
-	memset( NewValueTable, 0x00, BYTESIZE );
-
-	uint8_t NewValue = 0;
-	for ( size_t i = 0; i < BYTESIZE; i++ )
-	{
-		if ( ByteCombination[i] )
-		{
-			//the reason NewValue starts at "1" is because we need "0" to represent a terminating pointer
-			//when we merge the compressed value, at the end we put "0" to indicate the end of data
-			//this trick is to seperates or identify where's the compressed data and the decoder, so no need to memorize location
-			NewValue++;
-			NewValueTable[i] = NewValue;
-			OldValueTable.emplace_back( i );
-		}
-	}
-	//calculate HuffmanCodes size
-	auto BitLenData = Len_Bit( NewValue ); //find bit length to represent Highest number of new value
-	auto BitLenDecoder = Len_Bit( OldValueTable.back() ); //find bit length to represent Highest number of old value
-
-	//NewValue represent how much combination of bytes in compressed format
-	uint32_t TotalAllocationData = std::ceil( (double) BitLenData * ( info.SizeSource + 1 ) / 8 ); //find amount of bytes to store compressed data
-	uint32_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 ); //find amount of bytes to store old (original) data
-	uint32_t TotalAllocationCombined = 1 + TotalAllocationData + TotalAllocationDecoder; //header need 1 byte
-
-	//if HuffmanCodes doesnt reduce it's original size, then return null
-	if ( TotalAllocationCombined >= info.SizeSource )
-	{
-		if ( !force ) return;
-		else
-		{
-			return HuffmanCodes::Uncompressed_Buffer( info, vBuffer );
-		}
-	}
-
-	vBuffer.resize( TotalAllocationCombined );
-
-	//create buffer for HuffmanCodes data based on original order
-	std::vector<uint8_t> BufferCompressedData;
-	BufferCompressedData.resize( info.SizeSource + 1 ); //additional bytes for null pointer
-	BufferCompressedData[info.SizeSource] = 0; //add terminating pointer at the end
-	for ( uint32_t i = 0; i < info.SizeSource; i++ )
-		BufferCompressedData[i] = NewValueTable[info.pData[i]];
-
-	//create header
-	sCompressHeader header;
-	header.DataLength = BitLenData;
-	header.DecoderLength = BitLenDecoder;
-	vBuffer[0] = Header_Create( header );
-
-	//combine header, compressed value, decoder tablo to pCompressed buffer.
-	Merge_HuffmanCodes( &vBuffer[1], header, BufferCompressedData, OldValueTable );
+	return Decompress( src.pData, src.Size );
 }
 
-cpinfo HuffmanCodes::Decompress( const uint8_t* pCompressed )
+sCompressInfo HuffmanCodes::Decompress( const uint8_t* src, size_t size )
 {
-	if ( !pCompressed ) return EMPTY_CPINFO;
+	sCompressHeader header = Header_Read( src );
+	if ( !needDecompression( header ) )
+	{
+		//the actual size if (size-1) because we ignore HuffmanCodes header which cost 1 byte.
+		uint8_t* pDecompressed = new uint8_t[size - 1];
+		memcpy( pDecompressed, &src[1], size - 1 );
+		return { pDecompressed, size - 1 };
+	}
+	return Decompress_Pointer( src );
+}
+
+sCompressInfo HuffmanCodes::Decompress_Pointer( const uint8_t* pCompressed )
+{
+	if ( !pCompressed ) return { nullptr, 0 };
 
 	uint8_t* pOriginal = nullptr;
 	sCompressHeader header = Header_Read( pCompressed );
@@ -157,8 +119,8 @@ cpinfo HuffmanCodes::Decompress( const uint8_t* pCompressed )
 	Expand_HuffmanCodes( pCompressed, header, vBufferData, vBufferDecoder );
 
 	//allocate, original size is determined
-	size_t size = vBufferData.size() * sizeof uint8_t;
-	pOriginal = (uint8_t*) malloc( size );
+	size_t size = vBufferData.size();
+	pOriginal = new uint8_t[size];
 
 	//translation with decoder table
 	for ( size_t i = 0; i < size; i++ )
@@ -169,89 +131,30 @@ cpinfo HuffmanCodes::Decompress( const uint8_t* pCompressed )
 	return { pOriginal, size };
 }
 
-void HuffmanCodes::Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed )
+sCompressInfo HuffmanCodes::Uncompressed( const uint8_t* src, size_t size )
 {
-	if ( pCompressed == nullptr ) return;
+	sCompressInfo res;
+	res.Size = 1 + size;
+	res.pData = (uint8_t*) malloc( 1 + size );
 
-	sCompressHeader header = Header_Read( pCompressed );
-	std::vector<uint8_t> vBufferData, vBufferDecoder;
-	Expand_HuffmanCodes( pCompressed, header, vBufferData, vBufferDecoder );
-
-	//reserve size to avoid dynamic allocation
-	vBuffer.resize( vBufferData.size() );
-
-	//translation with decoder table
-	for ( size_t i = 0; i < vBufferData.size(); i++ )
-		vBuffer[i] = vBufferDecoder[vBufferData[i] - 1];
-}
-
-cpinfo HuffmanCodes::Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize )
-{
-	sCompressHeader header = Header_Read( pCompressed );
-	if ( !needDecompression( header ) )
-	{
-		//pSize is size of an uncompressed format
-		//the actual size if (size-1) because we ignore HuffmanCodes header which cost 1 byte.
-		auto size = (pSize - 1) * sizeof uint8_t;
-		uint8_t* pOriginal = (uint8_t*) malloc( size );
-		memcpy( pOriginal, &pCompressed[1], size );
-		return { pOriginal, size };
-	}
-	return Decompress( pCompressed );
-}
-
-void HuffmanCodes::Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed, uint32_t pSize )
-{
-	sCompressHeader header = Header_Read( pCompressed );
-	if ( !needDecompression( header ) )
-	{
-		uint32_t OriginalSize = pSize - 1;
-		vBuffer.resize( OriginalSize );
-		for ( uint32_t i = 0; i < OriginalSize; i++ ) vBuffer[i] = pCompressed[1 + i];
-		return;
-	}
-	Decompress_Buffer( vBuffer, pCompressed );
-}
-
-uint8_t* HuffmanCodes::Uncompressed( sCompressInfo info )
-{
-	this->CompressedSize = 1 + info.SizeSource;
-	uint8_t* pUncompressed = (uint8_t*) malloc( 1 + info.SizeSource );
 	sCompressHeader header;
 	header.DataLength = 8;
 	header.DecoderLength = 0;
-	pUncompressed[0] = Header_Create( header );
-	memcpy( &pUncompressed[1], info.pData, info.SizeSource );
-	return pUncompressed;
+	res.pData[0] = Header_Create( header );
+	memcpy( &res.pData[1], src, size );
+
+	return res;
 }
 
-void HuffmanCodes::Uncompressed_Buffer( sCompressInfo info, std::vector<uint8_t>& vBuffer )
+size_t HuffmanCodes::Calc_Comp_Size( const uint8_t* src, size_t size )
 {
-	vBuffer.resize( 1 + info.SizeSource );
-	sCompressHeader header;
-	header.DataLength = 8;
-	header.DecoderLength = 0;
-	vBuffer[0] = Header_Create( header );
-	memcpy( &vBuffer[1], info.pData, info.SizeSource );
-}
+	if ( size == 0 || src == nullptr ) return 0;
 
-size_t HuffmanCodes::Compressed_Size() const
-{
-	return this->CompressedSize;
-}
+	bool ByteCombination[BYTESIZE];
+	memset( ByteCombination, 0x00, BYTESIZE );
 
-size_t HuffmanCodes::Decompressed_Size() const
-{
-	return this->DecompressedSize;
-}
-
-uint32_t HuffmanCodes::Calc_Comp_Size( sCompressInfo info )
-{
-	if ( info.SizeSource == 0 || info.pData == nullptr ) return 0;
-
-	bool* ByteCombination = (bool*) calloc( BYTESIZE, sizeof( bool ) );
-	for ( uint32_t i = 0; i < info.SizeSource; i++ )
-		ByteCombination[info.pData[i]] = true;
+	for ( uint32_t i = 0; i < size; i++ )
+		ByteCombination[src[i]] = true;
 
 	uint8_t OriginalHighestValue = 0;
 	uint8_t NewValue = 0;
@@ -269,8 +172,8 @@ uint32_t HuffmanCodes::Calc_Comp_Size( sCompressInfo info )
 	auto BitLenData = Len_Bit( NewValue );
 	auto BitLenDecoder = Len_Bit( OriginalHighestValue );
 
-	uint32_t TotalAllocationData = std::ceil( (double) BitLenData * ( info.SizeSource + 1 ) / 8 );
-	uint32_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 );
+	size_t TotalAllocationData = std::ceil( (double) BitLenData * ( size + 1 ) / 8 );
+	size_t TotalAllocationDecoder = std::ceil( (double) BitLenDecoder * NewValue / 8 );
 	return 1 + TotalAllocationData + TotalAllocationDecoder;
 }
 
@@ -299,57 +202,39 @@ sCompressHeader HuffmanCodes::Header_Read( const uint8_t* pCompressed )
 	return header;
 }
 
-void HuffmanCodes::Merge_HuffmanCodes( uint8_t* pBuffer, const sCompressHeader& header,  const std::vector<uint8_t>& vCompressed, const std::vector<uint8_t>& vDecoder )
+void HuffmanCodes::Merger( uint8_t* pBuf, uint8_t bitlen, uint8_t* lookup, size_t size )
 {
 	size_t write_index = 0;
-	for ( int i = 0; i < 2; i++ )
+	uint8_t available_bit = BYTELEN;
+	uint8_t concat, char_read, get, bit_limit;
+	concat = char_read = get = 0;
+
+	for ( size_t read_index = 0; read_index < size; read_index++ )
 	{
-		size_t write_size;
-		const uint8_t* data_ref;
-		uint8_t available_bit = BYTELEN;
-		uint8_t concat, char_read, get, bit_limit;
-		concat = char_read = get = 0;
-		if ( i == 0 )
+		if ( available_bit < bitlen )
 		{
-			data_ref = &vCompressed[0];
-			bit_limit = header.DataLength;
-			write_size = vCompressed.size();
+			if ( available_bit != (uint8_t) 0 )
+			{
+				char_read = lookup[read_index] << get;
+				concat = concat | char_read;
+			}
+			pBuf[write_index] = concat;
+			write_index++;
+
+			get = available_bit == 0 ? bitlen : bitlen - available_bit;
+			char_read = lookup[read_index] >> available_bit;
+			concat = char_read;
+			available_bit = BYTELEN - get;
 		}
 		else
 		{
-			data_ref = &vDecoder[0];
-			bit_limit = header.DecoderLength;
-			write_size = vDecoder.size();
+			char_read = lookup[read_index] << get;
+			get += bitlen;
+			available_bit -= bitlen;
+			concat = concat | char_read;
 		}
-
-		for ( size_t read_index = 0; read_index < write_size; read_index++ )
-		{
-			if ( available_bit < bit_limit )
-			{
-				if ( available_bit != (uint8_t) 0 )
-				{
-					char_read = data_ref[read_index] << get;
-					concat = concat | char_read;
-				}
-				pBuffer[write_index] = concat;
-				write_index++;
-
-				get = available_bit == 0 ? bit_limit : bit_limit - available_bit;
-				char_read = data_ref[read_index] >> available_bit;
-				concat = char_read;
-				available_bit = BYTELEN - get;
-			}
-			else
-			{
-				char_read = data_ref[read_index] << get;
-				get += bit_limit;
-				available_bit -= bit_limit;
-				concat = concat | char_read;
-			}
-		}
-		pBuffer[write_index] = concat;
-		write_index++;
 	}
+	pBuf[write_index] = concat;
 }
 
 void HuffmanCodes::Expand_HuffmanCodes( const uint8_t* pCompressed, const sCompressHeader& header, std::vector<uint8_t>& vBufferData, std::vector<uint8_t>& vBufferDecoder )

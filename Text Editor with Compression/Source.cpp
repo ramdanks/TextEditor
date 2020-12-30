@@ -1,5 +1,5 @@
 #include "Command.h"
-#include "../Utilities/Filestream.h"
+#include "Compressor/Compression.h"
 
 int main( int argc, const char* argv[] )
 {

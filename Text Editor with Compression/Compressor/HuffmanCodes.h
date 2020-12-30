@@ -8,12 +8,6 @@
 struct sCompressInfo
 {
 	uint8_t* pData;
-	uint32_t SizeSource;
-};
-
-struct cpinfo
-{
-	uint8_t* pData;
 	size_t Size;
 };
 
@@ -25,35 +19,21 @@ struct sCompressHeader
 
 class HuffmanCodes
 {
-	size_t CompressedSize;
-	size_t DecompressedSize;
-
 public:
-	HuffmanCodes() : CompressedSize(0) {}
-
 	//function will return nullptr if fail to reduce size. force=true will compress it anyway
-	uint8_t* Compress( sCompressInfo info, bool force = false );
-	//function will leave vBuffer empty if fail to reduce size. force=true will compress it anyway
-	static void Compress_Buffer( std::vector<uint8_t>& vBuffer, sCompressInfo info, bool force = false );
-	//this function expect param contain compressed format
-	static cpinfo Decompress( const uint8_t* pCompressed );
-	//this function expect param contain compressed format
-	static void Decompress_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed );
+	static sCompressInfo Compress( const uint8_t* src, size_t size, bool force = false );
 	//this function will accept uncompressed format, please give the correct pointer size
-	static cpinfo Decompress_Reference( const uint8_t* pCompressed, uint32_t pSize );
+	static sCompressInfo Decompress( const sCompressInfo& src );
 	//this function will accept uncompressed format, please give the correct pointer size
-	static void Decompress_Reference_Buffer( std::vector<uint8_t>& vBuffer, const uint8_t* pCompressed, uint32_t pSize );
+	static sCompressInfo Decompress( const uint8_t* src, size_t size );
+	//this function expect param contain compressed format
+	static sCompressInfo Decompress_Pointer( const uint8_t* pCompressed );
 
 	//return uncompressed format
-	uint8_t* Uncompressed( sCompressInfo info );
-	//return uncompressed format, buffer will be erased
-	static void Uncompressed_Buffer( sCompressInfo info, std::vector<uint8_t>& vBuffer );
-
-	size_t Compressed_Size() const;
-	size_t Decompressed_Size() const;
+	static sCompressInfo Uncompressed( const uint8_t* src, size_t size );
 
 	//find HuffmanCodes size
-	static uint32_t Calc_Comp_Size( sCompressInfo info );
+	static size_t Calc_Comp_Size( const uint8_t* src, size_t size );
 
 private:
 	static uint8_t Len_Bit( const uint8_t& num );
@@ -61,6 +41,7 @@ private:
 	static uint8_t Header_Create( const sCompressHeader& header );
 	static sCompressHeader Header_Read( const uint8_t* pCompressed );
 
-	static void Merge_HuffmanCodes( uint8_t* pBuffer, const sCompressHeader& header, const std::vector<uint8_t>& vCompressed, const std::vector<uint8_t>& vDecoder );
+	static void Merger( uint8_t* pBuf, uint8_t bitlen, uint8_t* lookup, size_t size );
+
 	static void Expand_HuffmanCodes( const uint8_t* pCompressed, const sCompressHeader& header, std::vector<uint8_t>& vBufferData, std::vector<uint8_t>& vBufferDecoder );
 };

@@ -914,7 +914,7 @@ void TextField::AddNewTab( sPageData& pd )
     UpdateStatusPos( pd.TextField );
     UpdateStatusEncoding( pd.TextField );
 
-    pd.TextField->DragAcceptFiles( true );
+    pd.TextField->DragAcceptFiles( Config::sGeneral.UseDragDrop );
     pd.TextField->AutoCompSetAutoHide( true );
     pd.TextField->AutoCompSetIgnoreCase( true );
     pd.TextField->AutoCompSetMaxWidth( 32 );
