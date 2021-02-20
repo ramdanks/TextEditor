@@ -472,20 +472,6 @@ void TextField::OnCompSummary( wxCommandEvent& event )
     message += mNotebook->GetPageText( sel );
     message += "\nCompressed: ";
     message += isCompressedFile ? "Yes" : "No";
-    if ( isCompressedFile )
-    {
-        auto info = Filestream::GetCompressedInfo( pd.FilePath );
-        message += "\nClusters: ";
-        message += TO_STR( info.ClusterSize );
-        message += "\nAddressing Size: ";
-        message += TO_STR( info.AddressingSize );
-        message += "\nOriginal Size: ";
-        message += TO_STR( pd.TextField->GetTextLength() );
-        message += "\nCompressed Size: ";
-        message += TO_STR( info.CompressedSize );
-        message += "\nRatio: ";
-        message += TO_STR( (double) info.CompressedSize / pd.TextField->GetTextLength() );
-    }
 
     auto SumDialog = wxMessageDialog( mParent, message, "Compression Summary", wxOK | wxSTAY_ON_TOP );
     SumDialog.ShowModal();

@@ -1,17 +1,14 @@
+.vs/*
 Releases/*
-Resource/*
-Tester/x64/*
-Vendor/*
+Build/x64/*
+Build/Win32/*
+
+Tester/Intermediate/*
+Text Editor with Compression/Intermediate/*
+DesktopGUI/Intermediate/*
+
 DesktopGUI/*.exe
 DesktopGUI/*.cfg
-DesktopGUI/x64/*
 DesktopGUI/log/*
 DesktopGUI/resource/*
 DesktopGUI/temp/*
-DesktopGUI/wxWidgets/*
-DesktopGUI/wxWidgets.zip
-Text Editor with Compression/x64/*
-x64/*
-.vs/*
-*.pptx
-*.gitignore
